@@ -1,0 +1,1048 @@
+<title>pi × tau · Agent 开发交互教程</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* ============ 设计令牌：终端讲义 ============ */
+:root{
+  --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
+  --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
+  --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
+  --pi:#1C5CAB; --tau:#8A5600;
+  --pi-mark:#2A78D6; --tau-mark:#EDA100;
+  --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10);
+  --good:#006300; --bad:#B03030; --bad-mark:#D03B3B;
+  --term-bg:#10141B; --term-ink:#B8C2D4; --term-dim:#6B7686; --term-bright:#E8EEF7;
+  --term-line:rgba(184,194,212,.14);
+  --mono:ui-monospace,"SF Mono","Cascadia Mono","JetBrains Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --shadow:0 1px 2px rgba(10,14,20,.05),0 4px 16px rgba(10,14,20,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0C0F14; --card:#131720; --card-2:#1A1F2B;
+    --ink:#E8EAEF; --ink-2:#A7ADB9; --ink-3:#767D8A;
+    --line:rgba(232,234,239,.13); --line-soft:rgba(232,234,239,.07);
+    --pi:#6DA7EC; --tau:#EDA100;
+    --pi-mark:#3987E5; --tau-mark:#C98500;
+    --pi-wash:rgba(57,135,229,.13); --tau-wash:rgba(201,133,0,.14);
+    --good:#0CA30C; --bad:#E66767; --bad-mark:#E66767;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C0F14; --card:#131720; --card-2:#1A1F2B;
+  --ink:#E8EAEF; --ink-2:#A7ADB9; --ink-3:#767D8A;
+  --line:rgba(232,234,239,.13); --line-soft:rgba(232,234,239,.07);
+  --pi:#6DA7EC; --tau:#EDA100;
+  --pi-mark:#3987E5; --tau-mark:#C98500;
+  --pi-wash:rgba(57,135,229,.13); --tau-wash:rgba(201,133,0,.14);
+  --good:#0CA30C; --bad:#E66767; --bad-mark:#E66767;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}
+:root[data-theme="light"]{
+  --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
+  --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
+  --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
+  --pi:#1C5CAB; --tau:#8A5600;
+  --pi-mark:#2A78D6; --tau-mark:#EDA100;
+  --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10);
+  --good:#006300; --bad:#B03030; --bad-mark:#D03B3B;
+  --term-bg:#10141B; --term-ink:#B8C2D4; --term-dim:#6B7686; --term-bright:#E8EEF7;
+  --shadow:0 1px 2px rgba(10,14,20,.05),0 4px 16px rgba(10,14,20,.06);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--pi);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:currentColor}
+:focus-visible{outline:2px solid var(--pi-mark);outline-offset:2px;border-radius:3px}
+code,pre,kbd{font-family:var(--mono)}
+::selection{background:var(--pi-wash)}
+
+/* ============ 布局骨架 ============ */
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header.top{position:sticky;top:0;z-index:50;background:var(--bg);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
+.topbar{display:flex;align-items:center;gap:16px;padding:10px 0;overflow-x:auto;scrollbar-width:none}
+.topbar::-webkit-scrollbar{display:none}
+.brand{font-family:var(--mono);font-weight:700;font-size:14px;white-space:nowrap;letter-spacing:.02em}
+.brand .pi-c{color:var(--pi)} .brand .tau-c{color:var(--tau)}
+nav.sections{display:flex;gap:4px}
+nav.sections a{font-family:var(--mono);font-size:12px;color:var(--ink-2);padding:5px 10px;border-radius:999px;white-space:nowrap;border-bottom:none}
+nav.sections a:hover{background:var(--card-2);color:var(--ink)}
+section{padding:64px 0 8px;scroll-margin-top:64px}
+h2{font-family:var(--mono);font-size:24px;line-height:1.3;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+h3{font-size:17px;margin:28px 0 10px}
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.lede{color:var(--ink-2);max-width:62ch;margin:0 0 26px}
+.card{background:var(--card);border:1px solid var(--line-soft);border-radius:12px;box-shadow:var(--shadow)}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
+.tag.pi{color:var(--pi);background:var(--pi-wash);border-color:transparent}
+.tag.tau{color:var(--tau);background:var(--tau-wash);border-color:transparent}
+.num{font-variant-numeric:tabular-nums}
+
+/* ============ Hero ============ */
+.hero{padding:72px 0 40px}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:36px;align-items:center}
+.hero h1{font-family:var(--mono);font-size:clamp(30px,4.6vw,46px);line-height:1.15;margin:14px 0 16px;letter-spacing:-.02em;text-wrap:balance}
+.hero h1 .rel{color:var(--ink-3)}
+.hero p.sub{font-size:16px;color:var(--ink-2);max-width:56ch;margin:0 0 22px}
+.projcards{display:grid;gap:12px}
+.projcard{padding:16px 18px;border-radius:12px;border:1px solid var(--line-soft);background:var(--card);box-shadow:var(--shadow)}
+.projcard .pname{font-family:var(--mono);font-weight:700;font-size:16px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.projcard .pname small{font-weight:400;font-size:12px;color:var(--ink-3)}
+.projcard p{margin:6px 0 0;font-size:13.5px;color:var(--ink-2)}
+.projcard.pi{border-left:3px solid var(--pi-mark)}
+.projcard.tau{border-left:3px solid var(--tau-mark)}
+.statrow{display:flex;gap:28px;flex-wrap:wrap;margin-top:30px;padding-top:22px;border-top:1px solid var(--line-soft)}
+.stat .v{font-family:var(--mono);font-size:24px;font-weight:700;letter-spacing:-.02em}
+.stat .k{font-size:12px;color:var(--ink-3);margin-top:2px}
+
+/* ============ 终端窗（模拟器 + 各处代码） ============ */
+.term{background:var(--term-bg);color:var(--term-ink);border-radius:12px;overflow:hidden;border:1px solid rgba(184,194,212,.12)}
+.term-head{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--term-line);font-family:var(--mono);font-size:11.5px;color:var(--term-dim)}
+.term-head .dots{display:flex;gap:5px}
+.term-head .dots i{width:9px;height:9px;border-radius:50%;background:var(--term-dim);opacity:.45}
+.term-body{padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.7;overflow-x:auto}
+pre.codeblock{margin:0;white-space:pre;font-size:12.5px;line-height:1.65}
+pre.codeblock mark{background:rgba(57,135,229,.22);color:var(--term-bright);border-radius:3px;padding:0 2px}
+.cm{color:var(--term-dim)}
+
+/* ============ 循环模拟器 ============ */
+.sim{border-radius:14px;overflow:hidden;border:1px solid var(--line-soft);box-shadow:var(--shadow);background:var(--card)}
+.sim-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line-soft)}
+.btn{font-family:var(--mono);font-size:13px;padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--card-2)}
+.btn.primary{background:var(--pi-mark);border-color:var(--pi-mark);color:#fff;font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.steer{border-color:var(--tau-mark);color:var(--tau)}
+.btn.steer:hover{background:var(--tau-wash)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.sim-step-label{font-family:var(--mono);font-size:12px;color:var(--ink-3);margin-left:auto}
+.sim-note{padding:12px 18px;font-size:13.5px;color:var(--ink-2);background:var(--card-2);border-bottom:1px solid var(--line-soft);min-height:48px}
+.sim-note b{color:var(--ink)}
+.sim-grid{display:grid;grid-template-columns:218px minmax(0,1fr) 296px;min-height:430px}
+.sim-col{padding:16px;min-width:0}
+.sim-col + .sim-col{border-left:1px solid var(--line-soft)}
+.sim-col h4{margin:0 0 12px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+
+/* 循环图 */
+.loopmap{display:flex;flex-direction:column;gap:0}
+.lnode{position:relative;font-family:var(--mono);font-size:12px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;color:var(--ink-2);background:var(--card);transition:all .25s}
+.lnode .idx{color:var(--ink-3);margin-right:6px}
+.lnode.on{border-color:var(--pi-mark);color:var(--ink);background:var(--pi-wash);font-weight:700}
+.lnode.done{opacity:.75}
+.larrow{align-self:center;color:var(--ink-3);font-size:11px;line-height:1;padding:3px 0;font-family:var(--mono)}
+.lback{margin-top:6px;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);text-align:center;border-top:1px dashed var(--line);padding-top:6px}
+.lback b{color:var(--pi)}
+
+/* 会话转录 */
+.transcript{display:flex;flex-direction:column;gap:9px;max-height:430px;overflow-y:auto;padding-right:4px}
+.bub{max-width:96%;border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.6;border:1px solid var(--line-soft)}
+.bub .who{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;color:var(--ink-3)}
+.bub.user{align-self:flex-end;background:var(--pi-wash);border-color:transparent}
+.bub.user .who{color:var(--pi)}
+.bub.steer{align-self:flex-end;background:var(--tau-wash);border-color:transparent}
+.bub.steer .who{color:var(--tau)}
+.bub.asst{align-self:flex-start;background:var(--card-2)}
+.bub.tcall{align-self:flex-start;background:transparent;border:1px dashed var(--line);font-family:var(--mono);font-size:12px}
+.bub.tcall .who{color:var(--pi)}
+.bub.tres{align-self:flex-start;background:var(--term-bg);color:var(--term-ink);font-family:var(--mono);font-size:11.5px;border-color:transparent;white-space:pre-wrap}
+.bub.tres .who{color:var(--term-dim)}
+.bub.tres.ok .who{color:var(--good)}
+.bub.tres.err .who{color:var(--bad)}
+.cursor{display:inline-block;width:7px;height:13px;background:var(--pi-mark);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* 事件流 */
+.evlog{font-family:var(--mono);font-size:11.5px;line-height:1.9;max-height:300px;overflow-y:auto;background:var(--term-bg);border-radius:10px;padding:10px 12px;color:var(--term-dim)}
+.evlog .ev{display:block;white-space:nowrap}
+.evlog .ev b{color:var(--term-bright);font-weight:600}
+.evlog .ev.lifecycle b{color:#86B6EF}
+.evlog .ev.tool b{color:#EDA100}
+.evlog .ev.err b{color:#E66767}
+.evlog .ev.new{animation:evin .3s ease}
+@keyframes evin{from{opacity:0;transform:translateY(3px)}to{opacity:1}}
+.ctxmeter{margin-top:14px}
+.ctxmeter .row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-bottom:5px}
+.meter{height:8px;border-radius:999px;background:var(--card-2);overflow:hidden;position:relative}
+.meter i{display:block;height:100%;border-radius:999px;background:var(--pi-mark);width:0%;transition:width .4s ease}
+.queuechips{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;min-height:24px}
+.qchip{font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:999px;background:var(--tau-wash);color:var(--tau);border:1px dashed var(--tau-mark)}
+
+/* 代码对照 */
+.codetabs{border-top:1px solid var(--line-soft)}
+.codetabs .tabrow{display:flex;gap:0;padding:0 18px;border-bottom:1px solid var(--line-soft)}
+.tabbtn{font-family:var(--mono);font-size:12.5px;padding:10px 14px;border:none;background:none;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent}
+.tabbtn[aria-selected="true"]{color:var(--ink);font-weight:700}
+.tabbtn.pi[aria-selected="true"]{border-bottom-color:var(--pi-mark)}
+.tabbtn.tau[aria-selected="true"]{border-bottom-color:var(--tau-mark)}
+.codewrap{padding:0}
+.codewrap .fname{font-family:var(--mono);font-size:11px;color:var(--term-dim);padding:8px 16px 0}
+.codewrap .term-body{padding-top:6px}
+
+/* ============ 架构分层 ============ */
+.arch{display:flex;flex-direction:column;gap:0;margin:26px 0 8px}
+.layer{border:1px solid var(--line-soft);border-radius:12px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+.layer + .archarrow{align-self:center;font-family:var(--mono);color:var(--ink-3);font-size:12px;padding:6px 0}
+.layer summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);gap:14px;padding:16px 18px;align-items:center}
+.layer summary::-webkit-details-marker{display:none}
+.layer summary:hover{background:var(--card-2)}
+.layer .lt .role{font-weight:700;font-size:15.5px}
+.layer .lt .desc{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.layer .side{font-family:var(--mono);font-size:12.5px;min-width:0}
+.layer .side .pkg{font-weight:700}
+.layer .side.pi .pkg{color:var(--pi)} .layer .side.tau .pkg{color:var(--tau)}
+.layer .side .loc{color:var(--ink-3);font-size:11.5px}
+.layer .detail{border-top:1px solid var(--line-soft);display:grid;grid-template-columns:1fr 1fr;gap:0}
+.layer .detail>div{padding:16px 18px;min-width:0}
+.layer .detail>div+div{border-left:1px solid var(--line-soft)}
+.layer .detail h5{margin:0 0 8px;font-family:var(--mono);font-size:12px}
+.layer .detail ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2)}
+.layer .detail li{margin:3px 0}
+.layer .detail code{font-size:12px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+
+/* ============ 机制对比 ============ */
+.mechgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px}
+.mech{border:1px solid var(--line-soft);border-radius:12px;background:var(--card);box-shadow:var(--shadow)}
+.mech summary{list-style:none;cursor:pointer;padding:14px 18px;display:flex;align-items:center;gap:10px}
+.mech summary::-webkit-details-marker{display:none}
+.mech summary:hover{background:var(--card-2)}
+.mech summary .mtitle{font-weight:700;font-size:14.5px}
+.mech summary .mhint{font-size:12px;color:var(--ink-3);margin-left:auto;font-family:var(--mono)}
+.mech .mbody{border-top:1px solid var(--line-soft);padding:14px 18px;font-size:13px}
+.mech .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mech .cols h6{margin:0 0 6px;font-family:var(--mono);font-size:11.5px}
+.mech .cols h6.pi{color:var(--pi)} .mech .cols h6.tau{color:var(--tau)}
+.mech ul{margin:0;padding-left:16px;color:var(--ink-2)}
+.mech li{margin:3px 0}
+.mech .bp{margin-top:12px;padding:9px 12px;border-radius:8px;background:var(--card-2);font-size:12.5px;color:var(--ink-2)}
+.mech .bp b{color:var(--ink)}
+
+/* ============ 图表 ============ */
+.chartcard{padding:20px 22px;margin-top:22px}
+.chartcard h3{margin:0 0 2px;font-size:15.5px}
+.chartcard .csub{font-size:12.5px;color:var(--ink-3);margin:0 0 16px}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--ink-2);margin-bottom:14px;font-family:var(--mono)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.bargroup{margin-bottom:14px}
+.bargroup .gl{font-size:12.5px;margin-bottom:5px;color:var(--ink-2)}
+.brow{display:grid;grid-template-columns:34px minmax(0,1fr);gap:8px;align-items:center;margin:3px 0}
+.brow .bl{font-family:var(--mono);font-size:11px;text-align:right}
+.brow .bl.pi{color:var(--pi)} .brow .bl.tau{color:var(--tau)} .brow .bl.n{color:var(--ink-3)}
+.btrack{position:relative;height:16px}
+.bfill{position:absolute;left:0;top:1px;height:14px;border-radius:0 4px 4px 0;min-width:2px}
+.bfill.pi{background:var(--pi-mark)} .bfill.tau{background:var(--tau-mark)} .bfill.n{background:var(--ink-3)}
+.bval{position:absolute;top:-1px;font-family:var(--mono);font-size:11px;color:var(--ink-2);white-space:nowrap}
+.tablefold{margin-top:12px;font-size:12.5px}
+.tablefold summary{cursor:pointer;color:var(--ink-3);font-family:var(--mono);font-size:11.5px}
+.tablefold table{border-collapse:collapse;margin-top:8px;font-variant-numeric:tabular-nums}
+.tablefold th,.tablefold td{padding:4px 14px 4px 0;text-align:left;border-bottom:1px solid var(--line-soft);font-size:12.5px}
+.tablefold th{font-family:var(--mono);font-size:11px;color:var(--ink-3);font-weight:600}
+.viztip{position:fixed;z-index:99;pointer-events:none;background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:11.5px;padding:6px 10px;border-radius:6px;opacity:0;transition:opacity .12s;max-width:260px;white-space:normal}
+
+/* ============ 最佳实践 ============ */
+.ticktable{width:100%;border-collapse:collapse;margin-top:18px;font-size:13px}
+.ticktable th,.ticktable td{padding:8px 12px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top}
+.ticktable th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.ticktable td.st{font-family:var(--mono);white-space:nowrap}
+.yes{color:var(--good);font-weight:700}
+.no{color:var(--bad);font-weight:700}
+.part{color:var(--tau);font-weight:700}
+.debate{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:22px}
+.dcard{border:1px solid var(--line-soft);border-radius:12px;background:var(--card);box-shadow:var(--shadow)}
+.dcard summary{list-style:none;cursor:pointer;padding:14px 16px}
+.dcard summary::-webkit-details-marker{display:none}
+.dcard summary .dt{font-weight:700;font-size:14px}
+.dcard summary .ds{font-size:12.5px;color:var(--ink-2);margin-top:4px}
+.dcard .dbody{border-top:1px solid var(--line-soft);padding:12px 16px;font-size:12.5px;color:var(--ink-2)}
+.dcard .dbody b{color:var(--ink)}
+.dcard summary .flip{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:8px}
+
+/* ============ 生态光谱 ============ */
+.spectrum{margin-top:26px;overflow-x:auto;padding-bottom:8px}
+.spec-rail{display:grid;grid-template-columns:repeat(7,minmax(128px,1fr));gap:8px;min-width:940px;position:relative;padding-top:18px}
+.spec-rail::before{content:"";position:absolute;top:8px;left:8px;right:8px;height:2px;background:linear-gradient(90deg,var(--pi-mark),var(--ink-3))}
+.snode{border:1px solid var(--line-soft);border-radius:10px;background:var(--card);padding:10px 12px;cursor:pointer;box-shadow:var(--shadow)}
+.snode:hover{border-color:var(--pi-mark)}
+.snode.sel{border-color:var(--pi-mark);background:var(--pi-wash)}
+.snode .sn{font-family:var(--mono);font-size:12px;font-weight:700}
+.snode .sd{font-size:11px;color:var(--ink-3);margin-top:3px}
+.snode .here{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:999px;background:var(--tau-wash);color:var(--tau)}
+.specdetail{margin-top:14px;padding:16px 18px;font-size:13.5px;color:var(--ink-2);min-height:74px}
+.specdetail b{color:var(--ink)}
+.spec-axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:8px;min-width:940px}
+
+/* ============ 学习路径 ============ */
+.pathgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+.pathcard{padding:18px 20px}
+.pathcard h3{margin:0 0 4px;font-size:15.5px}
+.pathcard .psub{font-size:12.5px;color:var(--ink-3);margin-bottom:12px;font-family:var(--mono)}
+.pathcard ol{margin:0;padding-left:20px;font-size:13px;color:var(--ink-2)}
+.pathcard ol li{margin:5px 0}
+.pathcard code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+.labs{margin-top:22px;padding:20px 22px}
+.labs .progress{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.labs .progress .meter{flex:1}
+.labs .progress .pct{font-family:var(--mono);font-size:12px;color:var(--ink-2);white-space:nowrap}
+.labgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px}
+.lab{display:flex;gap:10px;align-items:flex-start;padding:7px 4px;border-radius:8px;font-size:13px}
+.lab:hover{background:var(--card-2)}
+.lab input{margin-top:4px;accent-color:var(--pi-mark);flex:none}
+.lab .lt b{font-weight:700}
+.lab .lt span{color:var(--ink-3);font-size:12px;display:block}
+.lab input:checked ~ .lt b{text-decoration:line-through;color:var(--ink-3)}
+
+footer{margin-top:72px;border-top:1px solid var(--line-soft);padding:26px 0 40px;font-size:12.5px;color:var(--ink-3)}
+footer .cols{display:flex;gap:40px;flex-wrap:wrap}
+footer p{margin:4px 0}
+
+@media (max-width:960px){
+  .hero-grid{grid-template-columns:1fr}
+  .sim-grid{grid-template-columns:1fr}
+  .sim-col + .sim-col{border-left:none;border-top:1px solid var(--line-soft)}
+  .mechgrid,.pathgrid,.labgrid{grid-template-columns:1fr}
+  .layer summary{grid-template-columns:1fr;gap:6px}
+  .layer .detail{grid-template-columns:1fr}
+  .layer .detail>div+div{border-left:none;border-top:1px solid var(--line-soft)}
+  .mech .cols{grid-template-columns:1fr}
+}
+</style>
+
+<header class="top"><div class="wrap topbar">
+  <div class="brand"><span class="pi-c">pi</span> × <span class="tau-c">tau</span> <span style="color:var(--ink-3)">/ agent 教程</span></div>
+  <nav class="sections">
+    <a href="#overview">总览</a><a href="#loop">循环模拟器</a><a href="#arch">三层架构</a><a href="#mech">机制对比</a><a href="#data">数据</a><a href="#practice">最佳实践</a><a href="#eco">生态选型</a><a href="#path">学习路径</a>
+  </nav>
+</div></header>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="overview"><div class="wrap">
+  <div class="hero-grid">
+    <div>
+      <div class="kicker">交互式教程 · 对比学习 Agent 开发</div>
+      <h1>一个循环，两种实现<br><span class="rel">τ = 2π：tau 是 pi 的 Python 教学复刻</span></h1>
+      <p class="sub">Coding agent 的核心只是十行循环：<b>问模型 → 执行工具 → 结果回填 → 重复</b>。这两个真实开源项目共享同一张架构蓝图——先在 tau 的 1,351 行核心里看懂它，再到 pi 的 11 万行里看它的生产形态。</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn primary" href="#loop" style="border-bottom:none">▶ 先玩循环模拟器</a>
+        <a class="btn" href="#path" style="border-bottom:none">直接看学习路径</a>
+      </div>
+      <div class="statrow">
+        <div class="stat"><div class="v num" style="color:var(--pi)">111.7k</div><div class="k">pi 源码行数（TS）</div></div>
+        <div class="stat"><div class="v num" style="color:var(--tau)">24.6k</div><div class="k">tau 源码行数（Py）</div></div>
+        <div class="stat"><div class="v num">4</div><div class="k">默认工具（两者相同）</div></div>
+        <div class="stat"><div class="v num">&lt;1k</div><div class="k">pi 的 harness token 开销</div></div>
+      </div>
+    </div>
+    <div class="projcards">
+      <div class="projcard pi">
+        <div class="pname">pi <small>TypeScript · v0.80.6 · Mario Zechner (badlogic)</small></div>
+        <p>生产级极简 harness。npm 五件套：pi-ai（统一 1,057 个模型）/ pi-agent-core / pi-coding-agent / pi-tui。运行时扩展系统 + 自我扩展能力。Terminal-Bench 2.0 上与 Codex/Cursor 同级。</p>
+      </div>
+      <div class="projcard tau">
+        <div class="pname">tau <small>Python · v0.1.5 · alejandro-ao</small></div>
+        <p>"为阅读而生"的教学复刻：tau_ai / tau_agent / tau_coding 三层，核心循环 276 行。40 篇 dev-notes 逐阶段记录"这对应 pi 的什么设计"。也是能真用的终端 agent（PyPI：tau-ai）。</p>
+      </div>
+      <div class="projcard" style="border-left:3px solid var(--ink-3)">
+        <div class="pname" style="font-size:13px">学习策略 <small>本教程的用法</small></div>
+        <p>① 玩下面的模拟器建立直觉 → ② 按三层架构图定位代码 → ③ 逐机制对比读两边实现 → ④ 对照业界最佳实践 → ⑤ 做 12 个动手实验。配套详细文档在 <code>agent-study/pi-vs-tau-架构对比学习指南.md</code>。</p>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ================= 模拟器 ================= -->
+<section id="loop"><div class="wrap">
+  <div class="kicker">第 1 站 · 亲手转一圈</div>
+  <h2>Agent 循环模拟器</h2>
+  <p class="lede">场景：让 agent 修一个失败的测试。点「下一步」逐步执行，左边看循环走到哪一步，中间看对话如何生长，右边看事件流与上下文占用——这三样东西就是一个 harness 的全部可观察面。<b>试试在它干活时点「插话 steer」。</b></p>
+
+  <div class="sim">
+    <div class="sim-controls">
+      <button class="btn primary" id="btnNext">下一步 ▸</button>
+      <button class="btn" id="btnAuto">自动播放</button>
+      <button class="btn steer" id="btnSteer" disabled>✋ 插话 steer</button>
+      <button class="btn" id="btnReset">↺ 重置</button>
+      <span class="sim-step-label num" id="stepLabel">step 0 / 15</span>
+    </div>
+    <div class="sim-note" id="simNote"><b>准备就绪。</b>harness 已装载：极小系统提示词（身份 + 4 个工具的一行描述 + AGENTS.md + skills 索引）。点「下一步」发出第一条用户消息。</div>
+    <div class="sim-grid">
+      <div class="sim-col">
+        <h4>循环 loop</h4>
+        <div class="loopmap" id="loopMap"></div>
+      </div>
+      <div class="sim-col">
+        <h4>会话 transcript</h4>
+        <div class="transcript" id="transcript"></div>
+      </div>
+      <div class="sim-col">
+        <h4>事件流 events</h4>
+        <div class="evlog" id="evlog"><span class="ev" style="color:var(--term-dim)">// AgentEvent 会出现在这里</span></div>
+        <div class="ctxmeter">
+          <div class="row"><span>上下文占用</span><span class="num" id="ctxLabel">~1.0k tokens</span></div>
+          <div class="meter"><i id="ctxBar" style="width:3%"></i></div>
+          <div class="row" style="margin-top:4px"><span style="font-size:10px">图示范围 0–32k · 压缩触发 = 窗口−16,384（两者同参）</span></div>
+        </div>
+        <h4 style="margin-top:14px">消息队列</h4>
+        <div class="queuechips" id="queueChips"><span style="font-size:11px;color:var(--ink-3);font-family:var(--mono)">空</span></div>
+      </div>
+    </div>
+    <div class="codetabs">
+      <div class="tabrow" role="tablist">
+        <button class="tabbtn pi" role="tab" aria-selected="true" id="tabPi">pi · agent-loop.ts</button>
+        <button class="tabbtn tau" role="tab" aria-selected="false" id="tabTau">tau · loop.py</button>
+        <span class="sim-step-label" id="codeStageLabel" style="align-self:center;padding-right:6px">当前阶段对应的真实源码（节选/简化）</span>
+      </div>
+      <div class="codewrap term" style="border-radius:0;border:none">
+        <div class="fname" id="codeFname">packages/agent/src/agent-loop.ts</div>
+        <div class="term-body"><pre class="codeblock" id="codeBlock"></pre></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ================= 架构 ================= -->
+<section id="arch"><div class="wrap">
+  <div class="kicker">第 2 站 · 地图</div>
+  <h2>三层架构：同一张蓝图</h2>
+  <p class="lede">tau 从 pi 原样继承的口号：<b>AgentHarness = 可复用大脑 · CodingSession = 编码环境 · TUI = 一种前端</b>。依赖严格单向（自上而下），大脑层不知道终端的存在，前端只消费事件流。点开每一层看两边的对应实现。</p>
+
+  <div class="arch">
+    <details class="layer" open>
+      <summary>
+        <div class="lt"><div class="role">产品层 · coding agent 本体</div><div class="desc">CLI / TUI / 内置工具 / 系统提示词 / 会话落盘 / 压缩 / skills / 配置凭据</div></div>
+        <div class="side pi"><div class="pkg">pi-coding-agent</div><div class="loc num">52,660 行 · TUI/print/JSON/RPC 四模式</div></div>
+        <div class="side tau"><div class="pkg">tau_coding</div><div class="loc num">19,832 行 · TUI/print 两模式</div></div>
+      </summary>
+      <div class="detail">
+        <div><h5 style="color:var(--pi)">pi</h5><ul>
+          <li>中枢 <code>AgentSession</code>（3,246 行）：持久化 + 扩展 + 自动压缩 + 自动重试 + 模型切换</li>
+          <li>7 个工具实现，默认启用 4 个；grep 走 ripgrep、find 走 fd（自动下载二进制）</li>
+          <li><b>RPC 模式</b>：30+ 命令经 stdin/stdout 驱动外部前端</li>
+          <li>扩展 / skills / prompt 模板 / 主题 / packages 五级定制</li>
+        </ul></div>
+        <div><h5 style="color:var(--tau)">tau</h5><ul>
+          <li>中枢 <code>CodingSession</code>（2,274 行）：同职责减去扩展系统</li>
+          <li>恰好 4 个工具；搜索靠 bash 里的 grep</li>
+          <li>Textual TUI（4,384 行）隔在 100 行 <code>adapter.py</code> 后面（ADR 0001）</li>
+          <li>skills + prompt 模板；extensions 明确推迟（Phase 21）</li>
+        </ul></div>
+      </div>
+    </details>
+    <div class="archarrow">↓ 依赖方向（产品层 import 大脑层）</div>
+    <details class="layer">
+      <summary>
+        <div class="lt"><div class="role">大脑层 · 可移植 agent 运行时</div><div class="desc">循环 / 事件 / 消息模型 / 工具接口 / steering 队列 / 会话数据结构</div></div>
+        <div class="side pi"><div class="pkg">pi-agent-core</div><div class="loc num">8,244 行 · 纯函数 loop + Agent 类 + harness</div></div>
+        <div class="side tau"><div class="pkg">tau_agent</div><div class="loc num">1,351 行 · loop.py 276 行一次读完</div></div>
+      </summary>
+      <div class="detail">
+        <div><h5 style="color:var(--pi)">pi</h5><ul>
+          <li><code>agentLoop()</code> 纯函数返回 <code>EventStream&lt;AgentEvent&gt;</code>；10 种事件</li>
+          <li>工具<b>默认并行</b>执行；beforeToolCall / afterToolCall / prepareNextTurn 钩子</li>
+          <li>截断守卫：stopReason=length 时全部工具调用拒绝执行</li>
+          <li>运行中注册新工具（addedToolNames 延迟加载）</li>
+        </ul></div>
+        <div><h5 style="color:var(--tau)">tau</h5><ul>
+          <li><code>run_agent_loop()</code> 纯 async generator；14 种事件（pydantic）</li>
+          <li>工具<b>严格串行</b>；异常在工具边界捕获转 ok=False</li>
+          <li>取消后自动补"Tool call interrupted"合成结果，保 transcript 合法</li>
+          <li>会话 = 追加式条目树 + <code>SessionState.from_entries()</code> reducer</li>
+        </ul></div>
+      </div>
+    </details>
+    <div class="archarrow">↓ 依赖方向（大脑层调用 provider 层）</div>
+    <details class="layer">
+      <summary>
+        <div class="lt"><div class="role">Provider 层 · 统一 LLM 流式 API</div><div class="desc">把各厂商私有协议翻译成中立事件流；认证 / 重试 / thinking 映射 / 模型目录</div></div>
+        <div class="side pi"><div class="pkg">pi-ai</div><div class="loc num">36,702 行 · 9 种 wire API · 1,057 模型</div></div>
+        <div class="side tau"><div class="pkg">tau_ai</div><div class="loc num">3,404 行 · 5 个适配器 · 手写 SSE</div></div>
+      </summary>
+      <div class="detail">
+        <div><h5 style="color:var(--pi)">pi</h5><ul>
+          <li>硬契约：<b>stream 永不 throw</b>，一切失败编码为流内 error 事件</li>
+          <li>兼容性长尾：10 种 thinking 方言、24 条溢出错误正则、工具 ID 归一化 → <b>会话可中途换厂商</b></li>
+          <li>真实 usage/成本核算 + 自动 cache_control 断点</li>
+          <li>OAuth：Claude Pro/Max、ChatGPT、GitHub Copilot</li>
+        </ul></div>
+        <div><h5 style="color:var(--tau)">tau</h5><ul>
+          <li><code>ModelProvider</code> 是 Protocol（结构化类型，无基类）</li>
+          <li>零厂商 SDK：httpx + 手写 SSE 解析（教学价值高）</li>
+          <li>7 种 ProviderEvent；工具调用整体交付不流增量</li>
+          <li>刻意空白：无 usage/成本核算（chars/4 估算）——现成的练手 PR 选题</li>
+        </ul></div>
+      </div>
+    </details>
+  </div>
+</div></section>
+
+<!-- ================= 机制对比 ================= -->
+<section id="mech"><div class="wrap">
+  <div class="kicker">第 3 站 · 逐机制拆解</div>
+  <h2>八大核心机制对比</h2>
+  <p class="lede">每个机制：pi 怎么做 / tau 怎么做 / 业界最佳实践怎么说。展开即读；完整版（含 file:line 出处）见配套文档第 4 章。</p>
+  <div class="mechgrid">
+
+    <details class="mech"><summary><span class="mtitle">工具系统</span><span class="mhint">read·write·edit·bash</span></summary>
+      <div class="mbody"><div class="cols">
+        <div><h6 class="pi">pi</h6><ul><li>edit 有模糊匹配管线（NFKC/智能引号/异形空格），精确失败才启用</li><li>并行批次 + 按 realpath 的文件互斥队列</li><li>grep/find/ls 可选启用</li></ul></div>
+        <div><h6 class="tau">tau</h6><ul><li>edit 只做行尾归一化的精确匹配</li><li>串行执行 + asyncio.Lock 文件锁</li><li>没有搜索工具：让模型 bash 里跑 grep</li></ul></div>
+      </div><div class="bp"><b>共同设计即最佳实践</b>：oldText 必须唯一（poka-yoke）、截断 footer 引导续读、错误消息可直接行动、prepareArguments 容忍模型笔误——全部对应 Anthropic《Writing effective tools》的建议。</div></div>
+    </details>
+
+    <details class="mech"><summary><span class="mtitle">循环与队列</span><span class="mhint">steer / follow-up</span></summary>
+      <div class="mbody"><div class="cols">
+        <div><h6 class="pi">pi</h6><ul><li>steering 每轮开始+结束两次轮询注入</li><li>follow-up 在 agent 将停时注入（外层循环）</li><li>prepareNextTurn 可换模型/上下文</li></ul></div>
+        <div><h6 class="tau">tau</h6><ul><li>同款双队列（deque），默认 one-at-a-time</li><li>TUI：运行中 Enter=steer，Alt+Enter=follow-up</li><li>用户消息也走事件流回显——前端只有一个数据源</li></ul></div>
+      </div><div class="bp"><b>关键约束</b>：运行中调用 prompt() 直接抛错，插话必须走队列——保证 transcript 在任何时刻对 provider 合法。</div></div>
+    </details>
+
+    <details class="mech"><summary><span class="mtitle">系统提示词</span><span class="mhint">&lt;1000 tokens</span></summary>
+      <div class="mbody"><div class="cols">
+        <div><h6 class="pi">pi</h6><ul><li>~25 行机械拼装；工具自带一行 promptSnippet</li><li>指向自带文档的绝对路径——"agent 能解释自己"</li></ul></div>
+        <div><h6 class="tau">tau</h6><ul><li>同款拼装逻辑，注释直接写 "Pi-style"</li><li>skills 区块只在 read 工具存在时渲染</li></ul></div>
+      </div><div class="bp"><b>渐进式披露</b>：skills 只放"名字+描述+路径"索引，模型需要时自己 read。对照 Claude Code 10k+ tokens 的提示词，pi 全套 &lt;1k——Terminal-Bench 证明不吃亏。</div></div>
+    </details>
+
+    <details class="mech"><summary><span class="mtitle">会话持久化</span><span class="mhint">JSONL 条目树</span></summary>
+      <div class="mbody"><div class="cols">
+        <div><h6 class="pi">pi</h6><ul><li>~/.pi/agent/sessions/ 下 uuidv7 命名</li><li>/tree 分支、/fork、/clone、/share(gist)、HTML 导出</li><li>v1→v3 版本迁移</li></ul></div>
+        <div><h6 class="tau">tau</h6><ul><li>同款条目树 + leaf 指针；根目录有真实样本 session-temp.jsonl</li><li>自动会话命名（对 pi 的有意分歧）</li><li>HTML/JSONL 导出</li></ul></div>
+      </div><div class="bp"><b>树而非数组，追加而不改写</b>：分支=移动 leaf 指针；历史永不丢失；<code>from_entries()</code> 就是 12-Factor 说的"无状态 reducer"。每条 message_end 即落盘。</div></div>
+    </details>
+
+    <details class="mech"><summary><span class="mtitle">上下文压缩</span><span class="mhint">reserve 16,384</span></summary>
+      <div class="mbody"><div class="cols">
+        <div><h6 class="pi">pi</h6><ul><li>真实 usage 计数，chars/4 兜底</li><li>切中 turn 时生成两段式摘要</li><li>累计维护 read/modified 文件清单</li></ul></div>
+        <div><h6 class="tau">tau</h6><ul><li>纯 chars/4 估算（+每消息开销常数）</li><li>同款结构化摘要提示词（Goal/Progress/Decisions/Next）</li><li>同款溢出恢复：压缩一次 → 重试一次 → 放弃</li></ul></div>
+      </div><div class="bp"><b>切点永不落在 tool_call 与 tool_result 之间</b>（否则 transcript 非法）；溢出不走普通重试通道。context rot 是实测现象——badlogic 经验值：100k 后质量下滑。</div></div>
+    </details>
+
+    <details class="mech"><summary><span class="mtitle">扩展系统</span><span class="mhint">pi 的灵魂</span></summary>
+      <div class="mbody"><div class="cols">
+        <div><h6 class="pi">pi</h6><ul><li>TS 扩展 jiti 热加载：33 个事件，可拦截 input/tool_call/context/provider 请求</li><li>运行中 registerTool 立即可用 + /reload 闭环 → <b>agent 自己扩展自己</b></li><li>skills / 模板 / 主题 / packages</li></ul></div>
+        <div><h6 class="tau">tau</h6><ul><li>只有 skills（严格 Agent Skills 规范，ADR 0003）+ prompt 模板</li><li>extensions 推迟到 Phase 21</li><li>custom 会话条目留了钩子</li></ul></div>
+      </div><div class="bp"><b>极简核心成立的另一半</b>：pi 拒绝内置 MCP/权限/计划模式的每一条，都跟着"用扩展自己装一个"。ExtensionAPI 类型定义就是一份"harness 有哪些可拦截点"的清单。</div></div>
+    </details>
+
+    <details class="mech"><summary><span class="mtitle">安全与权限</span><span class="mhint">最有争议</span></summary>
+      <div class="mbody"><div class="cols">
+        <div><h6 class="pi">pi</h6><ul><li>无权限弹窗：“能写代码并执行的 agent，弹窗是安全剧场”</li><li>要安全 → 容器 + 掐网络（3 种模式文档）</li><li>project trust：加载项目内扩展前须信任决策（是输入守卫，不是沙箱）</li></ul></div>
+        <div><h6 class="tau">tau</h6><ul><li>同立场，连确认弹窗都没有</li><li>防御面：目录不可被克隆仓库覆盖、凭据 0600、bash 不 source rc</li></ul></div>
+      </div><div class="bp"><b>对照另一极</b>：Claude Code 弹窗→沙箱(bubblewrap+网络代理)→auto mode 分类器。有趣的收敛：Anthropic 沙箱文章实质承认"真边界胜过弹窗"。权限的价值取决于信任上下文（个人工作站 vs 企业 SRE）。</div></div>
+    </details>
+
+    <details class="mech"><summary><span class="mtitle">TUI</span><span class="mhint">自研 vs 借力</span></summary>
+      <div class="mbody"><div class="cols">
+        <div><h6 class="pi">pi</h6><ul><li>自研 pi-tui：差分渲染只重画变化行、同步输出防闪烁、内联图片协议</li><li>用 @xterm/headless 仿真终端做测试</li></ul></div>
+        <div><h6 class="tau">tau</h6><ul><li>Textual + Rich，隔在 adapter 后（可整体换 UI 框架）</li><li>run_id 递增丢弃取消后迟到事件——异步 UI 竞态的经典解法</li></ul></div>
+      </div><div class="bp"><b>取舍范式</b>：产品差异化在终端体验 → 自研；否则借力生态。做自己的项目时默认学 tau。</div></div>
+    </details>
+
+  </div>
+</div></section>
+
+<!-- ================= 数据 ================= -->
+<section id="data"><div class="wrap">
+  <div class="kicker">第 4 站 · 用数字看差距</div>
+  <h2>规模与开销</h2>
+  <p class="lede">"教学版 vs 生产版"的差距不在核心设计（两边循环几乎同构），而在兼容性长尾与测试覆盖。悬停条形可看明细。</p>
+
+  <div class="card chartcard" id="locChart">
+    <h3>各层源码行数对比</h3>
+    <p class="csub">单位：千行（k LOC）· 不含测试 · pi v0.80.6 / tau v0.1.5</p>
+    <div class="legend"><span><i style="background:var(--pi-mark)"></i>pi (TypeScript)</span><span><i style="background:var(--tau-mark)"></i>tau (Python)</span></div>
+    <div id="locBars"></div>
+    <details class="tablefold"><summary>表格视图</summary>
+      <table><thead><tr><th>层</th><th>pi 包</th><th>pi 行数</th><th>tau 包</th><th>tau 行数</th></tr></thead>
+      <tbody>
+        <tr><td>Provider 层</td><td>pi-ai</td><td class="num">36,702</td><td>tau_ai</td><td class="num">3,404</td></tr>
+        <tr><td>大脑层</td><td>pi-agent-core</td><td class="num">8,244</td><td>tau_agent</td><td class="num">1,351</td></tr>
+        <tr><td>产品层</td><td>pi-coding-agent</td><td class="num">52,660</td><td>tau_coding</td><td class="num">19,832</td></tr>
+        <tr><td>TUI</td><td>pi-tui</td><td class="num">12,144</td><td>（用 Textual）</td><td class="num">—</td></tr>
+        <tr><td>测试</td><td>全仓</td><td class="num">≈83,000</td><td>tests/</td><td class="num">≈19,156</td></tr>
+      </tbody></table>
+    </details>
+  </div>
+
+  <div class="card chartcard" id="tokChart">
+    <h3>harness 注入模型上下文的固定开销（系统提示词 + 工具定义）</h3>
+    <p class="csub">近似值 · 来源：badlogic 的 pi 宣言（pi &lt;1k；Claude Code 10k+）；tau 同构于 pi</p>
+    <div id="tokBars"></div>
+    <p class="csub" style="margin-top:10px">这就是"薄 harness"论点的核心数字：Terminal-Bench 2.0 上 &lt;1k 开销的 pi 与 10k+ 开销的大型 harness 成绩同级——省下来的都是任务可用的注意力预算。</p>
+  </div>
+</div></section>
+
+<!-- ================= 最佳实践 ================= -->
+<section id="practice"><div class="wrap">
+  <div class="kicker">第 5 站 · 对照业界共识</div>
+  <h2>最佳实践对照</h2>
+  <p class="lede">用 12-Factor Agents（生产 agent 的事实标准清单）逐条打分，再看两个项目"有意不做"的四件事——每张卡片可翻开看反方观点。</p>
+
+  <div class="card" style="padding:6px 22px 16px;overflow-x:auto">
+    <table class="ticktable">
+      <thead><tr><th>12-Factor 条目</th><th>pi / tau</th><th>实现方式</th></tr></thead>
+      <tbody>
+        <tr><td>F2 拥有自己的提示词</td><td class="st"><span class="yes">✓ 满分</span></td><td>机械拼装，全部可见，无隐藏注入</td></tr>
+        <tr><td>F3 拥有上下文窗口</td><td class="st"><span class="yes">✓ 满分</span></td><td>transformContext / 压缩 / 溢出恢复全部自持</td></tr>
+        <tr><td>F4 工具只是结构化输出</td><td class="st"><span class="yes">✓</span></td><td>TypeBox / 手写 JSON Schema，无魔法装饰器</td></tr>
+        <tr><td>F6 启动/暂停/恢复 API</td><td class="st"><span class="yes">✓</span></td><td>prompt / steer / follow_up / abort + JSONL resume</td></tr>
+        <tr><td>F8 拥有控制流</td><td class="st"><span class="yes">✓</span></td><td>循环就是自己的一个函数（276 行读完）</td></tr>
+        <tr><td>F9 错误压入上下文</td><td class="st"><span class="yes">✓</span></td><td>异常 → ok=false 工具结果；模型看见失败才会修</td></tr>
+        <tr><td>F12 无状态 reducer</td><td class="st"><span class="yes">✓</span></td><td><code>SessionState.from_entries()</code> 字面实现</td></tr>
+        <tr><td>F7 用工具调用联系人类（HITL）</td><td class="st"><span class="no">✗ 无内置</span></td><td>pi 的答案："用扩展自己装"（tool_call 钩子可拦截）</td></tr>
+        <tr><td>F11 随处可触发</td><td class="st"><span class="part">◐ 部分</span></td><td>pi 有 RPC/SDK/print；tau 只有 CLI</td></tr>
+        <tr><td>（补）系统化工具评测 evals</td><td class="st"><span class="no">✗ 两边都缺</span></td><td>Anthropic 工具文章的第一条建议——自己做 agent 时补上</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>有意不做的四件事（点开看反方）</h3>
+  <div class="debate">
+    <details class="dcard"><summary><div class="dt">不做 MCP</div><div class="ds">"MCP server 动辄吃掉 7-9% 上下文窗口。CLI 工具 + README 更省。"</div><div class="flip">▸ 点开看反方与收敛点</div></summary>
+      <div class="dbody"><b>反方</b>：MCP 已捐入 Linux 基金会，OpenAI/Google 全采用，生态价值真实。<br><b>收敛点</b>：Anthropic 自己也在推"代码执行式 MCP"把工具 schema 挪出提示词——双方都同意：工具目录不该全量常驻上下文。pi 生态用扩展外挂 MCP（OpenClaw/mcporter）。</div>
+    </details>
+    <details class="dcard"><summary><div class="dt">不做内置子代理</div><div class="ds">"bash 里再开一个 pi 实例，全程可观察。"</div><div class="flip">▸ 点开看反方与收敛点</div></summary>
+      <div class="dbody"><b>反方</b>：Anthropic 多 agent 研究系统在研究类任务上 +90%（token 15 倍）。<br><b>收敛点</b>：那篇文章明说 <b>coding 不适合多 agent</b>（上下文难共享、可并行度低）。pi 的立场对 coding 场景基本成立；做研究类产品时再引入编排。</div>
+    </details>
+    <details class="dcard"><summary><div class="dt">不做权限弹窗</div><div class="ds">"能写代码并执行的 agent，弹窗是安全剧场。要安全→容器+掐网络。"</div><div class="flip">▸ 点开看反方与收敛点</div></summary>
+      <div class="dbody"><b>反方</b>：企业/SRE 场景需要审计、分级授权、HITL。用户数据也支持弹窗疲劳论（Claude Code 用户批准 93% 的弹窗）。<br><b>收敛点</b>：Anthropic 沙箱方案（文件系统+网络双隔离）实质承认"真边界胜过弹窗"；auto mode 用分类器替弹窗。<b>权限的价值取决于信任上下文。</b></div>
+    </details>
+    <details class="dcard"><summary><div class="dt">不做计划模式 / TODO 工具</div><div class="ds">"它们让模型困惑。用 TODO.md——文件更好且可观察。"</div><div class="flip">▸ 点开看反方与收敛点</div></summary>
+      <div class="dbody"><b>反方</b>：结构化任务利于 UI 呈现与多会话协作（Claude Code 的任务列表派）。<br><b>收敛点</b>：Manus 的"复述 todo.md 对抗 lost-in-the-middle"支持文件派；本质是品味分歧，两条路都有大厂实践。</div>
+    </details>
+  </div>
+</div></section>
+
+<!-- ================= 生态 ================= -->
+<section id="eco"><div class="wrap">
+  <div class="kicker">第 6 站 · 放进大地图</div>
+  <h2>框架生态光谱</h2>
+  <p class="lede">按抽象层级从"裸金属"到"全托管"排列。点击节点看定位与选型建议。pi/tau 证明了"薄 harness"档位的存在价值：比裸循环多了你一定会需要的四件套（多 provider、会话、压缩、中断插话），又不引入任何隐藏提示词。<b>与 LangGraph 等框架的范式级深度对比（三种控制流范式、同一个 agent 的四种写法、概念对照表、决策清单）见文档第 11 章。</b></p>
+  <div class="spectrum">
+    <div class="spec-rail" id="specRail"></div>
+    <div class="spec-axis"><span>← 完全控制 · 更多自己写</span><span>更多现成能力 · 更少控制 →</span></div>
+  </div>
+  <div class="card specdetail" id="specDetail">点击上方任一节点查看详情。</div>
+</div></section>
+
+<!-- ================= 学习路径 ================= -->
+<section id="path"><div class="wrap">
+  <div class="kicker">第 7 站 · 开始动手</div>
+  <h2>学习路径与实验清单</h2>
+  <p class="lede">核心策略：<b>先 tau 后 pi</b>——先用一个下午在 tau 里建立完整心智模型，再带着地图去 pi 里看生产形态。实验进度保存在本地浏览器。</p>
+
+  <div class="pathgrid">
+    <div class="card pathcard">
+      <h3>第一周 · tau：建立心智模型</h3>
+      <div class="psub">每一步都是一次可完成的阅读</div>
+      <ol>
+        <li>README + 官网 <code>internals/architecture</code>、<code>design-principles</code>（背下 7 条原则）</li>
+        <li>数据模型：<code>tau_agent/messages.py</code>（47 行）→ <code>tools.py</code> → <code>events.py</code></li>
+        <li><b>核心：<code>loop.py</code>（276 行）</b>，对照官网 agent-loop 页逐步读</li>
+        <li><code>harness.py</code>：双队列、取消、transcript 修复</li>
+        <li><code>session/</code>：entries → tree → memory（reducer！）+ 根目录 JSONL 样本</li>
+        <li><code>tau_ai/provider.py</code> + <code>anthropic.py</code>：手写 SSE 长什么样</li>
+        <li>产品层择要：<code>tools.py</code> 四工具全文 → <code>system_prompt.py</code> → <code>session.py</code></li>
+        <li>泛读 <code>dev-notes/</code>：roadmap、04-sessions、ADR 0003</li>
+      </ol>
+    </div>
+    <div class="card pathcard">
+      <h3>第二周 · pi：看生产形态</h3>
+      <div class="psub">带着 tau 的地图找差异</div>
+      <ol>
+        <li><code>coding-agent/README</code> Philosophy 段 + <code>docs/security.md</code>（无权限论证全文）</li>
+        <li><code>agent-loop.ts</code> 对照 loop.py：steering 注入 / 截断守卫 / 并行执行 / prepareNextTurn</li>
+        <li><code>agent.ts</code>（订阅者顺序结算）+ <code>types.ts</code>（AgentTool 接口）</li>
+        <li><code>core/tools/edit-diff.ts</code>：模糊匹配管线精读</li>
+        <li><code>system-prompt.ts</code> / <code>compaction.ts</code> / <code>docs/session-format.md</code></li>
+        <li><code>pi-ai/types.ts</code>（9 种 API、compat 开关）+ <code>overflow.ts</code>（感受长尾）</li>
+        <li><b>扩展系统：<code>extensions/types.ts</code> + <code>examples/extensions/</code> 逐个跑</b></li>
+        <li>外围：badlogic 宣言、Armin Ronacher 评测、Terminal-Bench</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card pathcard" style="margin-top:16px">
+    <h3>进阶：从零复刻一个自己的 mini-harness</h3>
+    <div class="psub">主文档第 9 章「从零复刻」· M0–M10 共 11 个里程碑</div>
+    <p style="font-size:13px;color:var(--ink-2);margin:0">读完看懂 ≠ 会造。施工图从空目录出发：M0 骨架与依赖守卫 → M1 核心类型 → M2 FakeProvider+真适配器 → M3 循环（四大守卫）→ M4 四工具 → M5 队列 → M6 提示词 → M7 JSONL 会话 → M8 print 模式（用它修一个真 bug）→ M9 压缩 → M10 选做。每个里程碑都带验收测试与 pi/tau 对照文件，附「十大典型翻车」预防清单。见 <code>pi-vs-tau-架构对比学习指南.md</code> 第 9 章。<b>起步工程已搭好：<code>agent-study/mini/</code>——M0/M1 完成、开箱全绿（mypy strict + 依赖方向守卫测试），M2/M3 是带规格测试的练习（5 条循环契约已验证可通关），参考答案在 solutions/。</b></p>
+  </div>
+
+  <div class="card pathcard" style="margin-top:16px">
+    <h3>深度对比：pi/tau vs LangGraph 等框架</h3>
+    <div class="psub">主文档第 11 章 · 范式 / 代码对照 / 决策清单</div>
+    <p style="font-size:13px;color:var(--ink-2);margin:0">核心区别一句话：pi/tau 是"你拥有循环的库"，LangGraph 是"框架拥有执行、你填空"的图运行时——控制反转方向相反。章节含：三种控制流范式（模型驱动循环 / 显式图 / 代理交接）、同一个 agent 的四种写法代码对照、逐维度硬对比表与概念对照表（steering ↔ interrupt、JSONL 树 ↔ checkpointer）、两边挨的批评各该听哪一半、图与循环各自的真实胜场、"外层编排 + 内层薄 harness"混合策略与 7 问决策清单。</p>
+  </div>
+
+  <div class="card pathcard" style="margin-top:16px">
+    <h3>模型接入：什么 API 都能接吗？本地模型呢？</h3>
+    <div class="psub">主文档第 10 章「模型接入指南」· 格式要求 / 统一层 / 本地模型</div>
+    <p style="font-size:13px;color:var(--ink-2);margin:0">两条硬性要求：必须支持工具调用（不可妥协）、最好支持流式。市面上没有统一格式，只有事实标准——OpenAI Chat Completions（一个适配器吃遍 90% 模型，含"同一件事的四种写法"对照表）。最佳实践是<b>内部中立层 + 适配器 + 逃生舱</b>，警惕最小公分母陷阱。Ollama / vLLM / LM Studio 可直接接入：mini 三行配置、tau 用 <code>~/.tau/catalog.toml</code>、pi 用 <code>~/.pi/agent/models.json</code>——文档给出核对自官方的可用示例与四个本地模型专属坑。</p>
+  </div>
+
+  <div class="card labs">
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><h3 style="margin:0">12 个动手实验</h3><span class="psub" style="margin:0">由浅入深 · 勾选保存进度</span></div>
+    <div class="progress"><div class="meter"><i id="labBar" style="width:0%;background:var(--good)"></i></div><span class="pct num" id="labPct">0 / 12</span></div>
+    <div class="labgrid" id="labGrid"></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="cols">
+    <div>
+      <p><b style="color:var(--ink)">配套资料</b></p>
+      <p>完整详细文档：<code>agent-study/pi-vs-tau-架构对比学习指南.md</code></p>
+      <p>代码级分析笔记（含 file:line 出处）：<code>agent-study/sources/</code></p>
+    </div>
+    <div>
+      <p><b style="color:var(--ink)">项目</b></p>
+      <p>pi：<a href="https://pi.dev">pi.dev</a> · github.com/earendil-works/pi · v0.80.6</p>
+      <p>tau：<a href="https://twotimespi.dev">twotimespi.dev</a> · github.com/alejandro-ao/tau · v0.1.5</p>
+    </div>
+    <div>
+      <p><b style="color:var(--ink)">必读三篇</b></p>
+      <p><a href="https://ampcode.com/how-to-build-an-agent">How to Build an Agent</a>（300 行入门）</p>
+      <p><a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective Agents</a>（Anthropic）</p>
+      <p><a href="https://mariozechner.at/posts/2025-11-30-pi-coding-agent/">pi 设计宣言</a>（badlogic）</p>
+    </div>
+  </div>
+  <p style="margin-top:20px">生成于 2026-07-11 · 数据基于 pi v0.80.6（commit 4c18610）与 tau v0.1.5 · 本页为单文件离线可用</p>
+</div></footer>
+
+<div class="viztip" id="viztip"></div>
+
+<script>
+/* ================= 循环模拟器 ================= */
+const STAGES=[
+  {id:'user',  label:'用户消息入列'},
+  {id:'ctx',   label:'组装上下文'},
+  {id:'llm',   label:'LLM 流式生成'},
+  {id:'decide',label:'有工具调用？'},
+  {id:'tools', label:'执行工具'},
+  {id:'append',label:'结果回填 transcript'},
+  {id:'drain', label:'排空 steer/follow-up 队列'},
+  {id:'end',   label:'agent_end'}
+];
+const CODE={
+  user:{pi:{f:'packages/agent/src/agent-loop.ts',c:`<span class="cm">// prompt() 运行中会抛错——插话必须走队列</span>
+prompt(message) {
+  if (this.state.isStreaming)
+    throw new Error(<mark>"Agent is already running. Use steer() or followUp()"</mark>);
+  this.state.messages.push(userMessage);
+  return this.runLoop();
+}`},tau:{f:'src/tau_agent/harness.py',c:`def prompt(self, content: str) -&gt; AsyncIterator[AgentEvent]:
+    <mark>self._ensure_not_running()</mark>  <span class="cm"># 运行中只能 steer/follow_up</span>
+    self._messages.append(UserMessage(content=content))
+    return self._run()
+<span class="cm"># _run() 先补挂起的 tool_result（transcript 必须始终合法）</span>
+<span class="cm"># 然后把用户消息经事件流回显给前端</span>`}},
+  ctx:{pi:{f:'packages/agent/src/agent-loop.ts · streamAssistantResponse()',c:`<span class="cm">// 每轮发请求前的三步管线</span>
+let msgs = config.transformContext?.(messages) ?? messages;  <span class="cm">// 裁剪/注入（压缩挂这里）</span>
+const llmMsgs = config.convertToLlm(msgs);                   <span class="cm">// 过滤应用自定义消息</span>
+const apiKey = await config.getApiKey?.();                   <span class="cm">// 每轮现取，OAuth 会过期</span>
+const stream = streamFn(model, <mark>{ systemPrompt, messages: llmMsgs, tools }</mark>, opts);`},tau:{f:'src/tau_agent/loop.py',c:`<span class="cm"># 上下文 = 系统提示词 + 全部消息 + 工具 schema，别无他物</span>
+stream = provider.stream_response(
+    model=model,
+    system=system,          <span class="cm"># &lt;1k tokens：身份+工具一行描述+AGENTS.md+skills索引</span>
+    <mark>messages=messages</mark>,     <span class="cm"># 调用者拥有这个 list，循环只 append</span>
+    tools=tools,
+    signal=signal,
+)`}},
+  llm:{pi:{f:'packages/agent/src/agent-loop.ts',c:`for await (const ev of stream) {
+  <span class="cm">// 每个增量事件都带累积中的 partial 消息</span>
+  events.push({ type: <mark>"message_update"</mark>, assistantMessageEvent: ev, message: partial });
+}
+<span class="cm">// 硬契约：stream 永不 throw——一切失败都是流内 error 事件</span>
+if (msg.stopReason === "error" || msg.stopReason === "aborted") return endRun();`},tau:{f:'src/tau_agent/loop.py',c:`async for event in stream:
+    match event.type:
+        case "text_delta":     yield <mark>MessageDeltaEvent(delta=event.delta)</mark>
+        case "thinking_delta": yield ThinkingDeltaEvent(delta=event.delta)
+        case "response_end":
+            messages.append(event.message)   <span class="cm"># 入 transcript</span>
+            yield MessageEndEvent(message=event.message)
+        case "error":          yield ErrorEvent(message=..., recoverable=False)`}},
+  decide:{pi:{f:'packages/agent/src/agent-loop.ts · 截断守卫',c:`<span class="cm">// stopReason=length：输出被截断，参数可能不完整</span>
+if (message.stopReason === "length") {
+  <mark>failToolCallsFromTruncatedMessage(message)</mark>;
+  <span class="cm">// "arguments may be truncated…none of them are safe to execute"</span>
+}
+const hasMoreToolCalls = toolCalls.length &gt; 0;  <span class="cm">// 没有 → 走队列排空</span>`},tau:{f:'src/tau_agent/loop.py',c:`tool_calls = assistant_message.tool_calls
+if not tool_calls:
+    yield TurnEndEvent(turn=turn)
+    <span class="cm"># 先 steering、再 follow-up；都空 → 退出循环</span>
+    if not <mark>_drain_queues()</mark>:
+        break`}},
+  tools:{pi:{f:'packages/agent/src/agent-loop.ts · executeToolCalls()',c:`<span class="cm">// 默认并行；任一工具声明 sequential 则整批降级串行</span>
+const prepared = [];
+for (const call of toolCalls)
+  prepared.push(await prepareToolCall(call));   <span class="cm">// 校验参数 + beforeToolCall 钩子(可拦截)</span>
+<mark>await Promise.all(prepared.map(p =&gt; executePreparedToolCall(p)))</mark>;
+<span class="cm">// 完成顺序发事件，但结果消息按原始顺序追加</span>`},tau:{f:'src/tau_agent/loop.py · _execute_tool_calls()',c:`<span class="cm"># 严格串行——先学正确性，再学 pi 的并行</span>
+for index, tool_call in enumerate(tool_calls):
+    yield ToolExecutionStartEvent(tool_call=tool_call)
+    try:
+        result = await tool.execute(tool_call)
+    except Exception as exc:
+        <mark>result = _failure_result(tool_call, exc)</mark>  <span class="cm"># 工具是隔离边界</span>
+    messages.append(_tool_result_message(result))`}},
+  append:{pi:{f:'packages/agent/src/types.ts',c:`<span class="cm">// 工具结果回填后，模型下一轮就能"看见"它</span>
+interface AgentToolResult&lt;T&gt; {
+  content: (TextContent | ImageContent)[];  <span class="cm">// 给模型看的</span>
+  details: T;                               <span class="cm">// 给 UI 渲染的（如 diff）</span>
+  addedToolNames?: string[];                <span class="cm">// 运行中注册的新工具！</span>
+  <mark>terminate?: boolean;</mark>                      <span class="cm">// 整批 terminate 则提前结束</span>
+}`},tau:{f:'src/tau_agent/loop.py',c:`def _tool_result_message(result) -&gt; ToolResultMessage:
+    <span class="cm"># 错误文本折叠进 content——错误保留在上下文里，</span>
+    <span class="cm"># 模型看见失败才会修正（12-Factor F9）</span>
+    return ToolResultMessage(
+        tool_call_id=result.tool_call_id,
+        content=result.content, <mark>ok=result.ok</mark>, error=result.error)`}},
+  drain:{pi:{f:'packages/agent/src/agent-loop.ts',c:`<span class="cm">// steering：每轮开始+结束轮询；follow-up：agent 将停时才注入</span>
+let pending = await config.getSteeringMessages?.() ?? [];
+if (!hasMoreToolCalls &amp;&amp; pending.length === 0) {
+  <mark>pending = await config.getFollowUpMessages?.() ?? []</mark>;
+  if (pending.length === 0) break;  <span class="cm">// 真的没活了</span>
+}`},tau:{f:'src/tau_agent/harness.py',c:`<span class="cm"># 双 deque；默认 one-at-a-time（每个边界只取一条）</span>
+def _drain_queue(self, queue: deque[str]) -&gt; list[str]:
+    if self._config.queue_mode == "all":
+        items = list(queue); queue.clear(); return items
+    return [<mark>queue.popleft()</mark>] if queue else []`}},
+  end:{pi:{f:'packages/agent/src/agent-loop.ts',c:`events.push({ type: "turn_end", message, toolResults });
+<span class="cm">// prepareNextTurn 钩子：可在此换模型/换上下文（压缩挂这里）</span>
+await config.prepareNextTurn?.(state);
+...
+events.push({ type: <mark>"agent_end"</mark>, messages });  <span class="cm">// run 结束</span>`},tau:{f:'src/tau_agent/loop.py',c:`<span class="cm"># while…else：max_turns 用尽发 recoverable 错误</span>
+else:
+    yield ErrorEvent(message="max_turns reached", recoverable=True)
+finally:
+    yield <mark>AgentEndEvent()</mark>
+<span class="cm"># 每条 message_end 时消息已实时落盘 JSONL——随时可 --resume</span>`}}
+};
+const STEPS=[
+ {stage:'user',note:'<b>一切从一条 UserMessage 开始。</b>注意事件顺序：agent_start → turn_start → 用户消息经事件流回显——前端从同一条事件流渲染一切，没有旁路。',
+  t:[{k:'user',w:'user',x:'tests 里有个测试挂了，帮我找到原因并修好'}],
+  e:[['agent_start','lifecycle'],['turn_start <span class="cm">(turn 1)</span>','lifecycle'],['message_start <span class="cm">(user)</span>',''],['message_end','']],ctx:1.2},
+ {stage:'ctx',note:'<b>组装发给模型的全部内容：</b>极小系统提示词（&lt;1k tokens）+ 消息历史 + 4 个工具的 JSON Schema。没有隐藏注入——12-Factor 第 2/3 条：拥有自己的提示词与上下文窗口。',
+  t:[],e:[],ctx:1.2},
+ {stage:'llm',note:'<b>流式响应</b>：文本增量逐条发出，然后是一个完整的 bash 工具调用。stopReason = toolUse。',
+  t:[{k:'asst',w:'assistant',x:'我先跑一下测试看看失败信息。'},{k:'tcall',w:'tool call · bash',x:'uv run pytest -q'}],
+  e:[['message_start <span class="cm">(assistant)</span>',''],['message_delta <span class="cm">×12</span>',''],['toolcall <span class="cm">bash</span>','tool'],['message_end <span class="cm">stopReason=toolUse</span>','']],ctx:2.0},
+ {stage:'decide',note:'<b>分支判断。</b>有工具调用 → 去执行。若 stopReason=length（输出被截断），pi/tau 会<b>拒绝执行全部工具调用</b>——参数可能不完整，执行不安全。新手最容易踩的坑。',
+  t:[],e:[],ctx:2.0},
+ {stage:'tools',note:'<b>执行 bash。</b>pi 默认并行执行一批调用，tau 严格串行。异常在工具边界捕获转成 ok=false 结果——"工具是隔离边界"，循环永不因工具崩溃。',
+  t:[{k:'tres err',w:'bash · exit 1',x:'FAILED tests/test_math.py::test_add\n  assert add(2, 3) == 5\n  E  assert -1 == 5\n1 failed, 2 passed in 0.31s'}],
+  e:[['tool_execution_start <span class="cm">(bash)</span>','tool'],['tool_execution_end <span class="cm">ok=false</span>','tool'],['turn_end <span class="cm">(turn 1)</span>','lifecycle']],ctx:2.9,steerPoint:true},
+ {stage:'llm',note:'<b>回到循环顶部</b>：带着失败详情再次调用 LLM——错误保留在上下文里，模型看见失败才会修正（12-Factor F9）。它决定去读源码。',
+  t:[{k:'asst',w:'assistant',x:'add(2,3) 返回了 -1，我看看实现。'},{k:'tcall',w:'tool call · read',x:'src/calc.py'}],
+  e:[['turn_start <span class="cm">(turn 2)</span>','lifecycle'],['toolcall <span class="cm">read</span>','tool'],['message_end','']],ctx:3.4},
+ {stage:'append',note:'<b>read 返回带行号的内容。</b>若文件超 2000 行/50KB 会头部截断并附"用 offset=N 继续读"——截断信息也要引导下一步（工具即提示词）。',
+  t:[{k:'tres ok',w:'read · ok',x:'1  def add(a, b):\n2      """Add two numbers."""\n3      return a - b   # ← bug\n4\n5  def sub(a, b):\n6      return a - b'}],
+  e:[['tool_execution_start/end <span class="cm">(read)</span>','tool'],['turn_end <span class="cm">(turn 2)</span>','lifecycle']],ctx:4.2,steerPoint:true},
+ {stage:'llm',note:'<b>模型定位到 bug，发出 edit 调用。</b>oldText 必须在文件中<b>恰好出现一次</b>——注意它带上了注释让匹配唯一。匹配不唯一会直接报错：让"改错地方"在结构上不可能（poka-yoke 防呆设计）。',
+  t:[{k:'asst',w:'assistant',x:'第 3 行把加法写成了减号。用 edit 修复。'},{k:'tcall',w:'tool call · edit',x:'oldText: "return a - b   # ← bug"\nnewText: "return a + b"'}],
+  e:[['turn_start <span class="cm">(turn 3)</span>','lifecycle'],['toolcall <span class="cm">edit</span>','tool']],ctx:4.8},
+ {stage:'tools',note:'<b>edit 全部校验通过才写盘（all-or-nothing）</b>，返回 unified diff——content 给模型看，details 里的结构化 diff 给 TUI 渲染。',
+  t:[{k:'tres ok',w:'edit · ok',x:'--- src/calc.py\n+++ src/calc.py\n@@ -3 +3 @@\n-    return a - b   # ← bug\n+    return a + b'}],
+  e:[['tool_execution_start/end <span class="cm">(edit)</span>','tool'],['turn_end <span class="cm">(turn 3)</span>','lifecycle']],ctx:5.3,steerPoint:true},
+ {stage:'llm',note:'<b>验证闭环</b>：改完必须重新跑测试——agent 的每一步都要从环境获得真实反馈（ground truth），这是 Anthropic 对 agent 的定义性要求。',
+  t:[{k:'asst',w:'assistant',x:'重新跑测试确认修复。'},{k:'tcall',w:'tool call · bash',x:'uv run pytest -q'}],
+  e:[['turn_start','lifecycle'],['toolcall <span class="cm">bash</span>','tool']],ctx:5.8},
+ {stage:'tools',note:'<b>全部通过。</b>',
+  t:[{k:'tres ok',w:'bash · exit 0',x:'3 passed in 0.28s'}],
+  e:[['tool_execution_end <span class="cm">ok=true</span>','tool'],['turn_end','lifecycle']],ctx:6.2},
+ {stage:'llm',note:'<b>这次没有工具调用</b>（stopReason=stop）——模型认为任务完成，输出总结。',
+  t:[{k:'asst',w:'assistant',x:'修好了：add() 第 3 行的减号改成加号，3 个测试全部通过。'}],
+  e:[['turn_start','lifecycle'],['message_delta <span class="cm">×9</span>',''],['message_end <span class="cm">stopReason=stop</span>','']],ctx:6.5},
+ {stage:'drain',note:'<b>停止前最后检查队列</b>：steering / follow-up 还有排队消息吗？有 → 注入并继续循环；没有 → 真正结束。这就是"插话"不打断工具执行却总能被听见的原因。',
+  t:[],e:[['queue_update <span class="cm">steering=[] follow_up=[]</span>','']],ctx:6.5},
+ {stage:'end',note:'<b>run 结束。</b>其实每条 message_end 时消息已实时落盘 JSONL（追加式条目树）——现在关掉终端，<code>--resume</code> 也能原样恢复。这就是"无状态 reducer"：状态 = 重放条目。',
+  t:[],e:[['agent_end','lifecycle']],ctx:6.5},
+];
+const STEER_STEPS=[
+ {stage:'drain',note:'<b>✋ 插话被注入了！</b>steering 消息在工具批次之间的边界排空——不打断正在执行的工具，但下一次 LLM 调用就能看到。运行中 prompt() 会抛错，插话必须走队列。',
+  t:[{k:'steer',w:'user · steer',x:'顺便把 sub() 也检查一下'}],
+  e:[['queue_update <span class="cm">steering 1→0</span>','tool'],['message_start <span class="cm">(user)</span>',''],['message_end','']],ctx:5.5},
+ {stage:'llm',note:'模型带着插话继续：确认新要求，再回主线任务。',
+  t:[{k:'asst',w:'assistant',x:'收到，我会一并检查 sub()（它的 a - b 本来就是正确的减法实现）。继续主线。'}],
+  e:[['turn_start','lifecycle'],['message_end','']],ctx:5.7},
+];
+const loopMap=document.getElementById('loopMap');
+STAGES.forEach((s,i)=>{
+  const n=document.createElement('div');n.className='lnode';n.id='ln-'+s.id;
+  n.innerHTML='<span class="idx">'+(i+1)+'</span>'+s.label;
+  loopMap.appendChild(n);
+  if(i<STAGES.length-1){const a=document.createElement('div');a.className='larrow';a.textContent='↓';loopMap.appendChild(a);}
+});
+const lback=document.createElement('div');lback.className='lback';lback.innerHTML='循环边：<b>6→2</b> 还有工具调用 · <b>7→2</b> 队列有消息';loopMap.appendChild(lback);
+
+let idx=0, steered=false, steerQueued=false, autoTimer=null, activeTab='pi';
+let steps=STEPS.slice();
+const $=id=>document.getElementById(id);
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function render(){
+  $('stepLabel').textContent='step '+idx+' / '+steps.length;
+  $('btnNext').disabled=idx>=steps.length;
+  $('btnNext').textContent=idx>=steps.length?'已结束 ✓':'下一步 ▸';
+  const cur=idx>0?steps[idx-1]:null;
+  STAGES.forEach(s=>{const el=$('ln-'+s.id);el.classList.remove('on');});
+  if(cur){const el=$('ln-'+cur.stage);if(el)el.classList.add('on');}
+  $('simNote').innerHTML=cur?cur.note:'<b>准备就绪。</b>harness 已装载：极小系统提示词（身份 + 4 个工具的一行描述 + AGENTS.md + skills 索引）。点「下一步」发出第一条用户消息。';
+  const ctx=cur?cur.ctx:1.0;
+  $('ctxLabel').textContent='~'+ctx.toFixed(1)+'k tokens';
+  $('ctxBar').style.width=Math.min(100,ctx/32*100)+'%';
+  const canSteer=cur&&!steered&&idx<9&&idx>=3;
+  $('btnSteer').disabled=!canSteer;
+  $('queueChips').innerHTML=steerQueued?'<span class="qchip">steer: "顺便把 sub() 也检查一下"</span>':'<span style="font-size:11px;color:var(--ink-3);font-family:var(--mono)">空</span>';
+  renderCode(cur?cur.stage:'user');
+}
+function renderCode(stage){
+  const c=CODE[stage]||CODE.user;const side=c[activeTab];
+  $('codeFname').textContent=side.f;
+  $('codeBlock').innerHTML=side.c;
+  $('codeStageLabel').textContent='阶段「'+(STAGES.find(s=>s.id===stage)||STAGES[0]).label+'」的真实源码（节选/简化）';
+}
+function addBubbles(list){
+  for(const b of list){
+    const d=document.createElement('div');d.className='bub '+b.k;
+    d.innerHTML='<div class="who">'+b.w+'</div>'+esc(b.x).replace(/\n/g,'<br>');
+    $('transcript').appendChild(d);
+  }
+  $('transcript').scrollTop=$('transcript').scrollHeight;
+}
+function addEvents(list){
+  for(const[e,cls]of list){
+    const s=document.createElement('span');s.className='ev new '+cls;s.innerHTML='<b>'+e.split(' ')[0]+'</b> '+e.split(' ').slice(1).join(' ');
+    $('evlog').appendChild(s);
+  }
+  $('evlog').scrollTop=$('evlog').scrollHeight;
+}
+function next(){
+  if(idx>=steps.length)return;
+  if(steerQueued&&steps[idx].steerPoint===undefined&&idx>0&&steps[idx-1].steerPoint){
+    steps.splice(idx,0,...STEER_STEPS);steerQueued=false;
+  }
+  const st=steps[idx];idx++;
+  if(st.t)addBubbles(st.t);
+  if(st.e)addEvents(st.e);
+  render();
+  if(idx>=steps.length&&autoTimer){clearInterval(autoTimer);autoTimer=null;$('btnAuto').textContent='自动播放';}
+}
+$('btnNext').addEventListener('click',next);
+$('btnAuto').addEventListener('click',()=>{
+  if(autoTimer){clearInterval(autoTimer);autoTimer=null;$('btnAuto').textContent='自动播放';return;}
+  if(idx>=steps.length)resetSim();
+  $('btnAuto').textContent='⏸ 暂停';autoTimer=setInterval(next,2200);
+});
+$('btnSteer').addEventListener('click',()=>{
+  steered=true;steerQueued=true;$('btnSteer').disabled=true;
+  addEvents([['steer() <span class="cm">→ 入队，等待下一个边界</span>','tool']]);
+  render();
+});
+function resetSim(){
+  idx=0;steered=false;steerQueued=false;steps=STEPS.slice();
+  if(autoTimer){clearInterval(autoTimer);autoTimer=null;$('btnAuto').textContent='自动播放';}
+  $('transcript').innerHTML='';
+  $('evlog').innerHTML='<span class="ev" style="color:var(--term-dim)">// AgentEvent 会出现在这里</span>';
+  render();
+}
+$('btnReset').addEventListener('click',resetSim);
+$('tabPi').addEventListener('click',()=>{activeTab='pi';$('tabPi').setAttribute('aria-selected','true');$('tabTau').setAttribute('aria-selected','false');render();});
+$('tabTau').addEventListener('click',()=>{activeTab='tau';$('tabTau').setAttribute('aria-selected','true');$('tabPi').setAttribute('aria-selected','false');render();});
+render();
+
+/* ================= 图表 ================= */
+const LOC=[
+ {g:'Provider 层',pi:36.7,tau:3.4,pn:'pi-ai',tn:'tau_ai',note:'差距 = 兼容性长尾：10 种 thinking 方言、24 条溢出正则、1057 个模型目录、OAuth×3'},
+ {g:'大脑层',pi:8.2,tau:1.35,pn:'pi-agent-core',tn:'tau_agent',note:'核心循环两边几乎同构；pi 多了并行执行、钩子系统、可移植 harness'},
+ {g:'产品层',pi:52.7,tau:19.8,pn:'pi-coding-agent',tn:'tau_coding',note:'pi 多出扩展系统、RPC 模式、packages、7 个工具、会话迁移'},
+ {g:'TUI',pi:12.1,tau:0,pn:'pi-tui（自研差分渲染）',tn:'tau 用 Textual（不计入）',note:'pi 自研 vs tau 借力生态——最典型的取舍'},
+];
+const MAX=52.7;
+const locBars=$('locBars');
+LOC.forEach(d=>{
+  const g=document.createElement('div');g.className='bargroup';
+  const piW=(d.pi/MAX*72),tauW=(d.tau/MAX*72);
+  g.innerHTML='<div class="gl">'+d.g+'</div>'
+   +'<div class="brow"><div class="bl pi">pi</div><div class="btrack"><i class="bfill pi" data-tip="'+d.pn+' · '+d.pi+'k 行。'+d.note+'" style="width:'+piW+'%"></i><span class="bval num" style="left:calc('+piW+'% + 8px)">'+d.pi+'k</span></div></div>'
+   +(d.tau>0
+     ?'<div class="brow"><div class="bl tau">tau</div><div class="btrack"><i class="bfill tau" data-tip="'+d.tn+' · '+d.tau+'k 行。'+d.note+'" style="width:'+tauW+'%"></i><span class="bval num" style="left:calc('+tauW+'% + 8px)">'+d.tau+'k</span></div></div>'
+     :'<div class="brow"><div class="bl tau">tau</div><div class="btrack"><span class="bval" style="left:8px;color:var(--ink-3)">— 用 Textual，无自研 TUI</span></div></div>');
+  locBars.appendChild(g);
+});
+const TOK=[
+ {n:'pi',v:1,label:'&lt;1k',cls:'pi',tip:'系统提示词约 25 行 + 4 个工具定义。badlogic 实测 <1,000 tokens'},
+ {n:'tau',v:1,label:'&lt;1k（同构）',cls:'tau',tip:'同款拼装逻辑与工具集，量级与 pi 相同'},
+ {n:'Claude Code',v:10,label:'10k+',cls:'n',tip:'含大量工具定义与行为规则。换来的是开箱即用的完整产品能力——这是取舍不是优劣'},
+];
+const tokBars=$('tokBars');
+TOK.forEach(d=>{
+  const w=d.v/10*72;
+  const r=document.createElement('div');r.className='brow';r.style.margin='7px 0';
+  r.innerHTML='<div class="bl '+(d.cls==='n'?'n':d.cls)+'" style="width:34px;min-width:34px"></div><div class="btrack"><i class="bfill '+d.cls+'" data-tip="'+d.tip+'" style="width:'+Math.max(w,2)+'%"></i><span class="bval num" style="left:calc('+Math.max(w,2)+'% + 8px)">'+d.n+' · '+d.label+' tokens</span></div>';
+  tokBars.appendChild(r);
+});
+const tip=$('viztip');
+document.addEventListener('mousemove',e=>{
+  const t=e.target.closest('[data-tip]');
+  if(t){tip.textContent=t.getAttribute('data-tip');tip.style.opacity=1;
+    const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-10);
+    tip.style.left=x+'px';tip.style.top=(e.clientY+16)+'px';}
+  else tip.style.opacity=0;
+});
+
+/* ================= 生态光谱 ================= */
+const SPEC=[
+ {n:'裸循环',d:'直接调 Messages API',here:false,detail:'<b>裸循环</b>：Thorsten Ball 的 300 行 Go 教程、sketch.dev 的 9 行循环。适合：理解本质、极简嵌入。你将亲手写一次（实验 #3）。'},
+ {n:'薄 harness',d:'pi · tau',here:true,detail:'<b>薄 harness（pi/tau 所在档位）</b>：循环 + 多 provider + 会话 + 压缩 + 中断插话，全部自持可见、无隐藏提示词。适合：想完全控制上下文、做自己的 terminal/coding agent、当库嵌入产品。'},
+ {n:'最小框架',d:'smolagents · OpenAI Agents SDK',here:false,detail:'<b>最小框架</b>：smolagents（核心约 1000 行，特色 CodeAgent——动作写成可执行 Python 而非 JSON，约省 30% 步数）；OpenAI Agents SDK（Agents/Handoffs/Guardrails + tracing）。适合：研究原型、OpenAI 系多 agent。'},
+ {n:'类型化中间层',d:'PydanticAI · Vercel AI SDK',here:false,detail:'<b>类型化中间层</b>：PydanticAI（"GenAI 界的 FastAPI"，类型校验输出、可接 Temporal 做持久执行）；Vercel AI SDK（TS 流式 UI 全家桶，其 HarnessAgent 可直接驱动 pi/Claude Code/Codex）。适合：生产 Python/TS 应用。'},
+ {n:'图编排',d:'LangGraph',here:false,detail:'<b>图编排</b>：LangGraph——状态机、checkpoint、time-travel、HITL 中断。适合长时有状态业务流；学习成本陡峭，也是 12-Factor"框架隐藏控制流"批判的主要对象。'},
+ {n:'全家桶 harness',d:'Claude Agent SDK',here:false,detail:'<b>全家桶</b>：Claude Agent SDK——Claude Code 整机作为库（内置工具/循环/自动压缩/子代理/hooks/权限/会话）。适合：要开箱即用的完整能力且接受 Claude-only；正是极简派避开的那种不透明，两条路线各有拥趸。'},
+ {n:'企业多 agent',d:'Google ADK · CrewAI · AutoGen',here:false,detail:'<b>企业多 agent 平台</b>：Google ADK（多语言、A2A 协议、eval 工具链）、CrewAI（角色制 35 行起步）、AutoGen。适合企业云生态绑定或快速 demo；简单场景概念负担重。'},
+];
+const rail=$('specRail');
+SPEC.forEach((s,i)=>{
+  const n=document.createElement('button');n.className='snode';n.type='button';
+  n.innerHTML='<div class="sn">'+s.n+'</div><div class="sd">'+s.d+'</div>'+(s.here?'<span class="here">★ pi/tau 在这</span>':'');
+  n.addEventListener('click',()=>{
+    document.querySelectorAll('.snode').forEach(x=>x.classList.remove('sel'));
+    n.classList.add('sel');$('specDetail').innerHTML=s.detail;
+  });
+  rail.appendChild(n);
+});
+const hereNode=rail.querySelector('.snode .here');
+if(hereNode)hereNode.closest('.snode').click();
+
+/* ================= 实验清单 ================= */
+const LABS=[
+ ['跑起来','两个都装上，各自问对方仓库 "explain this repo"，对比行为'],
+ ['读 JSONL 会话','打开 ~/.tau/sessions/ 逐行读；画条目树；手工改 leaf 指针再 resume'],
+ ['写一个裸循环','用 tau_ai 的 provider + 50 行代码复刻最小循环，给 read/bash 两个工具'],
+ ['事件流观察','用 FakeProvider 打印两轮工具调用的完整事件序列，画时序图'],
+ ['给 tau 加 grep 工具','参照 pi 的 ripgrep --json 实现，带截断 + 引导 footer + 测试'],
+ ['触发一次压缩','把阈值调小，观察摘要结构（Goal/Progress/Next），resume 验证重放'],
+ ['写一个 SKILL.md','放 .agents/skills/，验证 pi 和 tau 同一个文件都能用'],
+ ['pi 扩展入门','让 pi 自己写扩展：每次 edit 后自动跑 lint 并把错误 followUp 注入'],
+ ['亲手实现权限弹窗','用 pi 的 tool_call 事件 + ctx.ui.confirm 做 bash 确认——体会两边论点'],
+ ['给 tau 加真实 usage','OpenAI 适配器已请求 include_usage 却没透出——现成的 PR 选题'],
+ ['并行工具执行','把 tau 的串行改成 asyncio.gather，处理顺序与文件锁，对照 pi 自评'],
+ ['自定义前端','照 tau 的 custom-frontend 指南写个 Web 前端，或用 pi --mode rpc 驱动'],
+];
+const labGrid=$('labGrid');
+let saved={};try{saved=JSON.parse(localStorage.getItem('pitau-labs')||'{}')}catch(e){}
+LABS.forEach((l,i)=>{
+  const lab=document.createElement('label');lab.className='lab';
+  lab.innerHTML='<input type="checkbox" '+(saved[i]?'checked':'')+'><div class="lt"><b>'+(i+1)+'. '+l[0]+'</b><span>'+l[1]+'</span></div>';
+  lab.querySelector('input').addEventListener('change',ev=>{saved[i]=ev.target.checked;try{localStorage.setItem('pitau-labs',JSON.stringify(saved))}catch(e){};updLabs();});
+  labGrid.appendChild(lab);
+});
+function updLabs(){
+  const done=Object.values(saved).filter(Boolean).length;
+  $('labBar').style.width=(done/12*100)+'%';
+  $('labPct').textContent=done+' / 12';
+}
+updLabs();
+</script>
