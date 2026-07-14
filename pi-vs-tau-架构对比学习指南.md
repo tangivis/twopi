@@ -5,7 +5,7 @@
 > - **pi** `~/workspace/code/pi` — TypeScript 生产级 agent harness（Mario Zechner / badlogic，v0.80.6）
 > - **tau** `~/workspace/code/tau` — Python 教学级复刻（alejandro-ao，v0.1.5，官方自述 *"A Python implementation of a minimalist Pi-style coding-agent harness"*）
 >
-> 编写日期：2026-07-11（2026-07-12 增补第 9 章「从零复刻」、第 10 章「模型接入指南」、第 11 章「深度对比主流框架」）。基于 pi commit `4c18610`、tau v0.1.5（2026-07-09）；2026-07-12 复核：pi 已 pull 至 `8479bd84`（新增 5 个修复性小提交，版本仍 0.80.6，分析结论不受影响），tau 无更新（`b344d3e`）。
+> 编写日期：2026-07-11（2026-07-12 增补第 9–11 章：从零复刻 / 模型接入 / 深度对比主流框架；2026-07-13 增补第 12 章：延伸样本 rust-ai-agent 对比）。基于 pi commit `4c18610`、tau v0.1.5（2026-07-09）；2026-07-12 复核：pi 已 pull 至 `8479bd84`（新增 5 个修复性小提交，版本仍 0.80.6，分析结论不受影响），tau 无更新（`b344d3e`）。
 > 英文原始分析笔记见 `sources/`（pi/tau 各一份代码级笔记 + 一份网上最佳实践调研，含全部出处链接）。
 
 ---
@@ -34,7 +34,8 @@
 - [9. 从零复刻：搭建你自己的 mini-harness](#9-从零复刻搭建你自己的-mini-harness)
 - [10. 模型接入指南：格式要求、统一层与本地模型](#10-模型接入指南格式要求统一层与本地模型)
 - [11. 深度对比：pi/tau 与 LangGraph 等主流框架](#11-深度对比pitau-与-langgraph-等主流框架)
-- [12. 参考资料](#12-参考资料)
+- [12. 延伸样本：rust-ai-agent（Rust）和 pi/tau 一样吗？](#12-延伸样本rust-ai-agentrust和-pitau-一样吗)
+- [13. 参考资料](#13-参考资料)
 
 ---
 
@@ -450,7 +451,7 @@ pi 的供应链清单值得单独收藏——2025-2026 npm 投毒潮后，这是
 5. `core/system-prompt.ts`、`core/compaction/compaction.ts`、`docs/session-format.md`
 6. `packages/ai/src/types.ts`（9 种 API、compat 开关）、`utils/overflow.ts`（感受兼容性长尾）
 7. **扩展系统**：`extensions/types.ts` 的 ExtensionAPI + `examples/extensions/` 逐个跑
-8. 外围文章：badlogic 的 pi 宣言、Armin Ronacher 的评测（链接见第 12 章）
+8. 外围文章：badlogic 的 pi 宣言、Armin Ronacher 的评测（链接见第 13 章）
 
 ### 8.2 动手实验（由浅入深 12 个）
 
@@ -1090,7 +1091,72 @@ Anthropic 的多 agent 研究系统实际就是这个形状：orchestrator 是�
 
 ---
 
-## 12. 参考资料
+## 12. 延伸样本：rust-ai-agent（Rust）和 pi/tau 一样吗？
+
+> 有读者问：GitHub 上的 [`solenovex/rust-ai-agent`](https://github.com/solenovex/rust-ai-agent)（B 站 UP 主「软件工艺师」的视频系列《用 Rust 构建 AI Agent》配套代码）和 pi/tau 是一类东西吗？
+>
+> **简答：genre 相同（都是教学项目），但 shape 不同——它当前不是 coding-agent harness，甚至不是"循环式 agent"，而是"增强 LLM + 结构化输出 + 评测驱动"的另一种范式。** 它恰好是本文档最好的一个反例样本：帮你看清"AI Agent"这个词覆盖的范围有多宽，也正好补上 pi/tau 缺的那一块（评测）。
+>
+> 分析基于 2026-07-13 快照（约 24 star、6 个 commit、按集数打 tag `ep01…ep04`、edition 2024、MIT 前提待核）。**这是一个早期、随视频推进的教学仓库，后续集数可能长出工具循环——本节结论限定在当前快照。** 未逐文件精读，架构判断来自 Cargo.toml + 目录结构 + `gaia/solver.rs` 摘要。
+
+### 12.1 它是什么
+
+`async-openai` SDK + `tokio` + `reqwest` + `schemars`（从 Rust 结构体 derive JSON Schema）+ `backon`（指数退避重试）搭起来的教学工程。目录透露了它的骨架：
+
+- **`src/llm/`** —— LLM 交互层，但组织维度是**交互模式**而非 provider：`complete.rs`（非流式）、`stream.rs`（流式）、`structured.rs` + `structured_ds.rs`（结构化输出 + schema 约束）、`semaphore.rs`（并发/限流控制）。注意这里没有"多 provider 中立层"——它直接吃 `async-openai` 的 OpenAI 兼容 wire 格式。
+- **`src/gaia/`** —— 全盘围绕 **GAIA 基准**组织（GAIA = General AI Assistants，Meta + HuggingFace 2023 年提出的通用助手评测集，题目需要网页检索、文件解析、数学、多模态）：`dataset.rs`（加载数据集）、`solver.rs`（求解一道题）、`evaluator.rs`（给答案打分）、`models.rs`。
+- **`src/bin/gaia.rs`** —— 可运行入口。
+
+**最关键的一点**：`solver.rs` 的 `solve_problem()` 是**单次 LLM 调用**——系统提示词 + 用户题目 → 强制 JSON 结构化输出（`GaiaOutput` 由 schemars 生成 schema）→ 反序列化 → 用 `backon` 重试。**没有 `while` 循环、没有工具调用、没有把工具结果喂回模型。** 这不是 agent 循环，是"增强 LLM"直接答题，外面套一个数据集评测器。
+
+### 12.2 三条轴上和 pi/tau 的定位
+
+用本文档一直在用的坐标系来放它：
+
+| 轴 | rust-ai-agent（当前快照） | pi / tau |
+|---|---|---|
+| **意图 genre** | ✅ 教学项目（和 tau 同类——"为学习而写"） | tau 教学 / pi 生产 |
+| **控制流范式**（§2.1、§11.1） | **增强 LLM / workflow 端**：单次调用 + 结构化输出，无循环 | **agent 端**：模型驱动的 tool-use 循环 |
+| **领域** | 通用助手 / 跑基准（GAIA answer-only） | 终端 coding（read/write/edit/bash + 会话 + TUI） |
+| **provider 层** | 单一，直接用 `async-openai` SDK | 自建中立层（tau 5 适配器 / pi 9 协议）+ 事件流 |
+| **工具 schema** | `schemars` 从 Rust 类型 **derive**（第三种流派） | tau 手写 dict / pi TypeBox |
+| **有没有 agent 循环** | ❌ 当前没有 | ✅ 核心就是循环 |
+| **有没有系统评测** | ✅ **有**（`evaluator.rs` 对 GAIA 数据集打分） | ❌ 两者都缺（见 §5.2） |
+
+一句话：**它和 tau 共享"教学"的灵魂，但站在 Anthropic《Building Effective Agents》光谱的另一端**——pi/tau 在"agent"（模型自主循环），rust-ai-agent 在"workflow / 增强 LLM"（预定义的单步 + 结构化输出）。这不是谁高级，是两种建造块（§2.1）。
+
+### 12.3 为什么它对学习反而有价值：三个互补点
+
+正因为不一样，它填的是 pi/tau 教不了的空白：
+
+1. **它是"增强 LLM"建造块的干净样本。** §2.1 讲过 workflow 和 agent 的区别；rust-ai-agent 让你看见"没有循环的 AI 应用"长什么样——很多生产系统其实就停在这里，一次结构化调用足矣（Anthropic 的第一条建议："能用单次调用就别上 agent"）。
+2. **它有 pi/tau 都缺的评测脊椎。** §5.2 专门标注过：pi/tau 都没有系统化 evals。而 rust-ai-agent 的整个 `gaia/` 就是"数据集 → solver → evaluator 打分"的评测循环——这正是《Writing effective tools for agents》反复强调的"从真实任务建 eval"。**想给你的 mini（第 9 章）补 M10 评测扩展，这就是现成的参照结构。**
+3. **它示范了 Rust 的结构化输出流派。** `schemars` 从类型 derive schema，是继 tau 手写 dict、pi TypeBox 之后的第三种工具/输出 schema 做法，类型安全最强。想理解"schema 从哪来"的三种权衡，三个项目正好凑齐。
+
+### 12.4 如果你想把它变成"真 agent"
+
+它现在缺的，恰好是第 9 章 M3–M8 教的东西。把它升级成 pi/tau 那样的循环式 agent，路线图就是：
+
+- **加循环（M3）**：把 `solve_problem()` 的单次调用包进 `while`，读 `tool_calls`（`async-openai` 原生支持 function calling）→ 执行 → 结果回填 → 重复。四大守卫照搬。
+- **加工具（M4）**：GAIA 需要网页检索/文件解析——正好给它 web-search、read-file、python-exec 工具（GAIA 的典型工具面），而不是 coding 的 edit/bash。
+- **加会话（M7）**：多步求解要留痕，追加式 JSONL 条目树同样适用。
+- 它已有的 `evaluator.rs` 反而是 pi/tau 要补的——**双向取长补短**。
+
+> 顺带一提：如果你找的是"Rust 版的 pi"（真正对标的 coding-agent harness），社区里有 [`Dicklesworthstone/pi_agent_rust`](https://github.com/Dicklesworthstone/pi_agent_rust)（自称"零 unsafe 的高性能 Rust coding agent CLI"）更接近；Rust 原生 agent 框架生态另有 Rig、AutoAgents、OpenFANG 等（对应第 6 章光谱的"框架"档）。rust-ai-agent 与它们都不同——它是**教你从头写**的视频教程，不是拿来即用的框架。这一点上，它和 tau 的定位最像，只是选了"评测驱动的通用助手"而非"终端 coding"作为教学载体。
+
+### 12.5 结论
+
+「和 pi/tau 一样吗？」——**教学初心一样，技术形态不一样**。把三者并排，你得到的是一张更完整的地图：
+
+- **tau**：教你写 *coding-agent 循环*（Python，agent 端）
+- **pi**：同一套设计的 *生产形态*（TypeScript，agent 端，带扩展/多 provider/会话全家桶）
+- **rust-ai-agent**：教你写 *增强-LLM + 评测*（Rust，workflow 端，结构化输出 + GAIA 打分）
+
+学习建议：**主线仍是先 tau 后 pi**（第 8 章）建立 agent 循环的完整直觉；rust-ai-agent 作为**支线**看两样东西——「没有循环的 AI 应用」的样子，以及「评测驱动开发」怎么组织。等你做第 9 章的 mini 时，把它的 `evaluator.rs` 思路借过来做 M10。
+
+---
+
+## 13. 参考资料
 
 **项目本体**
 - pi：仓库 `~/workspace/code/pi` · https://pi.dev · https://github.com/earendil-works/pi
@@ -1113,7 +1179,13 @@ Anthropic 的多 agent 研究系统实际就是这个形状：orchestrator 是�
 
 **基准与生态**
 - Terminal-Bench 2.0 — https://www.tbench.ai/ · SWE-bench Verified · MCP — https://modelcontextprotocol.io/
+- GAIA 基准（通用助手评测）— Meta + HuggingFace, 2023
 - 框架官方文档：Claude Agent SDK（code.claude.com/docs）· OpenAI Agents SDK · LangGraph · smolagents · PydanticAI · Vercel AI SDK · Google ADK
+
+**第 12 章延伸样本**
+- rust-ai-agent（教学）— https://github.com/solenovex/rust-ai-agent · B 站《用 Rust 构建 AI Agent》/ UP 主「软件工艺师」
+- pi_agent_rust（对标 pi 的 Rust coding agent）— https://github.com/Dicklesworthstone/pi_agent_rust
+- Rust 原生 agent 框架：Rig · AutoAgents · OpenFANG
 
 **本目录**
 - `sources/pi-architecture-notes.md` — pi 代码级分析（英文，含 file:line 出处）

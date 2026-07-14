@@ -683,6 +683,13 @@ footer p{margin:4px 0}
     <p style="font-size:13px;color:var(--ink-2);margin:0">两条硬性要求：必须支持工具调用（不可妥协）、最好支持流式。市面上没有统一格式，只有事实标准——OpenAI Chat Completions（一个适配器吃遍 90% 模型，含"同一件事的四种写法"对照表）。最佳实践是<b>内部中立层 + 适配器 + 逃生舱</b>，警惕最小公分母陷阱。Ollama / vLLM / LM Studio 可直接接入：mini 三行配置、tau 用 <code>~/.tau/catalog.toml</code>、pi 用 <code>~/.pi/agent/models.json</code>——文档给出核对自官方的可用示例与四个本地模型专属坑。</p>
   </div>
 
+  <div class="card pathcard" style="margin-top:16px;border-left:3px solid var(--ink-3)">
+    <h3>延伸样本：rust-ai-agent（Rust）和 pi/tau 一样吗？</h3>
+    <div class="psub">主文档第 12 章 · 读者提问 · 第三个坐标点</div>
+    <p style="font-size:13px;color:var(--ink-2);margin:0 0 12px"><b>教学初心一样，技术形态不一样。</b>solenovex/rust-ai-agent 是 B 站《用 Rust 构建 AI Agent》配套教学码——和 tau 同为"为学习而写"，但站在光谱另一端：它当前<b>不是循环式 agent</b>，而是"增强 LLM + 结构化输出（schemars derive schema）+ GAIA 基准评测"。<code>solver.rs</code> 是单次 LLM 调用，无循环、无工具回填。三者并排给你一张完整地图：tau=coding 循环(Py)、pi=同设计生产形态(TS)、rust-ai-agent=增强-LLM+评测(Rust, workflow 端)。反而补上了 pi/tau 都缺的评测脊椎（<code>evaluator.rs</code>）——做第 9 章 mini 的 M10 时可借用。</p>
+    <a class="btn" style="text-decoration:none;border-bottom:none;display:inline-block" href="https://claude.ai/code/artifact/8af237ac-af72-4182-a52f-58fa1835f8ba">🦀 打开代码级交互精读 →</a>
+  </div>
+
   <div class="card labs">
     <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><h3 style="margin:0">12 个动手实验</h3><span class="psub" style="margin:0">由浅入深 · 勾选保存进度</span></div>
     <div class="progress"><div class="meter"><i id="labBar" style="width:0%;background:var(--good)"></i></div><span class="pct num" id="labPct">0 / 12</span></div>
