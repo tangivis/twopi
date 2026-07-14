@@ -196,9 +196,9 @@ footer a{color:var(--rust)}
 
 <header class="top"><div class="wrap topbar">
   <div class="brand"><span class="r">rust-ai-agent</span> · 代码精读</div>
-  <a class="back" href="https://claude.ai/code/artifact/0cf11862-58f4-4807-84c3-72229d2400db">← pi×tau 主教程</a>
+  <a class="back" href="./index.html">← pi×tau 主教程</a>
   <nav class="sections">
-    <a href="#myth">正名</a><a href="#explorer">代码浏览器</a><a href="#patterns">结构化输出</a><a href="#gaia">GAIA 评测</a><a href="#bridge">对比循环</a><a href="#follow">跟着学</a>
+    <a href="#myth">正名</a><a href="#explorer">代码浏览器</a><a href="#patterns">结构化输出</a><a href="#gaia">GAIA 评测</a><a href="#bridge">对比循环</a><a href="#local">本地模型</a><a href="#follow">跟着学</a>
   </nav>
 </div></header>
 
@@ -263,7 +263,7 @@ footer a{color:var(--rust)}
       <tr><td><b style="color:var(--tau)">提示词强制</b></td><td><code>JsonObject</code> + schema 写进系统提示词</td><td>同样 <code>schemars</code> derive，但序列化成文本塞进 prompt</td><td>模型只支持"给我 JSON"不支持 schema（如早期 DeepSeek，<code>_ds</code> 由此得名）</td><td>模型可能不严格遵守，需 <code>serde</code> 兜底 + 重试</td></tr>
     </tbody>
   </table>
-  <p class="lede" style="margin-top:14px">这正好是<a href="https://claude.ai/code/artifact/0cf11862-58f4-4807-84c3-72229d2400db">主教程第 10 章</a>「逃生舱」思想的 Rust 实现：能力不齐时降级到提示词强制。三个项目凑齐了工具/输出 schema 的三种流派——tau 手写 dict、pi 用 TypeBox、rust-ai-agent 用 <code>schemars</code> derive（类型安全最强）。</p>
+  <p class="lede" style="margin-top:14px">这正好是<a href="./index.html">主教程第 10 章</a>「逃生舱」思想的 Rust 实现：能力不齐时降级到提示词强制。三个项目凑齐了工具/输出 schema 的三种流派——tau 手写 dict、pi 用 TypeBox、rust-ai-agent 用 <code>schemars</code> derive（类型安全最强）。</p>
 </div></section>
 
 <section id="gaia"><div class="wrap">
@@ -302,6 +302,25 @@ footer a{color:var(--rust)}
   </div>
 </div></section>
 
+<section id="local"><div class="wrap">
+  <div class="kicker">动手 · 换本地模型</div>
+  <h2>用本地模型跑：把 solver 降级到「提示词强制」</h2>
+  <p class="lede">先说结论：<b>模型不限、接口限</b>。它全程用 <code>async-openai</code> 的 <code>Client::new()</code>，只认 OpenAI Chat Completions 一种 wire 格式（Anthropic/Gemini 原生 API 接不了，但可经 OpenRouter）。<code>async-openai</code> 读环境变量 <code>OPENAI_BASE_URL</code>（0.41 源码确认，非硬编码）——把它指向本地端点就能换成本地模型。<b>唯一的坑是结构化输出</b>：纯文本/流式随便跑，但 <code>solver.rs</code> 用的 <code>JsonSchema{strict:true}</code> 不是所有本地端点都支持。下面是具体改法。</p>
+
+  <div class="term" style="margin-bottom:16px"><div class="term-head"><div class="dots"><i></i><i></i><i></i></div><span>.env + bin/gaia.rs —— 指向本地</span></div>
+    <pre class="code" id="envCode"></pre>
+  </div>
+
+  <div class="pat-tabs" id="localTabs" role="tablist"></div>
+  <div class="pat-body">
+    <div class="pat-desc" id="localDesc"></div>
+    <div class="term"><div class="term-head"><div class="dots"><i></i><i></i><i></i></div><span id="localFile"></span></div>
+      <div class="expcode" style="max-height:440px"><pre class="code" id="localCode"></pre></div>
+    </div>
+  </div>
+  <p class="lede" style="margin-top:14px">两段代码只差一个 <code>ResponseFormat</code> + schema 放哪——这正是本页上面「结构化输出两流派」教的东西，也是主教程第 10 章的<b>逃生舱</b>：端点能力不齐时，从"让服务端强制"降级到"让提示词哄"。Ollama / vLLM / LM Studio / llama.cpp 都提供 OpenAI 兼容端点，纯文本 / 流式（<code>complete.rs</code> / <code>stream.rs</code>）任何一个都能直接跑；只有严格结构化输出这条路需要按上面降级。</p>
+</div></section>
+
 <section id="follow"><div class="wrap">
   <div class="kicker">动手 · 跟着学</div>
   <h2>怎么真正跑起来 + 升级成"真 agent"</h2>
@@ -326,13 +345,13 @@ footer a{color:var(--rust)}
     </div>
   </div>
   <div class="gift">
-    <b>双向取长补短。</b>想把它升级成 pi/tau 那样的循环式 agent？缺的正是主教程第 9 章 M3–M8 教的：把 <code>solve_problem()</code> 的单次调用包进 <code>while</code>，读 <code>tool_calls</code>（<code>async-openai</code> 原生支持）→ 执行 → 结果回填 → 重复；给 GAIA 配 web-search / read-file / python-exec 工具（而非 coding 的 edit/bash）。<b>反过来</b>，它的 <code>evaluator.rs</code> 恰好是 pi/tau 都缺的评测脊椎——做你的 <a href="https://claude.ai/code/artifact/0cf11862-58f4-4807-84c3-72229d2400db">mini（第 9 章）</a>的 M10 时把它借过来。</div>
+    <b>双向取长补短。</b>想把它升级成 pi/tau 那样的循环式 agent？缺的正是主教程第 9 章 M3–M8 教的：把 <code>solve_problem()</code> 的单次调用包进 <code>while</code>，读 <code>tool_calls</code>（<code>async-openai</code> 原生支持）→ 执行 → 结果回填 → 重复；给 GAIA 配 web-search / read-file / python-exec 工具（而非 coding 的 edit/bash）。<b>反过来</b>，它的 <code>evaluator.rs</code> 恰好是 pi/tau 都缺的评测脊椎——做你的 <a href="./index.html">mini（第 9 章）</a>的 M10 时把它借过来。</div>
 </div></section>
 
 <footer><div class="wrap">
   <p><b style="color:var(--ink)">来源与诚实边界</b></p>
   <p class="provenance">代码逐字取自 <a href="https://github.com/solenovex/rust-ai-agent">github.com/solenovex/rust-ai-agent</a>（commit 76047df，2026-07-13 克隆读取，全部 634 行读完）。B 站《用 Rust 构建 AI Agent》/ UP 主「软件工艺师」。这是随视频推进的早期教学仓库——本页结论限定在当前快照；后续集数若加入工具循环，定性可能变化。</p>
-  <p class="provenance">配套：<a href="https://claude.ai/code/artifact/0cf11862-58f4-4807-84c3-72229d2400db">pi×tau 主教程（含循环模拟器、第 9 章从零复刻、第 12 章文字对比）</a> · 主文档 <code>agent-study/pi-vs-tau-架构对比学习指南.md</code> 第 12 章</p>
+  <p class="provenance">配套：<a href="./index.html">pi×tau 主教程（含循环模拟器、第 9 章从零复刻、第 12 章文字对比）</a> · 主文档 <code>agent-study/pi-vs-tau-架构对比学习指南.md</code> 第 12 章</p>
 </div></footer>
 
 <!-- ============ 真实源码（text/plain：逐字嵌入，不被 HTML/JS 转义影响） ============ -->
@@ -915,6 +934,39 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }</script>
 
+<script type="text/plain" id="src-env"># .env —— async-openai 读这两个变量（0.41 源码确认，OPENAI_BASE_URL 非硬编码）
+OPENAI_BASE_URL=http://localhost:11434/v1   # Ollama；vLLM 用 :8000/v1，LM Studio 用 :1234/v1
+OPENAI_API_KEY=ollama                        # 占位即可，本地端点不校验
+
+# 再把 bin/gaia.rs 的 MODELS 换成本地模型名（去掉 OpenRouter 的 provider/ 前缀）：
+#   const MODELS: &[&str] = &["qwen2.5-coder:7b"];</script>
+
+<script type="text/plain" id="src-cloud">// solver.rs —— 云端 / OpenRouter：端点支持 strict JSON schema（当前默认写法）
+let schema = schemars::schema_for!(GaiaOutput);
+let format_setting = ResponseFormat::JsonSchema {
+    json_schema: ResponseFormatJsonSchema {
+        name: "gaia_output".into(),
+        schema: serde_json::to_value(&schema)?,
+        strict: Some(true),          // ← 服务端强制返回合法 JSON
+        description: Some("GAIA problem solving output".into()),
+    },
+};
+// system 直接用 GAIA_PROMPT（原样）
+// ...拼 messages、chat.create、serde_json::from_str 反序列化成 GaiaOutput</script>
+
+<script type="text/plain" id="src-local">// solver.rs —— 本地 Ollama/llama.cpp：多半不支持 strict schema，降级到「提示词强制」
+// （抄 structured_ds.rs 的思路：schema 塞进系统提示词 + 只要求 JsonObject）
+let schema = schemars::schema_for!(GaiaOutput);
+let schema_str = serde_json::to_string_pretty(&schema)?;
+let system = format!(                 // ← schema 写进系统提示词，而不是 response_format
+    "{system}\n\n只输出符合下面 JSON Schema 的原始 JSON，不要 markdown 围栏：\n{schema_str}"
+);
+
+let format_setting = ResponseFormat::JsonObject;   // ← 只要求"给我 JSON"，不要求 strict schema
+
+// 其余不变：用上面的 system、chat.create、serde_json::from_str 兜底解析
+// backon 重试照旧——本地模型可能偶尔不守规矩，重试 + serde 报错就是安全网</script>
+
 <script>
 /* ---------- Rust 语法高亮（单遍分词，对原始源码操作后转义，避免 &lt; 误伤泛型） ---------- */
 const KW = new Set('pub async fn let mut use impl match if else return await for while loop in const static move as self crate mod where dyn ref struct enum trait unsafe'.split(' '));
@@ -1046,12 +1098,43 @@ PATS.forEach((p,i)=>{
 });
 function selectPat(key){
   const p=PATS.find(x=>x.key===key);
-  document.querySelectorAll('.pat-tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.key===key?'true':'false'));
+  document.querySelectorAll('#patTabs .pat-tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.key===key?'true':'false'));
   document.getElementById('patDesc').innerHTML=p.desc;
   document.getElementById('patFile').textContent=p.file;
   renderCode(document.getElementById('patCode'),srcOf(p.src),HIL[key]);
 }
 selectPat('schema');
+
+/* ---------- 本地模型：env 块 + solver 云端/本地切换 ---------- */
+function renderEnv(el,src){
+  el.innerHTML=src.split('\n').map(l=>{
+    if(/^\s*#/.test(l)) return '<span class="row"><span class="c-com">'+escHtml(l)+'</span></span>';
+    const m=l.match(/^([A-Z_]+)=(.*)$/);
+    if(m) return '<span class="row"><span class="c-typ">'+escHtml(m[1])+'</span>=<span class="c-str">'+escHtml(m[2])+'</span></span>';
+    return '<span class="row">'+(escHtml(l)||' ')+'</span>';
+  }).join('');
+}
+renderEnv(document.getElementById('envCode'),srcOf('src-env'));
+const LOCALS=[
+ {key:'cloud',label:'云端 · strict schema（当前默认）',file:'solver.rs（现状）',src:'src-cloud',
+  desc:'<b>让服务端强制。</b>OpenRouter / OpenAI 支持 <code>ResponseFormat::JsonSchema{strict:true}</code>，端点保证输出合法 JSON——solver.rs 现在就这么写。'},
+ {key:'local',label:'本地 · JsonObject + 提示词',file:'solver.rs（改后）',src:'src-local',
+  desc:'<b>让提示词哄。</b>本地端点多半不支持 strict schema，就把 schema 塞进系统提示词、只用 <code>JsonObject</code>，靠 serde + backon 兜底——即 structured_ds.rs 的路子。'},
+];
+const localTabs=document.getElementById('localTabs');
+LOCALS.forEach(p=>{
+  const b=document.createElement('button');b.className='pat-tab';b.type='button';b.setAttribute('role','tab');b.textContent=p.label;b.dataset.key=p.key;
+  b.addEventListener('click',()=>selectLocal(p.key));
+  localTabs.appendChild(b);
+});
+function selectLocal(key){
+  const p=LOCALS.find(x=>x.key===key);
+  document.querySelectorAll('#localTabs .pat-tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.key===key?'true':'false'));
+  document.getElementById('localDesc').innerHTML=p.desc;
+  document.getElementById('localFile').textContent=p.file;
+  renderCode(document.getElementById('localCode'),srcOf(p.src));
+}
+selectLocal('cloud');
 
 /* ---------- GAIA 评测流水线 stepper ---------- */
 const GSTAGES=[

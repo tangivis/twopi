@@ -687,7 +687,7 @@ footer p{margin:4px 0}
     <h3>延伸样本：rust-ai-agent（Rust）和 pi/tau 一样吗？</h3>
     <div class="psub">主文档第 12 章 · 读者提问 · 第三个坐标点</div>
     <p style="font-size:13px;color:var(--ink-2);margin:0 0 12px"><b>教学初心一样，技术形态不一样。</b>solenovex/rust-ai-agent 是 B 站《用 Rust 构建 AI Agent》配套教学码——和 tau 同为"为学习而写"，但站在光谱另一端：它当前<b>不是循环式 agent</b>，而是"增强 LLM + 结构化输出（schemars derive schema）+ GAIA 基准评测"。<code>solver.rs</code> 是单次 LLM 调用，无循环、无工具回填。三者并排给你一张完整地图：tau=coding 循环(Py)、pi=同设计生产形态(TS)、rust-ai-agent=增强-LLM+评测(Rust, workflow 端)。反而补上了 pi/tau 都缺的评测脊椎（<code>evaluator.rs</code>）——做第 9 章 mini 的 M10 时可借用。</p>
-    <a class="btn" style="text-decoration:none;border-bottom:none;display:inline-block" href="https://claude.ai/code/artifact/8af237ac-af72-4182-a52f-58fa1835f8ba">🦀 打开代码级交互精读 →</a>
+    <a class="btn" style="text-decoration:none;border-bottom:none;display:inline-block" href="./rust-ai-agent.html">🦀 打开代码级交互精读 →</a>
   </div>
 
   <div class="card labs">

@@ -1154,6 +1154,19 @@ Anthropic 的多 agent 研究系统实际就是这个形状：orchestrator 是�
 
 学习建议：**主线仍是先 tau 后 pi**（第 8 章）建立 agent 循环的完整直觉；rust-ai-agent 作为**支线**看两样东西——「没有循环的 AI 应用」的样子，以及「评测驱动开发」怎么组织。等你做第 9 章的 mini 时，把它的 `evaluator.rs` 思路借过来做 M10。
 
+### 12.6 补充：它能接什么模型？本地能跑吗？
+
+读完全部代码 + 核对 `async-openai` 0.41 源码后的精确答案（不是笼统的"都行"）：
+
+- **接口类型：限。只认 OpenAI Chat Completions 一种 wire 格式。** 全程用 `async_openai::Client::new()`，说的是 OpenAI `/chat/completions` 协议。**Anthropic 原生 API、Gemini 原生 API 不能直接接**——它没有 pi/tau 那样的自建多-provider 中立层。
+- **换模型：几乎不限，但要经 OpenAI 兼容层。** `async-openai` 读环境变量 `OPENAI_BASE_URL`（源码确认，非硬编码），指向任何 OpenAI 兼容端点即可换模型。它默认就这么干——模型名 `openai/gpt-4.1-mini`、`anthropic/claude-haiku-4.5` 是 **OpenRouter slug**，即它通过 OpenRouter 这个网关去调 GPT 和 Claude。想用 Claude/Gemini，走 OpenRouter（正是第 10 章"一个 OpenAI 适配器吃遍 90%"的活例子）。**它把"多 provider"外包给了网关，而不是像 pi/tau 那样自己实现。**
+- **本地模型：能接，但有一个关键前提——结构化输出支持。** 设 `OPENAI_BASE_URL=http://localhost:11434/v1` + 占位 key，Ollama / vLLM / LM Studio / llama.cpp 都能接。分两种：
+  - `complete.rs` / `stream.rs`（纯文本 / 流式）——**任何**本地 OpenAI 兼容服务都能跑。
+  - `solver.rs` / `structured.rs`（用 `ResponseFormat::JsonSchema{strict:true}`，即 OpenAI 严格结构化输出）——**不是所有本地端点都支持** strict json_schema（Ollama/llama.cpp 参差，vLLM 有 guided decoding）。不支持就会失败。
+  - 兜底现成的：仓库里 `structured_ds.rs`（`ResponseFormat::JsonObject` + 把 schema 塞进提示词）就是给这种情况的降级方案。**想用本地模型跑 GAIA，多半要把 `solver.rs` 从 strict-schema 改成 `_ds` 那条路**——具体 before/after diff 见交互页《rust-ai-agent 代码精读》的「本地模型」一节。
+
+一句话：**模型不限、接口限（只认 OpenAI 兼容）；本地能接，纯文本/流式无障碍，但默认的严格结构化输出不是所有本地端点都支持，需要时降级到提示词强制方案。**
+
 ---
 
 ## 13. 参考资料
