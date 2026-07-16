@@ -1,0 +1,791 @@
+<title>进阶篇：把 agent 用起来 & 把系统搭起来 · pi×tau 教程</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
+  --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
+  --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
+  --pi:#1C5CAB; --tau:#8A5600; --rust:#A6431A;
+  --adv:#6C3FC5; --adv-mark:#7C52D6; --arch:#0B6E62; --arch-mark:#0E7E70;
+  --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10); --rust-wash:rgba(194,98,45,.10);
+  --adv-wash:rgba(124,82,214,.10); --arch-wash:rgba(14,126,112,.10);
+  --good:#006300; --bad:#B03030;
+  --term-bg:#10141B; --term-ink:#C4CCD8; --term-dim:#6B7686; --term-bright:#E8EEF7; --term-line:rgba(184,194,212,.14);
+  --c-kw:#E39366; --c-typ:#7FB2E8; --c-str:#8FC98F; --c-com:#6B7686; --c-mac:#D9A441; --c-attr:#B08CE0;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --shadow:0 1px 2px rgba(10,14,20,.05),0 4px 16px rgba(10,14,20,.06);
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0C0F14; --card:#131720; --card-2:#1A1F2B;
+  --ink:#E8EAEF; --ink-2:#A7ADB9; --ink-3:#767D8A;
+  --line:rgba(232,234,239,.13); --line-soft:rgba(232,234,239,.07);
+  --pi:#6DA7EC; --tau:#EDA100; --rust:#E39366;
+  --adv:#B79BEC; --adv-mark:#7C52D6; --arch:#3FBFAC; --arch-mark:#0E7E70;
+  --pi-wash:rgba(57,135,229,.13); --tau-wash:rgba(201,133,0,.14); --rust-wash:rgba(194,98,45,.15);
+  --adv-wash:rgba(124,82,214,.16); --arch-wash:rgba(14,126,112,.16);
+  --good:#0CA30C; --bad:#E66767;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}}
+:root[data-theme="dark"]{
+  --bg:#0C0F14; --card:#131720; --card-2:#1A1F2B;
+  --ink:#E8EAEF; --ink-2:#A7ADB9; --ink-3:#767D8A;
+  --line:rgba(232,234,239,.13); --line-soft:rgba(232,234,239,.07);
+  --pi:#6DA7EC; --tau:#EDA100; --rust:#E39366;
+  --adv:#B79BEC; --adv-mark:#7C52D6; --arch:#3FBFAC; --arch-mark:#0E7E70;
+  --pi-wash:rgba(57,135,229,.13); --tau-wash:rgba(201,133,0,.14); --rust-wash:rgba(194,98,45,.15);
+  --adv-wash:rgba(124,82,214,.16); --arch-wash:rgba(14,126,112,.16);
+  --good:#0CA30C; --bad:#E66767;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}
+:root[data-theme="light"]{
+  --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
+  --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
+  --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
+  --pi:#1C5CAB; --tau:#8A5600; --rust:#A6431A;
+  --adv:#6C3FC5; --adv-mark:#7C52D6; --arch:#0B6E62; --arch-mark:#0E7E70;
+  --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10); --rust-wash:rgba(194,98,45,.10);
+  --adv-wash:rgba(124,82,214,.10); --arch-wash:rgba(14,126,112,.10);
+  --good:#006300; --bad:#B03030;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--adv);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:currentColor}
+:focus-visible{outline:2px solid var(--adv-mark);outline-offset:2px;border-radius:3px}
+code,pre,kbd{font-family:var(--mono)}
+::selection{background:var(--adv-wash)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header.top{position:sticky;top:0;z-index:50;background:var(--bg);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
+.topbar{display:flex;align-items:center;gap:16px;padding:10px 0;overflow-x:auto;scrollbar-width:none}
+.topbar::-webkit-scrollbar{display:none}
+.brand{font-family:var(--mono);font-weight:700;font-size:14px;white-space:nowrap}
+.brand .u{color:var(--adv)} .brand .a{color:var(--arch)}
+nav.sections{display:flex;gap:4px;margin-left:auto}
+nav.sections a{font-family:var(--mono);font-size:12px;color:var(--ink-2);padding:5px 10px;border-radius:999px;white-space:nowrap;border-bottom:none}
+nav.sections a:hover{background:var(--card-2);color:var(--ink)}
+.back{font-family:var(--mono);font-size:12px;color:var(--ink-3);white-space:nowrap;border-bottom:none}
+section{padding:56px 0 8px;scroll-margin-top:60px}
+h2{font-family:var(--mono);font-size:23px;line-height:1.3;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+h3{font-size:16px;margin:24px 0 8px}
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.kicker.u{color:var(--adv)} .kicker.a{color:var(--arch)}
+.lede{color:var(--ink-2);max-width:66ch;margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--line-soft);border-radius:12px;box-shadow:var(--shadow)}
+.num{font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
+.tag.pi{color:var(--pi);background:var(--pi-wash);border-color:transparent}
+.tag.tau{color:var(--tau);background:var(--tau-wash);border-color:transparent}
+.tag.rust{color:var(--rust);background:var(--rust-wash);border-color:transparent}
+.tag.adv{color:var(--adv);background:var(--adv-wash);border-color:transparent}
+.tag.arch{color:var(--arch);background:var(--arch-wash);border-color:transparent}
+
+/* hero */
+.hero{padding:60px 0 26px}
+.hero h1{font-family:var(--mono);font-size:clamp(26px,4.2vw,40px);line-height:1.18;margin:12px 0 16px;letter-spacing:-.02em;text-wrap:balance}
+.hero h1 .u{color:var(--adv)} .hero h1 .a{color:var(--arch)}
+.hero .sub{font-size:16px;color:var(--ink-2);max-width:62ch;margin:0 0 18px}
+.doors{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+.door{display:block;padding:16px 18px;border-radius:12px;border:1px solid var(--line-soft);box-shadow:var(--shadow);color:inherit}
+.door:hover{border-bottom-color:transparent;transform:translateY(-1px)}
+.door h4{margin:0 0 6px;font-family:var(--mono);font-size:13px}
+.door p{margin:0;font-size:13px;color:var(--ink-2)}
+.door.u{background:var(--adv-wash)} .door.u h4{color:var(--adv)}
+.door.a{background:var(--arch-wash)} .door.a h4{color:var(--arch)}
+.statrow{display:flex;gap:26px;flex-wrap:wrap;margin-top:24px;padding-top:20px;border-top:1px solid var(--line-soft)}
+.stat .v{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-.02em}
+.stat .k{font-size:12px;color:var(--ink-3);margin-top:2px}
+
+/* part band */
+.partband{margin:56px 0 -30px;padding:10px 0;border-top:2px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+.partband.u{color:var(--adv);border-color:var(--adv)}
+.partband.a{color:var(--arch);border-color:var(--arch)}
+
+/* formula */
+.formula{padding:16px 18px;font-family:var(--mono);font-size:clamp(12px,1.9vw,14.5px);text-align:center;overflow-x:auto;white-space:nowrap}
+.formula b{color:var(--adv)}
+.formula .fix{color:var(--ink-3)}
+
+/* domain chips + recipe */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 14px}
+.chip{font-family:var(--mono);font-size:12.5px;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);border-radius:999px;cursor:pointer}
+.chip[aria-selected="true"]{border-color:var(--adv-mark);color:var(--adv);background:var(--adv-wash);font-weight:700}
+.recipe{overflow:hidden}
+.rhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line-soft);background:var(--adv-wash)}
+.rhead .rname{font-family:var(--mono);font-weight:700;font-size:15px}
+.rhead .rtag{font-size:12.5px;color:var(--ink-2)}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.rcell{padding:14px 18px;border-bottom:1px solid var(--line-soft)}
+.rcell:nth-child(odd){border-right:1px solid var(--line-soft)}
+.rcell h5{margin:0 0 8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.rcell ul{margin:0;padding-left:16px;font-size:13px;color:var(--ink-2)}
+.rcell li{margin:4px 0}
+.rcell li b{color:var(--ink)}
+.rcell code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+.rfoot{padding:13px 18px;font-size:13px;color:var(--ink-2);display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rfoot h5{margin:0 0 6px;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.rfoot ul{margin:0;padding-left:16px}
+.rfoot li{margin:3px 0}
+
+/* cold box */
+.coldbox{margin-top:18px;padding:16px 18px;border-left:3px solid var(--bad)}
+.coldbox h4{margin:0 0 8px;font-size:14px;color:var(--bad)}
+.coldbox p{margin:6px 0;font-size:13.5px;color:var(--ink-2)}
+.coldbox b{color:var(--ink)}
+.gate{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.gate span{font-family:var(--mono);font-size:11.5px;padding:4px 10px;border-radius:8px;background:var(--card-2);color:var(--ink-2)}
+
+/* pattern tabs */
+.pat-tabs{display:flex;gap:4px;flex-wrap:wrap;margin:18px 0 12px}
+.pat-tab{font-family:var(--mono);font-size:12.5px;padding:7px 13px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);border-radius:8px;cursor:pointer}
+.pat-tab[aria-selected="true"]{border-color:var(--adv-mark);color:var(--adv);background:var(--adv-wash);font-weight:700}
+.pat-body{border:1px solid var(--line-soft);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);background:var(--card)}
+.pat-top{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,4fr);gap:0;border-bottom:1px solid var(--line-soft)}
+.dgwrap{padding:16px 18px;border-right:1px solid var(--line-soft);background:var(--card)}
+.dgctl{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dgctl .lbl{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase}
+.dg{display:flex;flex-direction:column;gap:7px}
+.dg-row{display:flex;gap:7px;align-items:stretch}
+.dg-lane{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.dg-node{font-family:var(--mono);font-size:11.5px;line-height:1.5;padding:6px 10px;border-radius:8px;border:1px solid var(--line);color:var(--ink-2);opacity:.3;transition:opacity .3s,border-color .3s}
+.dg-node.on{opacity:1;color:var(--ink)}
+.dg-node.m.on{border-color:var(--pi);background:var(--pi-wash)}
+.dg-node.w.on{border-color:var(--adv-mark);background:var(--adv-wash)}
+.dg-node.j.on{border-color:var(--tau);background:var(--tau-wash)}
+.dg-node.x.on{border-color:var(--line);background:var(--card-2)}
+.dg-arr{font-family:var(--mono);font-size:11px;color:var(--ink-3);text-align:center;opacity:.3;transition:opacity .3s}
+.dg-arr.on{opacity:1}
+.dg-note{font-family:var(--mono);font-size:10.5px;color:var(--adv);border-top:1px dashed var(--line);padding-top:6px;text-align:center;opacity:.3;transition:opacity .3s}
+.dg-note.on{opacity:1}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:baseline}
+.legend .m i{background:var(--pi)} .legend .w i{background:var(--adv-mark)} .legend .j i{background:var(--tau)}
+.pat-info{padding:14px 18px;font-size:13px;color:var(--ink-2);display:flex;flex-direction:column;gap:10px}
+.pat-info .pi-row b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:3px}
+.pat-info .yes b{color:var(--good)} .pat-info .no b{color:var(--bad)}
+.pat-info code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+.pat-code{background:var(--term-bg)}
+.pat-refs{padding:11px 18px;font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line-soft);display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
+.pat-refs b{color:var(--ink);font-size:12px}
+
+/* terminal / code */
+.term{background:var(--term-bg);overflow:hidden}
+.term-head{display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1px solid var(--term-line);font-family:var(--mono);font-size:11.5px;color:var(--term-dim)}
+.term-head .dots{display:flex;gap:5px}.term-head .dots i{width:9px;height:9px;border-radius:50%;background:var(--term-dim);opacity:.4}
+.code{margin:0;padding:12px 4px 12px 0;font-family:var(--mono);font-size:12.5px;line-height:1.62;overflow-x:auto;color:var(--term-ink);counter-reset:ln;max-height:480px;overflow-y:auto}
+.code .row{display:block;white-space:pre;padding:0}
+.code .row::before{content:counter(ln);counter-increment:ln;display:inline-block;width:38px;padding-right:14px;text-align:right;color:var(--term-dim);opacity:.6;user-select:none}
+.c-kw{color:var(--c-kw)}.c-typ{color:var(--c-typ)}.c-str{color:var(--c-str)}.c-com{color:var(--c-com);font-style:italic}.c-mac{color:var(--c-mac)}.c-attr{color:var(--c-attr)}
+.btn{font-family:var(--mono);font-size:12.5px;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--card-2)}
+.btn.primary{background:var(--adv-mark);border-color:var(--adv-mark);color:#fff;font-weight:700}
+.btn.primary:hover{filter:brightness(1.07)}
+
+/* orchestration chooser */
+.chooser{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.choice{padding:14px 16px}
+.choice h4{margin:0 0 6px;font-family:var(--mono);font-size:13px;color:var(--adv)}
+.choice p{margin:0;font-size:12.5px;color:var(--ink-2)}
+.choice code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+
+/* blueprint */
+.bpgrid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,3fr);gap:14px;margin-top:20px}
+.bpstack{display:flex;flex-direction:column;gap:6px}
+.bplayer{display:flex;align-items:baseline;gap:12px;width:100%;text-align:left;font-family:var(--mono);font-size:12.5px;padding:11px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);border-radius:10px;cursor:pointer;box-shadow:var(--shadow)}
+.bplayer .lid{color:var(--arch);font-weight:700;width:26px;flex:none}
+.bplayer .lname{color:var(--ink);font-weight:700}
+.bplayer .lsub{margin-left:auto;font-size:11px;color:var(--ink-3);text-align:right}
+.bplayer:hover{background:var(--card-2)}
+.bplayer[aria-selected="true"]{border-color:var(--arch-mark);background:var(--arch-wash)}
+.bpdep{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);text-align:center;margin:-1px 0}
+.bprail{display:flex;flex-direction:column;gap:6px}
+.bprail .railtitle{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:2px 4px}
+.bpx{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:12px;padding:10px 13px;border:1px dashed var(--line);background:var(--card);color:var(--ink-2);border-radius:10px;cursor:pointer}
+.bpx:hover{background:var(--card-2)}
+.bpx[aria-selected="true"]{border-color:var(--arch-mark);border-style:solid;background:var(--arch-wash);color:var(--ink)}
+.bpdetail{margin-top:14px;overflow:hidden}
+.bpd-head{padding:13px 18px;background:var(--arch-wash);border-bottom:1px solid var(--line-soft);font-size:13.5px;color:var(--ink-2)}
+.bpd-head b{color:var(--ink);font-family:var(--mono)}
+.bpd-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.bpd-cell{padding:13px 18px;font-size:13px;color:var(--ink-2)}
+.bpd-cell:first-child{border-right:1px solid var(--line-soft)}
+.bpd-cell h5{margin:0 0 7px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.bpd-cell ul{margin:0;padding-left:16px}
+.bpd-cell li{margin:4px 0}
+.bpd-cell code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+.pintable{width:100%;border-collapse:collapse;font-size:12.5px;border-top:1px solid var(--line-soft)}
+.pintable td,.pintable th{padding:8px 18px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top}
+.pintable th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;width:120px}
+.pintable code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+.bpd-src{padding:10px 18px;font-size:12px;color:var(--ink-3);border-top:1px solid var(--line-soft)}
+
+/* matrix */
+.mtable{width:100%;border-collapse:collapse;font-size:13px;margin-top:18px}
+.mtable th,.mtable td{padding:9px 12px;border-bottom:1px solid var(--line-soft);text-align:center}
+.mtable th{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--ink-3);font-weight:600}
+.mtable td:first-child,.mtable th:first-child{text-align:left;font-family:var(--mono);font-size:12px}
+.mtable td:first-child b{color:var(--arch)}
+.mtable .c{font-family:var(--mono);font-size:14px;cursor:help}
+.mtable .full{color:var(--good)} .mtable .part{color:var(--tau)} .mtable .void{color:var(--ink-3)} .mtable .none{color:var(--ink-3);opacity:.5}
+.mlegend{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--ink-3);font-family:var(--mono)}
+.callouts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.callout{padding:13px 16px;font-size:12.5px;color:var(--ink-2)}
+.callout b{color:var(--ink)}
+
+/* roadmap */
+.rmap{margin-top:18px;overflow:hidden}
+.rrow{display:grid;grid-template-columns:56px minmax(0,3fr) minmax(0,4fr) 110px;gap:14px;padding:11px 18px;border-bottom:1px solid var(--line-soft);align-items:baseline}
+.rrow:last-child{border-bottom:none}
+.rrow .mid{font-family:var(--mono);font-weight:700;color:var(--arch)}
+.rrow .mname{font-size:13.5px;color:var(--ink);font-weight:600}
+.rrow .mname small{display:block;font-weight:400;font-size:12px;color:var(--ink-3)}
+.rrow .macc{font-size:12.5px;color:var(--ink-2)}
+.rrow .macc b{color:var(--ink-3);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;margin-right:4px}
+.rrow .mst{font-family:var(--mono);font-size:11px;text-align:right;white-space:nowrap}
+.rrow .mst.done{color:var(--good)} .rrow .mst.ex{color:var(--tau)} .rrow .mst.todo{color:var(--ink-3)} .rrow .mst.new{color:var(--adv)}
+.rrow.hl{background:var(--adv-wash)}
+
+/* checklist */
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.checkcard{padding:14px 16px}
+.checkcard .cn{font-family:var(--mono);font-size:11px;color:var(--arch);font-weight:700}
+.checkcard p{margin:4px 0 8px;font-size:13.5px;color:var(--ink);font-weight:600}
+.checkcard .why{font-size:12.5px;color:var(--ink-2);font-weight:400;margin:0 0 8px}
+.checkcard .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;font-size:11.5px}
+.checkcard .meta a{font-family:var(--mono)}
+
+footer{margin-top:64px;border-top:1px solid var(--line-soft);padding:24px 0 40px;font-size:12.5px;color:var(--ink-3)}
+footer a{color:var(--adv)}
+.provenance{margin-top:10px;font-size:11.5px}
+
+@media (max-width:900px){
+  .doors,.rgrid,.rfoot,.pat-top,.chooser,.bpgrid,.bpd-body,.callouts,.checks{grid-template-columns:1fr}
+  .dgwrap{border-right:none;border-bottom:1px solid var(--line-soft)}
+  .rcell:nth-child(odd){border-right:none}
+  .bpd-cell:first-child{border-right:none;border-bottom:1px solid var(--line-soft)}
+  .rrow{grid-template-columns:44px 1fr;grid-template-rows:auto auto}
+  .rrow .macc{grid-column:2}
+  .rrow .mst{grid-column:2;text-align:left}
+  nav.sections{display:none}
+}
+</style>
+
+<header class="top"><div class="wrap topbar">
+  <div class="brand">进阶篇 · <span class="u">应用</span> × <span class="a">构架</span></div>
+  <a class="back" href="./index.html">← pi×tau 主教程</a>
+  <a class="back" href="./rust-ai-agent.html">🦀 rust 精读</a>
+  <nav class="sections">
+    <a href="#usage">领域配方</a><a href="#orch">多 agent 编排</a><a href="#arch">构架蓝图</a><a href="#matrix">覆盖矩阵</a><a href="#roadmap">建造路线</a><a href="#checklist">十条清单</a>
+  </nav>
+</div></header>
+
+<section class="hero" id="overview"><div class="wrap">
+  <div class="kicker u">PI × TAU × RUST-AI-AGENT · 进阶篇</div>
+  <h1>学会一个循环之后：<br>把它<span class="u">用起来</span>，把系统<span class="a">搭起来</span></h1>
+  <p class="sub">主教程回答「agent 是什么、循环怎么转」。本页回答两个下一步的问题——全部结论落在 pi / tau / rust-ai-agent 三份真代码上，不空谈。</p>
+  <div class="doors">
+    <a class="door u" href="#usage"><h4>A · 应用篇 —— 我要用它做事</h4><p>同一个循环怎么长成<b>不同领域</b>的 agent（编码 / 研究 / 数据 / 客服 / 运维）；什么时候需要<b>多个 agent 协作</b>，五种编排模式怎么选。</p></a>
+    <a class="door a" href="#arch"><h4>B · 构架篇 —— 我要搭出这套系统</h4><p>按 2025–2026 最佳实践，一套完整 agent 系统的<b>分层蓝图</b>（7 层 + 4 根横梁）、三个项目各自盖到了哪层、以及从空目录开始的<b>施工顺序</b>。</p></a>
+  </div>
+  <div class="statrow">
+    <div class="stat"><div class="v num" style="color:var(--adv)">5+1</div><div class="k">领域配方卡</div></div>
+    <div class="stat"><div class="v num" style="color:var(--adv)">5</div><div class="k">多 agent 编排模式</div></div>
+    <div class="stat"><div class="v num" style="color:var(--arch)">7+4</div><div class="k">蓝图：层 + 横切</div></div>
+    <div class="stat"><div class="v num" style="color:var(--arch)">12</div><div class="k">建造里程碑 M0–M11</div></div>
+  </div>
+</div></section>
+
+<div class="wrap"><div class="partband u">Part A · 应用篇 —— 把 harness 用起来</div></div>
+
+<section id="usage"><div class="wrap">
+  <div class="kicker u">应用篇 · 第 1 站</div>
+  <h2>换领域 ≠ 换框架：领域 Agent 配方</h2>
+  <p class="lede">pi 的三层架构在这里兑现价值：<b>大脑（AgentHarness + 循环）一行不改</b>，动的只是产品层的四样东西——系统提示词、工具集、上下文策略、守卫。所以「搭一个 X 领域的 agent」不是新工程，是填一张配方卡。</p>
+  <div class="card formula">领域 Agent <span class="fix">=</span> <span class="fix">循环(不变)</span> <span class="fix">×</span> <b>系统提示词</b> <span class="fix">×</span> <b>工具集</b> <span class="fix">×</span> <b>上下文策略</b> <span class="fix">×</span> <b>守卫</b> <span class="fix">×</span> <b>评测</b></div>
+  <div class="chips" id="domChips" role="tablist" aria-label="领域"></div>
+  <div class="card recipe" id="recipePanel"></div>
+</div></section>
+
+<section id="orch"><div class="wrap">
+  <div class="kicker u">应用篇 · 第 2 站</div>
+  <h2>多 Agent 协作：五种编排模式（先泼冷水）</h2>
+  <p class="lede">编排不在 pi/tau 的循环里——这是刻意的：<b>编排是循环之上的一层</b>。你可以用「子代理即工具」在任何 harness 上把它长出来。但先看成本，再看模式。</p>
+
+  <div class="card coldbox">
+    <h4>❄️ 上多 agent 之前，先读这三行</h4>
+    <p>· Anthropic 实测（《How we built our multi-agent research system》）：单 agent 任务消耗约 <b>4× 于普通对话</b>的 token，多 agent 系统约 <b>15×</b>——收益必须配得上这张账单。</p>
+    <p>· Cognition《Don't Build Multi-Agents》的警告：并行子 agent <b>看不见彼此的中间决策</b>，各自的产出携带互相冲突的隐式假设——先把单线程 + 上下文工程做到头。</p>
+    <p>· pi/tau 的立场（本教程一以贯之）：先「单 agent + 更好的工具 + 更好的上下文」，仍不够，再编排。</p>
+    <div class="gate"><span>✅ 判据（至少中两条再上）：</span><span>① 子任务只读、彼此独立、可并行</span><span>② 主上下文确实会被撑爆</span><span>③ 子任务需要不同的工具集/提示词</span></div>
+  </div>
+
+  <div class="pat-tabs" id="patTabs" role="tablist" aria-label="编排模式"></div>
+  <div class="pat-body">
+    <div class="pat-top">
+      <div class="dgwrap">
+        <div class="dgctl"><span class="lbl">消息流向</span><button class="btn" id="dgReplay" style="margin-left:auto">▶ 重放</button></div>
+        <div class="dg" id="dgBox"></div>
+        <div class="legend"><span class="m"><i></i>主 agent / 领域 agent</span><span class="w"><i></i>子 agent / worker</span><span class="j"><i></i>交接物（结构化 JSON）</span></div>
+      </div>
+      <div class="pat-info" id="patInfo"></div>
+    </div>
+    <div class="pat-code term" style="border-radius:0;border:none">
+      <div class="term-head"><div class="dots"><i></i><i></i><i></i></div><span id="patFile"></span></div>
+      <pre class="code" id="patCode"></pre>
+    </div>
+    <div class="pat-refs" id="patRefs"></div>
+  </div>
+
+  <h3>编排层选型：先自写，需求硬了再上框架</h3>
+  <div class="chooser">
+    <div class="card choice"><h4>① 自写并发原语（默认）</h4><p>≤ 一屏代码的场景：Python 的 <code>asyncio.TaskGroup</code>、Rust 的 <code>JoinSet + Semaphore</code>。rust-ai-agent 的 <code>bin/gaia.rs</code> 就是现成示范——20 行搞定 fan-out + 限流 + 汇总。</p></div>
+    <div class="card choice"><h4>② LangGraph（图状态机）</h4><p>当你真的需要：图里带环的回退、按节点断点续跑、人工审批卡点作为一等公民。代价：控制反转——框架拥有执行。对照主文档第 11 章的 7 问决策清单再决定。</p></div>
+    <div class="card choice"><h4>③ Temporal / 工作流引擎</h4><p>当编排要<b>跨天跨机器存活</b>（重启不丢、重试有审计、SLA）。这时「外层 Temporal 编排 + 内层薄 harness」的混合策略最稳——循环仍然是你的。</p></div>
+  </div>
+</div></section>
+
+<div class="wrap"><div class="partband a">Part B · 构架篇 —— 把系统搭起来</div></div>
+
+<section id="arch"><div class="wrap">
+  <div class="kicker a">构架篇 · 第 1 站</div>
+  <h2>现代最佳实践蓝图：7 层 + 4 根横梁</h2>
+  <p class="lede">这张图不是发明，是整理：把 pi 已经做对的分层，对照 12-Factor Agents 与 Anthropic 的三篇工程文章，画成一张<b>可以照着施工</b>的蓝图。上层只依赖下层（单向），横梁贯穿所有层。点任意一层看职责、关键决策、三个项目各自的落点。</p>
+  <div class="bpgrid">
+    <div class="bpstack" id="bpStack" role="tablist" aria-label="蓝图层"></div>
+    <div class="bprail" id="bpRail"><div class="railtitle">横切关注点（贯穿所有层）</div></div>
+  </div>
+  <div class="card bpdetail" id="bpDetail"></div>
+</div></section>
+
+<section id="matrix"><div class="wrap">
+  <div class="kicker a">构架篇 · 第 2 站</div>
+  <h2>三份真代码在蓝图上的覆盖</h2>
+  <p class="lede">同一张蓝图，三个项目各盖到哪层（鼠标悬停每个格子看依据）。这张表也回答了「该学哪个」：<b>学结构看 tau，学生产细节看 pi，学评测与结构化输出看 rust-ai-agent</b>。</p>
+  <div class="card" style="padding:6px 18px 14px;overflow-x:auto">
+    <table class="mtable" id="mTable"></table>
+    <div class="mlegend"><span style="color:var(--good)">● 完整实现</span><span style="color:var(--tau)">◐ 部分 / 雏形</span><span>○ 留白（刻意不做）</span><span style="opacity:.6">— 没有</span></div>
+  </div>
+  <div class="callouts">
+    <div class="card callout"><b>pi 是唯一的全覆盖</b>——除了评测（X3）和编排（L5）。前者它靠 Terminal-Bench 等外部基准，后者是哲学：编排属于用户，不属于 harness。</div>
+    <div class="card callout"><b>rust-ai-agent 反向互补</b>：核心六层基本空白（ep05 刚长出单轮工具调用），却有 pi/tau 都没有的评测脊椎（X3 的 <code>evaluator.rs</code>）+ 重试（backon）+ 并发限流。</div>
+    <div class="card callout"><b>L5 三家都留白不是巧合</b>：编排模式（本页 A 篇）天然长在 harness 之上——「子代理即工具」只需要注册一个工具，不需要改任何一层。</div>
+  </div>
+</div></section>
+
+<section id="roadmap"><div class="wrap">
+  <div class="kicker a">构架篇 · 第 3 站</div>
+  <h2>施工顺序：M0 → M11</h2>
+  <p class="lede">浓缩自主文档第 9 章的施工图（顺序源自 tau 真实的 24 阶段建造日志，不是纸上推演）。<code>agent-study/mini/</code> 起步工程已就位：M0/M1 完成开箱全绿，M2/M3 是带规格测试的练习。本页新增 <b>M11 编排里程碑</b>，把 A 篇的模式落到你自己的 mini 上。</p>
+  <div class="card rmap" id="rMap"></div>
+  <p style="font-size:12.5px;color:var(--ink-3);margin-top:12px">完整施工图（每步的产出、验收测试、pi/tau 对照文件、十大典型翻车）见 <a href="https://github.com/tangivis/twopi/blob/main/pi-vs-tau-架构对比学习指南.md">主文档</a> 第 9 章；练习工程在仓库 <code>mini/</code> 目录。</p>
+</div></section>
+
+<section id="checklist"><div class="wrap">
+  <div class="kicker a">构架篇 · 第 4 站</div>
+  <h2>十条现代最佳实践（贴墙版）</h2>
+  <p class="lede">每条一句话主张 + 半句为什么 + 出处。全部能在本教程的某处看到真代码。</p>
+  <div class="checks" id="checkGrid"></div>
+</div></section>
+
+<footer><div class="wrap">
+  <p><b style="color:var(--ink)">本系列</b>：<a href="./index.html">主教程（循环模拟器 / 三层架构 / 十大机制）</a> · <a href="./rust-ai-agent.html">rust-ai-agent 代码精读</a> · 本页（应用 × 构架）</p>
+  <p>项目版本：pi v0.80.7（earendil-works/pi） · tau v0.1.6（huggingface/tau） · rust-ai-agent commit e6ee55d / ep05（solenovex/rust-ai-agent）</p>
+  <p class="provenance">2026-07-16 生成 · 编排模式的成本数字出自 Anthropic《How we built our multi-agent research system》；警告出自 Cognition《Don't Build Multi-Agents》；蓝图对照 12-Factor Agents 与 Anthropic《Building Effective Agents》《Writing effective tools》《Effective context engineering》。本页为单文件、离线可用、无外部依赖。</p>
+</div></footer>
+
+<!-- ============ 真代码 / 教学骨架（text/plain，避免 HTML 转义问题） ============ -->
+<script type="text/plain" id="src-p1"># 子代理即工具：对主 agent 来说，"派活"只是一次普通 tool call
+# （mini/tau 风格——AgentTool / AgentHarness 都是第 9 章里你亲手搭的类型）
+
+RESEARCH_PROMPT = "你是调研子代理：只做检索与阅读，最终输出 ≤5 条结论，每条带出处 URL。"
+
+async def run_research(args: dict) -> str:
+    sub = AgentHarness(                             # ① 新开一个"大脑"：干净的上下文
+        system_prompt=RESEARCH_PROMPT,
+        tools=[web_search, web_fetch, save_note],   # ② 子代理专属的工具集
+    )
+    result = await sub.run(args["question"])        # ③ 子代理自己跑完整循环（N 轮）
+    return result.final_text                        # ④ 只有浓缩结论回到主上下文
+
+research = AgentTool(
+    name="research",
+    description="深入调研一个子问题，返回带出处的结论列表",
+    input_schema={"type": "object",
+                  "properties": {"question": {"type": "string"}},
+                  "required": ["question"]},
+    executor=run_research,
+)
+
+# 主 agent 装配：tools=[read_file, edit, bash, research]
+# ← 循环本身一行都不用改。子代理读 100 个网页的中间过程
+#   不进主上下文，主 agent 只收到 5 条结论——这就是隔离的意义。</script>
+
+<script type="text/plain" id="src-p2">// 并行 fan-out + 汇总：rust-ai-agent src/bin/gaia.rs L23–58（逐字）
+// 多模型 × 多题并发评测 = fan-out 的最小真实样本
+const MODELS: &[&str] = &["openai/gpt-4.1-mini", "anthropic/claude-haiku-4.5"];
+
+pub async fn gaia_level1_experiment() -> anyhow::Result<()> {
+    let problems = load_gaia_level1().await?;
+    let mut set = JoinSet::new();                    // ① 任务集：fan-out
+    for model in MODELS.iter() {
+        for problem in problems.iter() {
+            let problem = problem.clone();
+            set.spawn(async move {
+                let permit = get_semaphore().acquire().await?;   // ② 信号量限流（并发=3）
+                let eval = evaluate_gaia_single(problem, model).await;
+                drop(permit);
+                Ok::<_, anyhow::Error>(eval)
+            });
+        }
+    }
+
+    let mut results: HashMap<String, Vec<GaiaEvalResult>> = HashMap::new();
+    while let Some(Ok(result)) = set.join_next().await {         // ③ barrier：收齐全部
+        match result {
+            Ok(eval) => {
+                tracing::info!("{eval:#?}");
+                results.entry(eval.model.clone()).or_default().push(eval);
+            }
+            Err(e) => tracing::error!("task panicked: {e}"),
+        }
+    }
+
+    for (model, evals) in &results {                 // ④ 汇总：按模型算正确率
+        let correct = evals.iter().filter(|e| e.correct).count();
+        let total = evals.len();
+        tracing::info!("{model}: {correct}/{total} ({:.1}%)",
+            correct as f64 / total as f64 * 100.0);
+    }
+    Ok(())
+}</script>
+
+<script type="text/plain" id="src-p3">// ── 交接物：rust-ai-agent src/models/action_plan.rs（逐字）──
+// 这个 schema 在原仓库里"生成了没人执行"；放进流水线，它就是站 1 的法定产出。
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct ActionPlan {
+    pub goal: String,
+    pub steps: Vec<ActionStep>,
+    pub difficulty: Difficulty,
+    pub estimated_minutes: u32
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct ActionStep {
+    pub index: u8,
+    pub description: String,
+    pub tool_hint: Option<String>
+}
+
+# ── 流水线（伪码）：每站一个独立 agent，交接物 = 上面的 schema ──
+plan   = await planner.run(task,  schema=ActionPlan)    # 站 1 · 规划
+draft  = await builder.run(plan,  schema=BuildResult)   # 站 2 · 执行
+report = await reviewer.run(draft, schema=ReviewReport) # 站 3 · 审校
+
+# 关键：站与站之间传"结构化交接物"，不传全文 transcript。
+# 任何一站失败只重跑那一站——交接物都落了盘，天然断点续跑。</script>
+
+<script type="text/plain" id="src-p4"># 生成-评审：两个 agent，一个产出、一个只挑刺（独立上下文，防"自恋通过"）
+VERDICT = {"type": "object",
+           "properties": {"ok":     {"type": "boolean"},
+                          "issues": {"type": "array", "items": {"type": "string"}}},
+           "required": ["ok", "issues"]}
+
+issues = []
+for round in range(3):                  # 回炉上限：防两个模型打乒乓烧钱
+    prompt  = task if round == 0 else f"{task}\n修复以下问题：{issues}"
+    draft   = await generator.run(prompt)
+    verdict = await critic.run(draft, schema=VERDICT)   # critic 只看产出，不看过程
+    if verdict["ok"]:
+        break
+    issues = verdict["issues"]          # 只回传 issues，不回传 critic 的推理全文
+
+# 优先级提醒：有客观判据时永远先用"机械 critic"——
+# 测试套件、exact-match（rust-ai-agent evaluator.rs 的 is_correct 就是最简形态）、
+# lint/类型检查——它们免费、稳定、不会幻觉。模型 critic 是它们之上的补充。</script>
+
+<script type="text/plain" id="src-p5"># 路由/分诊：便宜小模型先分流，每个领域 agent 就是上一节的"领域配方"
+ROUTE = {"type": "object",
+         "properties": {"route":      {"enum": ["billing", "tech", "refund", "human"]},
+                        "confidence": {"type": "number"}},
+         "required": ["route"]}
+
+triage = await cheap_model.complete(user_msg, schema=ROUTE)   # 一次结构化输出，几乎不要钱
+
+agent = {"billing": billing_agent,     # 各自领域的提示词 + 工具集 + 守卫
+         "tech":    tech_agent,
+         "refund":  refund_agent,
+         "human":   escalate_to_human}[triage["route"]]
+
+await agent.handle(conversation)
+
+# 两种形态，选一种想清楚：
+#   tool 形    —— 路由结果返回主 agent，主 agent 保持对话所有权（好回退）
+#   handoff 形 —— 对话所有权整体转移给领域 agent（OpenAI Agents SDK 的选择）
+# 置信度低于阈值 → 永远兜底到 human。</script>
+
+<script>
+/* ============ 工具函数 ============ */
+const $=s=>document.querySelector(s);
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+const KW=new Set(['use','pub','fn','let','mut','const','struct','enum','impl','match','while','for','in','if','else','async','await','move','return','break','continue','def','class','import','from','not','and','or','try','except','raise','with','as','lambda','elif','None','True','False','Ok','Err','Some','self']);
+function hlLine(src){
+  const re=/(#\[[^\]]*\])|(\/\/[^\n]*|#[^\n]*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|([A-Za-z_]\w*!)|([A-Z][A-Za-z0-9_]*)|([a-z_]\w*)/g;
+  let out='',last=0,m;
+  while((m=re.exec(src))){
+    out+=escHtml(src.slice(last,m.index));
+    const [full,attr,com,str,mac,typ,word]=m;
+    if(attr!==undefined) out+='<span class="c-attr">'+escHtml(attr)+'</span>';
+    else if(com!==undefined) out+='<span class="c-com">'+escHtml(com)+'</span>';
+    else if(str!==undefined) out+='<span class="c-str">'+escHtml(str)+'</span>';
+    else if(mac!==undefined) out+='<span class="c-mac">'+escHtml(mac)+'</span>';
+    else if(typ!==undefined) out+=KW.has(typ)?'<span class="c-kw">'+typ+'</span>':'<span class="c-typ">'+typ+'</span>';
+    else if(word!==undefined) out+=KW.has(word)?'<span class="c-kw">'+word+'</span>':escHtml(word);
+    last=m.index+full.length;
+  }
+  out+=escHtml(src.slice(last));
+  return out;
+}
+function renderCode(srcId,el){
+  const raw=document.getElementById(srcId).textContent.replace(/^\n/,'');
+  el.innerHTML=raw.split('\n').map(l=>'<span class="row">'+hlLine(l)+'</span>').join('\n');
+}
+
+/* ============ A1 · 领域配方 ============ */
+const RECIPES=[
+ {id:'code',icon:'💻',name:'编码 agent（基线）',tag:'pi 本体就是它——其余领域都是在这张卡上做替换',
+  prompt:['身份一句话 + 工具的一行描述（极小提示词，pi 哲学）','项目约定注入：AGENTS.md / 构建命令 / 代码风格','安全边界：不碰 <code>.env</code>、不外发代码'],
+  tools:[['read_file','带行号与截断 footer（引导续读）'],['edit','oldText 必须唯一——防呆设计'],['write_file','新建/覆盖'],['bash','超时 + 输出截断 + 会话隔离'],['grep','rg --json，结果限量']],
+  ctx:['编辑后回显 diff（模型自查）','长输出截断 + 「用 offset 续读」提示','compaction 保留最近 20k tokens（切点不劈开 tool 对）'],
+  guards:['truncation guard：finish=length 时不执行工具','bash 高危命令：沙箱/容器隔离（pi <code>docs/security.md</code>：权限弹窗是剧场，真隔离用容器）','git 操作默认不 push'],
+  eval:'仓库测试套件通过率；进阶上 SWE-bench Verified / Terminal-Bench 思路',
+  reuse:{pi:'拿来即用——这就是 pi',tau:'读 loop.py + tools.py 学结构',rust:'—'}},
+ {id:'research',icon:'🔎',name:'深度研究 agent',tag:'重读取、轻写入——多 agent 编排最先在这里回本',
+  prompt:['把问题拆成子问题，逐个检索、交叉验证','每条结论必须带出处 URL 与访问日期','输出结构化报告（结论 / 证据 / 分歧点）'],
+  tools:[['web_search','多引擎、限定时间范围'],['web_fetch','正文抽取 + 截断'],['save_note','结论落盘：文件当外部记忆'],['read_notes','按需读回，不常驻上下文']],
+  ctx:['检索原文<b>不进</b>主上下文——摘要进笔记文件（context offloading，Manus 的「文件即记忆」）','compaction 更激进：过程可弃，笔记不可弃','最终报告用结构化输出（GaiaOutput 模式）'],
+  guards:['网页内容一律视为<b>数据</b>而非指令（prompt injection 防护）','来源新鲜度与矛盾标注','域名白名单/黑名单'],
+  eval:'GAIA 风格问答对——rust-ai-agent <code>evaluator.rs</code> 的 exact-match 判分就是现成雏形',
+  reuse:{pi:'循环 + steering（中途纠偏检索方向）',tau:'session 树存每次调研',rust:'评测脊椎 + 结构化最终答案'}},
+ {id:'data',icon:'📊',name:'数据分析 agent',tag:'代码执行是核心工具，也是核心风险',
+  prompt:['先探查 schema，再提假设，用代码验证，最后给图表 + 结论','结论必须附带「怎么算出来的」（可复算）','不确定就说不确定，禁止编数'],
+  tools:[['run_python','沙箱 + 超时 + 内存上限（tau 工具执行器的 timeout 模式）'],['query_sql','只读账号 + LIMIT 强制'],['save_chart','图表落盘，返回路径'],['read_table_head','预览而非全量']],
+  ctx:['数据帧<b>永不</b>进上下文——只进 shape / dtypes / 摘要统计','中间结果落盘为 parquet/csv，路径入上下文','分析结论用结构化 JSON（结论/证据/图表路径）'],
+  guards:['代码执行：无网络、只读挂载数据目录、资源限额','SQL：只读账号，DDL/DML 直接拒绝','数据不外发（结论可以，原始行不行）'],
+  eval:'已知答案的数据集问答对 + 图表人工抽检',
+  reuse:{pi:'bash 工具的超时/截断实现',tau:'subprocess 执行器全文可抄',rust:'结构化输出两流派（strict schema / 提示词强制）'}},
+ {id:'support',icon:'🎧',name:'客服 / 业务 agent',tag:'守卫比能力重要——错误答案比不答贵得多',
+  prompt:['语气与品牌边界：不许诺退款/赔偿等（白名单话术）','答案必须引用 KB 条目 ID，查不到就转人工','何时升级：怒气信号 / 高价值客户 / 超范围'],
+  tools:[['kb_search','RAG 检索知识库，返回条目 + ID'],['get_order','业务 API，最小权限只读'],['create_ticket','写操作走白名单'],['escalate_to_human','12-Factor F7：联系人类也是一个工具调用']],
+  ctx:['按用户隔离 session——pi/tau 的 JSONL 会话树天然支持','多轮短对话，历史裁剪比 compaction 更常用','用户资料只注入必要字段（最小化）'],
+  guards:['<b>无出处不作答</b>（幻觉防护的产品化）','PII 脱敏后才入日志','写操作二次确认或人工复核队列'],
+  eval:'标注对话回归集 + 红线用例（必须转人工的 20 个场景）+ 人审抽样',
+  reuse:{pi:'事件流接 Web 前端（前端只认事件）',tau:'session 树做多用户会话',rust:'路由分诊用它的结构化输出'}},
+ {id:'devops',icon:'🛠',name:'DevOps / 运维 agent',tag:'只读诊断随便跑，写操作过闸门',
+  prompt:['先诊断后动作：现象 → 假设 → 证据 → 建议','报告引用具体日志行/指标名','高危动作只能「建议」，执行要确认'],
+  tools:[['kubectl_get / logs','只读默认，输出截断 + 续读'],['query_metrics','监控 API'],['run_runbook','白名单动作库，参数校验'],['page_oncall','升级给人']],
+  ctx:['runbook 用渐进披露：XML 索引常驻、正文按需加载（pi skills 机制）','长日志截断 + 引导按时间窗续读','JSONL session 天然是<b>审计日志</b>——谁在何时让 agent 做了什么，逐条可查'],
+  guards:['读写分离：只读工具自由，写操作确认或双人复核','或采纳 pi 立场：整个 agent 关进一次性容器，容器内全放开','密钥永不入上下文（工具内部取用）'],
+  eval:'故障演练场景库：注入已知故障，测定位准确率与平均步数',
+  reuse:{pi:'skills 渐进披露 + security.md 的隔离论证',tau:'事件流做操作留痕',rust:'backon 重试退避的用法'}},
+ {id:'yours',icon:'✏️',name:'你的领域（空白模板）',tag:'照抄这张卡的结构，四小时出第一版',
+  prompt:['角色与边界一句话（越短越稳——KV-cache 友好）','领域约定：术语表 / 禁区 / 输出形态','何时求助人类'],
+  tools:[['5–10 个动词命名的工具','超过 10 个说明拆分领域不对'],['每个工具','超时 + 截断 + 错误消息可直接行动'],['一个 escalate','永远给 agent 留一条「我不行」的出路']],
+  ctx:['什么进上下文（小而热的）/ 什么落盘（大而冷的）','截断策略先写好，再考虑 compaction','稳定前缀：系统提示词与工具定义不要每轮变'],
+  guards:['列出「绝不允许」清单，映射成校验代码而非提示词','高危动作 = 确认 / 白名单 / 沙箱 三选一','注入防护：外部内容视为数据'],
+  eval:'先写 20 个问答对（exact-match 都行）——没有评测的迭代是盲走',
+  reuse:{pi:'照抄三层架构与工具防呆',tau:'照抄类型与循环骨架',rust:'照抄评测 harness 与结构化输出'}}
+];
+const domChips=$('#domChips'),recipePanel=$('#recipePanel');
+domChips.innerHTML=RECIPES.map((r,i)=>'<button class="chip" role="tab" aria-selected="'+(i===0)+'" data-i="'+i+'">'+r.icon+' '+r.name.replace(/（.*）/,'')+'</button>').join('');
+function renderRecipe(i){
+  const r=RECIPES[i];
+  recipePanel.innerHTML=
+   '<div class="rhead"><span class="rname">'+r.icon+' '+r.name+'</span><span class="rtag">'+r.tag+'</span></div>'
+  +'<div class="rgrid">'
+  +'<div class="rcell"><h5>系统提示词要点</h5><ul>'+r.prompt.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>'
+  +'<div class="rcell"><h5>工具清单（动词命名 · 个位数）</h5><ul>'+r.tools.map(t=>'<li><b><code>'+t[0]+'</code></b> — '+t[1]+'</li>').join('')+'</ul></div>'
+  +'<div class="rcell"><h5>上下文策略</h5><ul>'+r.ctx.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>'
+  +'<div class="rcell"><h5>守卫与红线</h5><ul>'+r.guards.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>'
+  +'</div>'
+  +'<div class="rfoot"><div><h5>评测（没有它就是盲走）</h5><ul><li>'+r.eval+'</li></ul></div>'
+  +'<div><h5>从三个项目搬什么</h5><ul><li><span class="tag pi">pi</span> '+r.reuse.pi+'</li><li><span class="tag tau">tau</span> '+r.reuse.tau+'</li><li><span class="tag rust">rust</span> '+r.reuse.rust+'</li></ul></div></div>';
+  domChips.querySelectorAll('.chip').forEach((c,j)=>c.setAttribute('aria-selected',j===i));
+}
+domChips.addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)renderRecipe(+b.dataset.i)});
+renderRecipe(0);
+
+/* ============ A2 · 编排模式 ============ */
+function N(cls,s,txt){return '<div class="dg-node '+cls+'" data-s="'+s+'">'+txt+'</div>'}
+function AR(s,txt){return '<div class="dg-arr" data-s="'+s+'">'+(txt||'↓')+'</div>'}
+const PATTERNS=[
+ {id:'sub',name:'① 子代理即工具',file:'orchestrator-workers.py · 教学骨架（mini/tau 类型）',src:'src-p1',
+  dg:N('m',0,'主 agent · 循环进行中')+AR(1,'↓ tool_call: research("竞品 X 调研")')
+    +'<div class="dg-row"><div class="dg-lane">'+N('w',2,'子 agent 循环 · 干净上下文')+N('w',3,'search → fetch → save_note ×N 轮（100 个网页不进主上下文）')+'</div></div>'
+    +AR(4,'↓ tool_result')+N('j',5,'5 条结论 + 出处（浓缩交接物）')+AR(6)+N('m',7,'主 agent 拿结论继续本轮循环'),
+  use:'子任务重读取（读 100 个文件/网页）会撑爆主上下文；子任务需要不同工具集或人格；只需要结论、不需要过程。',
+  avoid:'子任务需要主对话的完整语境（转述必丢信息）；父子频繁往返（不如自己做）。',
+  contract:'子 agent 的最终文本（或结构化 JSON）作为 <code>tool_result</code> 回填；过程事件可透传到 UI 显示，但不进主 transcript。',
+  refs:['<b>坐标：</b>','<span class="tag pi">Claude Code 的 Task/子代理 = 此模式的产品化</span>','<span class="tag adv">Anthropic Research 系统 = orchestrator-workers</span>','<span class="tag tau">在 pi/tau 上：注册一个会 new AgentHarness 的工具即可</span>']},
+ {id:'fan',name:'② 并行 fan-out',file:'rust-ai-agent · src/bin/gaia.rs L23–58 · 逐字',src:'src-p2',
+  dg:N('m',0,'任务拆分：N 个只读、彼此独立的子任务')+AR(1,'↓ spawn ×N（信号量限流）')
+    +'<div class="dg-row"><div class="dg-lane">'+N('w',2,'worker 1')+'</div><div class="dg-lane">'+N('w',2,'worker 2')+'</div><div class="dg-lane">'+N('w',2,'worker …N')+'</div></div>'
+    +AR(3,'↓ join_next() 收齐（barrier）')+N('x',4,'barrier：等全部返回')+AR(5)+N('m',6,'汇总 synthesizer：聚合/去重/算分')+AR(7)+N('j',8,'报告（结构化）'),
+  use:'审查 N 个文件、评测 M 道题、搜索 K 个角度——子任务同构、只读、互不依赖；用并发摊薄墙钟时间。',
+  avoid:'workers 写同一份状态（必冲突，除非各给一个 worktree/副本）；子任务之间有先后依赖（那是流水线）。',
+  contract:'每个 worker 返回<b>同一个 schema</b> 的结果；汇总者只读结论集合。rust-ai-agent 用 <code>JoinSet + Semaphore(3)</code> 限流。',
+  refs:['<b>坐标：</b>','<span class="tag rust">gaia.rs 就是它：2 模型 × N 题并发评测</span>','<span class="tag adv">Anthropic：研究类（重读取）任务多 agent 收益最大</span>']},
+ {id:'pipe',name:'③ 流水线',file:'action_plan.rs（逐字）+ 流水线伪码',src:'src-p3',
+  dg:N('w',0,'站 1 · 规划 agent（自己的提示词/工具）')+AR(1,'↓ 交接物')+N('j',2,'ActionPlan（JSON schema 校验过）')+AR(3)+N('w',4,'站 2 · 执行 agent')+AR(5,'↓ 交接物')+N('j',6,'BuildResult')+AR(7)+N('w',8,'站 3 · 审校 agent')+AR(9)+N('j',10,'交付 ✓（任一站失败只重跑该站）'),
+  use:'阶段目标/工具/人格差异大（调研→写作→审校）；阶段间只需要交接物，不需要全部历史；要断点续跑。',
+  avoid:'阶段边界模糊、频繁回退——那说明它本质是一个循环，拆站反而丢上下文。',
+  contract:'<b>schema 即接口</b>：站与站之间传结构化 JSON（strict schema 校验），不传散文、不传全文 transcript。rust-ai-agent 的 <code>ActionPlan</code> 就是标准交接物形态。',
+  refs:['<b>坐标：</b>','<span class="tag rust">schemars derive = 交接物 schema 的最省事写法</span>','<span class="tag adv">12-Factor F1/F4：结构化输出是 agent 的母语</span>']},
+ {id:'critic',name:'④ 生成-评审',file:'generator-critic.py · 教学骨架',src:'src-p4',
+  dg:N('m',0,'生成 agent → 产出 v1')+AR(1)+N('w',2,'评审 agent（独立上下文 · 只看产出）')+AR(3,'↓ verdict(JSON)')+N('j',4,'{ok:false, issues:[…]}')+AR(5,'↺ 带 issues 回炉（≤3 轮）')+N('m',6,'生成 agent → 产出 v2')+AR(7)+N('j',8,'{ok:true} → 交付 ✓')
+    +'<div class="dg-note" data-s="9">先机械 critic（测试/exact-match/lint），再模型 critic</div>',
+  use:'质量 > 成本的产出（代码/报告/合同）；存在可写进 prompt 的客观判据；防止生成者"自恋通过"。',
+  avoid:'纯主观品味且无判据——两个模型可能一起错得很自信；预算紧的高频路径。',
+  contract:'critic 返回结构化 <code>verdict {ok, issues[]}</code>；生成者只收 issues 列表，不收 critic 的推理全文（省 token、防污染）。',
+  refs:['<b>坐标：</b>','<span class="tag rust">evaluator.rs 的 is_correct = 最机械的 critic</span>','<span class="tag pi">SWE-bench 用测试套件当 critic——最好的 critic 是编译器</span>']},
+ {id:'route',name:'⑤ 路由 / 分诊',file:'router-handoff.py · 教学骨架',src:'src-p5',
+  dg:N('x',0,'用户消息')+AR(1)+N('w',2,'router：便宜小模型 + 结构化输出')+AR(3,'↓ {route:"billing", confidence:0.93}')
+    +'<div class="dg-row"><div class="dg-lane">'+N('m',4,'billing agent ✓')+'</div><div class="dg-lane">'+N('m',5,'tech agent')+'</div><div class="dg-lane">'+N('m',5,'refund agent')+'</div></div>'
+    +'<div class="dg-note" data-s="6">handoff：对话所有权整体转移；置信度低 → 兜底转人工</div>',
+  use:'入口流量领域分明（客服：账单/技术/售后）；各领域工具集与合规要求不同；想用便宜模型省钱。',
+  avoid:'领域重叠大、需要跨域综合；路由错误的代价高于省下的钱。',
+  contract:'router 只输出 <code>{route, confidence}</code>（一次结构化调用）。两种形态：<b>tool 形</b>（结果返回主 agent，所有权不动）vs <b>handoff 形</b>（所有权转移，OpenAI Agents SDK 的选择）。',
+  refs:['<b>坐标：</b>','<span class="tag adv">OpenAI Agents SDK：handoffs 是一等公民</span>','<span class="tag tau">每个领域 agent = 上一节的一张配方卡</span>']}
+];
+const patTabs=$('#patTabs'),dgBox=$('#dgBox'),patInfo=$('#patInfo'),patFile=$('#patFile'),patCode=$('#patCode'),patRefs=$('#patRefs');
+patTabs.innerHTML=PATTERNS.map((p,i)=>'<button class="pat-tab" role="tab" aria-selected="'+(i===0)+'" data-i="'+i+'">'+p.name+'</button>').join('');
+let dgTimers=[];
+function playDg(){
+  dgTimers.forEach(clearTimeout);dgTimers=[];
+  const nodes=[...dgBox.querySelectorAll('[data-s]')];
+  nodes.forEach(n=>n.classList.remove('on'));
+  nodes.sort((a,b)=>+a.dataset.s-+b.dataset.s).forEach(n=>{
+    dgTimers.push(setTimeout(()=>n.classList.add('on'),120+(+n.dataset.s)*260));
+  });
+}
+function selectPat(i){
+  const p=PATTERNS[i];
+  patTabs.querySelectorAll('.pat-tab').forEach((t,j)=>t.setAttribute('aria-selected',j===i));
+  dgBox.innerHTML=p.dg;
+  patInfo.innerHTML=
+   '<div class="pi-row yes"><b>✓ 何时用</b>'+p.use+'</div>'
+  +'<div class="pi-row no"><b>✗ 何时不用</b>'+p.avoid+'</div>'
+  +'<div class="pi-row"><b>⇄ 通信契约</b>'+p.contract+'</div>';
+  patFile.textContent=p.file;
+  renderCode(p.src,patCode);
+  patRefs.innerHTML=p.refs.join(' ');
+  playDg();
+}
+patTabs.addEventListener('click',e=>{const b=e.target.closest('.pat-tab');if(b)selectPat(+b.dataset.i)});
+$('#dgReplay').addEventListener('click',playDg);
+selectPat(0);
+
+/* ============ B1 · 蓝图 ============ */
+const LAYERS=[
+ {id:'L6',name:'产品层',sub:'TUI / Web / headless / CI',duty:'每个前端只是事件流的一种消费方式。同一个大脑，可以同时长出终端 UI、print 模式、RPC 服务、CI 机器人——互不知晓。',
+  dec:['前端<b>只订阅事件</b>，绝不直接摸循环内部状态','print/headless 模式先做——最小可用产品','键盘中断（Esc/Ctrl-C）翻译成 cancel/steer 信号'],
+  pins:{pi:'<code>coding-agent</code>：TUI + print + RPC 三形态',tau:'TUI + print（教学版）',rust:'<code>main.rs</code> / <code>bin/gaia.rs</code>：CLI 直出',mini:'M8：print 模式（用它修一个真 bug）'},
+  src:'pi 设计宣言：「TUI 只是一个前端」'},
+ {id:'L5',name:'编排层（可选）',sub:'多 agent · 并发 · 预算',duty:'子代理即工具 / fan-out / 流水线 / 评审 / 路由（见应用篇）。带并发限流与 token 预算闸门。三个项目都基本留白——刻意：编排长在 harness 之上。',
+  dec:['先单 agent 做到头，再编排（成本 ~15×）','并发必须限流（信号量），预算必须有硬顶','交接物一律结构化 JSON，不传散文'],
+  pins:{pi:'留白——用自定义工具即可挂子代理',tau:'留白（同上）',rust:'<code>JoinSet + Semaphore</code>：fan-out 雏形 ◐',mini:'M11（本页新增）：子代理工具 + fan-out'},
+  src:'Anthropic《How we built our multi-agent research system》'},
+ {id:'L4',name:'会话与上下文',sub:'JSONL 树 · reducer · compaction',duty:'append-only JSONL 条目树 + leaf 指针（分支/回退天然支持）；SessionState 是从条目重放出来的<b>无状态 reducer</b>；上下文快满时结构化压缩。',
+  dec:['只追加、不改写——历史即审计','compaction 切点永不劈开 tool_call/tool_result 对','溢出恢复：压一次、重试一次，仍溢出才报错'],
+  pins:{pi:'session 格式文档 + <code>compaction.ts</code>（reserve/keepRecent）',tau:'<code>session/</code>：entries → tree → memory',rust:'—（无会话概念）',mini:'M7 会话 + M9 压缩'},
+  src:'12-Factor Agents F12：stateless reducer'},
+ {id:'L3',name:'工具层',sub:'schema · 校验 · 执行 · 防呆',duty:'工具 = schema（给模型看）+ 执行器（真干活）。入参校验、超时、输出截断带续读引导、错误消息可直接行动、防呆设计（oldText 必须唯一）。',
+  dec:['个位数工具、动词命名、描述面向模型而非人','错误返回「怎么修」而不是堆栈','容忍模型笔误（prepareArguments 归一化）'],
+  pins:{pi:'<code>core/tools/</code>：edit-diff 模糊匹配管线',tau:'<code>tools.py</code> 四工具全文可抄',rust:'<code>tools/calculator/</code>：定义/执行分文件，分发写死 if ◐',mini:'M4：坑最密集的一站'},
+  src:'Anthropic《Writing effective tools for AI agents》'},
+ {id:'L2',name:'循环与守卫',sub:'while + 4 道守卫 + steering',duty:'全系统最重要的 ~130 行：组装请求 → 调 provider → 执行工具 → 回填 → 直到没有 tool_calls。四道守卫兜底，steering 在轮间注入用户插话。',
+  dec:['守卫①截断（finish=length 不执行工具）②异常边界 ③未知工具 ④取消回填','transcript 永远保持 provider 合法（成对、有序）','steering / follow-up 双队列，默认一次一条'],
+  pins:{pi:'<code>packages/agent/agent-loop.ts</code>',tau:'<code>tau_agent/loop.py</code>（276 行）',rust:'ep05：单轮工具往返——<b>还差一个 while</b> ◐',mini:'M3：5 条规格测试通关'},
+  src:'主教程循环模拟器 = 本层的可视化'},
+ {id:'L1',name:'事件流契约',sub:'AgentEvent · 唯一前端接口',duty:'循环对外只说一种话：事件（turn/message/tool 的开始、增量、结束、错误）。前端、日志、编排层都只消费事件——这是解耦的关键一层。',
+  dec:['事件是<b>唯一</b>对外契约（改内部不破坏前端）','增量事件让 TUI 流式渲染','错误也是事件，不是异常'],
+  pins:{pi:'<code>agent.ts</code>：订阅者按序结算',tau:'<code>tau_agent/events.py</code>：10 种事件',rust:'—（tracing 日志不是契约）',mini:'M1：与消息类型一起定义'},
+  src:'pi：event stream as the only frontend contract'},
+ {id:'L0',name:'Provider 适配层',sub:'多厂商 wire 格式 → 统一类型',duty:'把 Anthropic / OpenAI Chat / OpenAI Responses / Gemini 各说各话的 wire 格式，翻译成统一内部消息与流式增量；产出 usage/cost；<b>流永不 throw</b>——错误编码成流内事件。',
+  dec:['内部中立层 + 适配器 + 逃生舱（compat flags），拒绝最小公分母','工具调用是硬性要求（不支持 = 接不了）','FakeProvider 先行：测试永不打真 API'],
+  pins:{pi:'<code>pi-ai</code>：9 种 API + compat 开关',tau:'<code>tau_ai/</code>：OpenAI-compatible + 手写 Anthropic SSE ◐',rust:'async-openai 单格式，多模型靠 OpenRouter 网关 ◐',mini:'M2：FakeProvider + 一个真适配器'},
+  src:'主文档第 10 章：模型接入指南'}
+];
+const XCUTS=[
+ {id:'X1',name:'重试与退避',duty:'429/5xx 指数退避重试；上下文溢出 → 压缩一次、重试一次。',dec:['对流式请求，重试要处理「半截流」','退避加抖动，防惊群'],pins:{pi:'内建重试',tau:'内建重试',rust:'<code>backon</code> crate ●',mini:'M9 一并做'},src:'生产必备，三家都有'},
+ {id:'X2',name:'可观测',duty:'事件日志 + JSONL session = 完整 trace：每轮说了什么、调了什么工具、花了多少 token，逐条可查、可回放。',dec:['先用「事件打日志」白嫖 observability','token/成本从 provider usage 事件聚合'],pins:{pi:'事件 + session ●',tau:'事件 + session ●',rust:'<code>tracing</code> 结构化日志 ◐',mini:'M1 起免费获得'},src:'JSONL 会话即审计日志'},
+ {id:'X3',name:'评测',duty:'数据集 + 判分器 + 并发跑分。exact-match 起步 → 测试套件 → LLM judge。没有评测的迭代是盲走。',dec:['20 个问答对就能起步','判分越机械越可信'],pins:{pi:'—（靠 Terminal-Bench 外部基准）',tau:'—',rust:'<code>evaluator.rs</code> + gaia.rs 跑分 ●（反超！）',mini:'M10 首推项'},src:'rust-ai-agent 唯一领先的一层'},
+ {id:'X4',name:'安全',duty:'外部内容视为数据（注入防护）；代码执行进沙箱/容器；密钥不入上下文；高危动作过闸门。',dec:['pi 立场：权限弹窗是剧场，真隔离用容器','守卫写成代码，不写成提示词'],pins:{pi:'<code>docs/security.md</code> 无权限论证 ◐',tau:'教学从简 ○',rust:'—（.env 隔离而已）',mini:'M9：超时/沙箱/确认'},src:'pi docs/security.md'}
+];
+const bpStack=$('#bpStack'),bpRail=$('#bpRail'),bpDetail=$('#bpDetail');
+bpStack.innerHTML=LAYERS.map((l,i)=>'<button class="bplayer" role="tab" aria-selected="false" data-k="l'+i+'"><span class="lid">'+l.id+'</span><span class="lname">'+l.name+'</span><span class="lsub">'+l.sub+'</span></button>'+(i<LAYERS.length-1?'<div class="bpdep">↑ 只依赖下层（单向）</div>':'')).join('');
+bpRail.innerHTML+=XCUTS.map((x,i)=>'<button class="bpx" role="tab" aria-selected="false" data-k="x'+i+'">'+x.id+' · '+x.name+'</button>').join('');
+function pinRow(p){return '<table class="pintable"><tr><th><span class="tag pi">pi 0.80.7</span></th><td>'+p.pi+'</td></tr><tr><th><span class="tag tau">tau 0.1.6</span></th><td>'+p.tau+'</td></tr><tr><th><span class="tag rust">rust ep05</span></th><td>'+p.rust+'</td></tr><tr><th><span class="tag arch">mini（你）</span></th><td>'+p.mini+'</td></tr></table>'}
+function selectLayer(k){
+  const isX=k[0]==='x';const d=(isX?XCUTS:LAYERS)[+k.slice(1)];
+  document.querySelectorAll('.bplayer,.bpx').forEach(b=>b.setAttribute('aria-selected',b.dataset.k===k));
+  bpDetail.innerHTML=
+   '<div class="bpd-head"><b>'+d.id+' · '+d.name+'</b> —— '+d.duty+'</div>'
+  +'<div class="bpd-body"><div class="bpd-cell"><h5>关键设计决策</h5><ul>'+d.dec.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>'
+  +'<div class="bpd-cell"><h5>出处 / 去哪看</h5><ul><li>'+d.src+'</li></ul></div></div>'
+  +pinRow(d.pins);
+}
+document.querySelector('.bpgrid').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)selectLayer(b.dataset.k)});
+selectLayer('l2'); /* 数组下标 2 = L4 会话与上下文（默认展开最有信息量的一层） */
+
+/* ============ B2 · 覆盖矩阵 ============ */
+const MROWS=[
+ ['L0 Provider 适配','●|9 种 API + compat 逃生舱','◐|OpenAI-compatible 为主 + 手写 Anthropic SSE','◐|async-openai 单格式，多模型靠 OpenRouter 网关','M2'],
+ ['L1 事件流契约','●|AgentEvent + 订阅者按序结算','●|10 种事件','—|tracing 日志不构成契约','M1'],
+ ['L2 循环与守卫','●|agent-loop.ts：4 守卫 + steering','●|loop.py 276 行','◐|ep05 单轮工具往返，无 while','M3'],
+ ['L3 工具层','●|edit-diff 模糊管线 + 防呆','●|四工具全文教学','◐|calculator：定义/执行分文件，分发写死','M4'],
+ ['L4 会话与上下文','●|JSONL 树 + compaction + 溢出恢复','●|entries→tree→memory reducer','—|无会话概念','M7+M9'],
+ ['L5 编排（可选）','○|刻意留白：自定义工具可挂子代理','○|同左','◐|JoinSet+Semaphore：fan-out 雏形','M11'],
+ ['L6 产品层','●|TUI + print + RPC','●|TUI + print','◐|CLI bins 直出','M8'],
+ ['X1 重试退避','●|内建','●|内建','●|backon crate','M9'],
+ ['X2 可观测','●|事件+session 即 trace','●|同左','◐|tracing 结构化日志','M1 起'],
+ ['X3 评测','—|靠外部基准（Terminal-Bench）','—|无','●|evaluator.rs + 并发跑分（反超）','M10'],
+ ['X4 安全','◐|security.md 隔离论证（无权限弹窗哲学）','○|教学从简','—|仅 .env 隔离','M9']
+];
+function mcell(s){const [v,t]=s.split('|');const cls=v==='●'?'full':v==='◐'?'part':v==='○'?'void':'none';return '<td class="c '+cls+'" title="'+t+'">'+v+'</td>'}
+$('#mTable').innerHTML='<tr><th>蓝图层</th><th>pi 0.80.7</th><th>tau 0.1.6</th><th>rust-ai-agent ep05</th><th>mini（你在哪步搭）</th></tr>'
+ +MROWS.map(r=>'<tr><td><b>'+r[0].split(' ')[0]+'</b> '+r[0].split(' ').slice(1).join(' ')+'</td>'+mcell(r[1])+mcell(r[2])+mcell(r[3])+'<td class="c" style="font-family:var(--mono);font-size:11.5px;color:var(--arch)">'+r[4]+'</td></tr>').join('');
+
+/* ============ B3 · 建造路线 ============ */
+const ROAD=[
+ ['M0','骨架与依赖方向守卫','半天','AST 测试锁死「上层依赖下层」——违规直接红','done','mini ✓ 已完成'],
+ ['M1','核心类型：消息 / 工具 / 事件','半天','mypy strict 全绿；类型即文档','done','mini ✓ 已完成'],
+ ['M2','Provider 层：FakeProvider 先行 + 真适配器','1–2 天','不打真 API 的流式测试全过','ex','练习（带 TODO 骨架）'],
+ ['M3','循环：全项目最重要的 ~130 行','1 天','5 条规格测试通关（四守卫齐活）','ex','练习（答案在 solutions/）'],
+ ['M4','四个工具：坑最密集的一站','2–3 天','截断 footer / 超时 / oldText 唯一 全有测试','todo',''],
+ ['M5','Harness：状态、双队列、取消','1 天','steering 注入与取消回填可复现','todo',''],
+ ['M6','系统提示词：机械拼装','半天','提示词 = 函数(环境)，可快照测试','todo',''],
+ ['M7','会话持久化：追加式条目树','1–2 天','杀进程 → resume 原样恢复','todo',''],
+ ['M8','CLI print 模式：第一次真正可用','半天','用它修一个真 bug（毕业礼）','todo',''],
+ ['M9','压缩与溢出恢复','1–2 天','超长会话自动压缩且不劈 tool 对','todo',''],
+ ['M10','评测 harness（选做首推）','1–3 天','20 题跑分出正确率——借 rust evaluator 思路','todo',''],
+ ['M11','编排：子代理工具 + fan-out','1–2 天','主 agent 派 2 个子调研并汇总（本页 A 篇落地）','new','本页新增']
+];
+$('#rMap').innerHTML=ROAD.map(r=>'<div class="rrow'+(r[4]==='new'?' hl':'')+'"><span class="mid">'+r[0]+'</span><span class="mname">'+r[1]+'<small>'+r[2]+'</small></span><span class="macc"><b>验收</b>'+r[3]+'</span><span class="mst '+r[4]+'">'+(r[5]||'待建')+'</span></div>').join('');
+
+/* ============ B4 · 十条清单 ============ */
+const CHECKS=[
+ ['01','拥有你的循环','框架可以用，但那 ~130 行必须是你看得懂、改得动的。','12-Factor F8','./index.html#loop|去看循环模拟器'],
+ ['02','系统提示词极小 + 前缀稳定','KV-cache 命中率是最被低估的性能杠杆——前缀每变一次，缓存全废。','Manus 上下文工程','./index.html#mech|主教程·机制对比'],
+ ['03','工具个位数、动词命名、错误可行动','工具是给模型看的 API：描述写给模型，错误消息告诉它怎么修。','Anthropic·Writing effective tools','./index.html#mech|四工具的防呆设计'],
+ ['04','上下文三板斧：截断、落盘、压缩','大而冷的落盘（文件即记忆），小而热的进上下文，快满了结构化压缩。','Manus / Chroma·context rot','#arch|蓝图 L4'],
+ ['05','事件流是唯一前端契约','错误也是事件。前端、日志、编排全部只消费事件——改内部不破坏任何人。','pi 设计','#arch|蓝图 L1'],
+ ['06','会话 append-only + 无状态 reducer','状态 = f(条目)。可回放、可分支、可审计，resume 是免费的。','12-Factor F12','#arch|蓝图 L4'],
+ ['07','结构化输出是 agent 之间的母语','人读散文，程序读 JSON。阶段交接、路由、评审全部走 schema。','rust-ai-agent 两流派','./rust-ai-agent.html#patterns|strict vs 提示词强制'],
+ ['08','评测先行：20 个问答对起步','exact-match 都比没有强。没有评测，每次改提示词都是掷骰子。','rust-ai-agent evaluator.rs','./rust-ai-agent.html#gaia|GAIA 流水线'],
+ ['09','人在环是一个工具','contact_human / escalate 注册成工具——「我不行」也是合法输出。高危动作过闸门。','12-Factor F7','#usage|客服配方卡'],
+ ['10','多 agent 是最后手段','先单 agent + 好工具 + 好上下文。要上，先过三判据，交接物一律结构化。','Anthropic / Cognition','#orch|五种编排模式']
+];
+$('#checkGrid').innerHTML=CHECKS.map(c=>{const [href,label]=c[4].split('|');return '<div class="card checkcard"><span class="cn">'+c[0]+'</span><p>'+c[1]+'<span class="why"><br>'+c[2]+'</span></p><div class="meta"><span class="tag arch">'+c[3]+'</span><a href="'+href+'">'+label+' →</a></div></div>'}).join('');
+</script>

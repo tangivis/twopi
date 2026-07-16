@@ -314,7 +314,7 @@ footer p{margin:4px 0}
 <header class="top"><div class="wrap topbar">
   <div class="brand"><span class="pi-c">pi</span> × <span class="tau-c">tau</span> <span style="color:var(--ink-3)">/ agent 教程</span></div>
   <nav class="sections">
-    <a href="#overview">总览</a><a href="#loop">循环模拟器</a><a href="#arch">三层架构</a><a href="#mech">机制对比</a><a href="#data">数据</a><a href="#practice">最佳实践</a><a href="#eco">生态选型</a><a href="#path">学习路径</a>
+    <a href="#overview">总览</a><a href="#loop">循环模拟器</a><a href="#arch">三层架构</a><a href="#mech">机制对比</a><a href="#data">数据</a><a href="#practice">最佳实践</a><a href="#eco">生态选型</a><a href="#path">学习路径</a><a href="./advanced.html" style="color:var(--pi)">进阶篇 ↗</a>
   </nav>
 </div></header>
 
@@ -338,11 +338,11 @@ footer p{margin:4px 0}
     </div>
     <div class="projcards">
       <div class="projcard pi">
-        <div class="pname">pi <small>TypeScript · v0.80.6 · Mario Zechner (badlogic)</small></div>
+        <div class="pname">pi <small>TypeScript · v0.80.7 · Mario Zechner (badlogic)</small></div>
         <p>生产级极简 harness。npm 五件套：pi-ai（统一 1,057 个模型）/ pi-agent-core / pi-coding-agent / pi-tui。运行时扩展系统 + 自我扩展能力。Terminal-Bench 2.0 上与 Codex/Cursor 同级。</p>
       </div>
       <div class="projcard tau">
-        <div class="pname">tau <small>Python · v0.1.5 · alejandro-ao</small></div>
+        <div class="pname">tau <small>Python · v0.1.6 · Alejandro AO · huggingface/tau</small></div>
         <p>"为阅读而生"的教学复刻：tau_ai / tau_agent / tau_coding 三层，核心循环 276 行。40 篇 dev-notes 逐阶段记录"这对应 pi 的什么设计"。也是能真用的终端 agent（PyPI：tau-ai）。</p>
       </div>
       <div class="projcard" style="border-left:3px solid var(--ink-3)">
@@ -686,8 +686,18 @@ footer p{margin:4px 0}
   <div class="card pathcard" style="margin-top:16px;border-left:3px solid var(--ink-3)">
     <h3>延伸样本：rust-ai-agent（Rust）和 pi/tau 一样吗？</h3>
     <div class="psub">主文档第 12 章 · 读者提问 · 第三个坐标点</div>
-    <p style="font-size:13px;color:var(--ink-2);margin:0 0 12px"><b>教学初心一样，技术形态不一样。</b>solenovex/rust-ai-agent 是 B 站《用 Rust 构建 AI Agent》配套教学码——和 tau 同为"为学习而写"，但站在光谱另一端：它当前<b>不是循环式 agent</b>，而是"增强 LLM + 结构化输出（schemars derive schema）+ GAIA 基准评测"。<code>solver.rs</code> 是单次 LLM 调用，无循环、无工具回填。三者并排给你一张完整地图：tau=coding 循环(Py)、pi=同设计生产形态(TS)、rust-ai-agent=增强-LLM+评测(Rust, workflow 端)。反而补上了 pi/tau 都缺的评测脊椎（<code>evaluator.rs</code>）——做第 9 章 mini 的 M10 时可借用。</p>
+    <p style="font-size:13px;color:var(--ink-2);margin:0 0 12px"><b>教学初心一样，技术形态不一样。</b>solenovex/rust-ai-agent 是 B 站《用 Rust 构建 AI Agent》配套教学码——和 tau 同为"为学习而写"，但站在光谱另一端：它<b>不是循环式 agent</b>，而是"增强 LLM + 结构化输出（schemars derive schema）+ GAIA 基准评测"。ep05（2026-07 更新）长出了<b>单轮工具调用</b>（calculator：调用→执行→回填→再取一次答案），但一轮即止、没有 while，仍在 workflow 端。三者并排给你一张完整地图：tau=coding 循环(Py)、pi=同设计生产形态(TS)、rust-ai-agent=增强-LLM+评测(Rust)。反而补上了 pi/tau 都缺的评测脊椎（<code>evaluator.rs</code>）——做第 9 章 mini 的 M10 时可借用。</p>
     <a class="btn" style="text-decoration:none;border-bottom:none;display:inline-block" href="./rust-ai-agent.html">🦀 打开代码级交互精读 →</a>
+  </div>
+
+  <div class="card pathcard" style="margin-top:16px;border-left:3px solid #7C52D6">
+    <h3>进阶篇：把它用起来 & 把系统搭起来</h3>
+    <div class="psub">新页面 · 应用（领域配方 / 多 agent 编排）× 构架（蓝图 / 矩阵 / 施工路线）</div>
+    <p style="font-size:13px;color:var(--ink-2);margin:0 0 12px"><b>应用篇</b>：领域 Agent = 同一个循环 × 提示词 × 工具集 × 上下文策略 × 守卫——5 张领域配方卡（编码/研究/数据/客服/运维）+ 空白模板；五种多 agent 编排模式（子代理即工具 / 并行 fan-out / 流水线 / 生成-评审 / 路由）配消息流向动画与真代码骨架，先泼冷水再教怎么上（多 agent ≈15× token 成本）。<b>构架篇</b>：7 层 + 4 横切的现代最佳实践蓝图（每层给出 pi / tau / rust-ai-agent 的落点文件）、三项目覆盖矩阵、M0→M11 施工顺序（新增 M11 编排里程碑）、十条贴墙清单。</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn" style="text-decoration:none;border-bottom:none;display:inline-block" href="./advanced.html#usage">🧭 应用篇：配方与编排 →</a>
+      <a class="btn" style="text-decoration:none;border-bottom:none;display:inline-block" href="./advanced.html#arch">🏗 构架篇：蓝图与路线 →</a>
+    </div>
   </div>
 
   <div class="card labs">
@@ -706,8 +716,8 @@ footer p{margin:4px 0}
     </div>
     <div>
       <p><b style="color:var(--ink)">项目</b></p>
-      <p>pi：<a href="https://pi.dev">pi.dev</a> · github.com/earendil-works/pi · v0.80.6</p>
-      <p>tau：<a href="https://twotimespi.dev">twotimespi.dev</a> · github.com/alejandro-ao/tau · v0.1.5</p>
+      <p>pi：<a href="https://pi.dev">pi.dev</a> · github.com/earendil-works/pi · v0.80.7</p>
+      <p>tau：<a href="https://twotimespi.dev">twotimespi.dev</a> · github.com/huggingface/tau · v0.1.6</p>
     </div>
     <div>
       <p><b style="color:var(--ink)">必读三篇</b></p>
@@ -716,7 +726,7 @@ footer p{margin:4px 0}
       <p><a href="https://mariozechner.at/posts/2025-11-30-pi-coding-agent/">pi 设计宣言</a>（badlogic）</p>
     </div>
   </div>
-  <p style="margin-top:20px">生成于 2026-07-11 · 数据基于 pi v0.80.6（commit 4c18610）与 tau v0.1.5 · 本页为单文件离线可用</p>
+  <p style="margin-top:20px">生成于 2026-07-11 · 数据基于 pi v0.80.6（commit 4c18610）与 tau v0.1.5 · 2026-07-16 复核至 pi v0.80.7 / tau v0.1.6（仓库现挂 huggingface/tau）· 本页为单文件离线可用</p>
 </div></footer>
 
 <div class="viztip" id="viztip"></div>

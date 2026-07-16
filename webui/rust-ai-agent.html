@@ -197,6 +197,7 @@ footer a{color:var(--rust)}
 <header class="top"><div class="wrap topbar">
   <div class="brand"><span class="r">rust-ai-agent</span> · 代码精读</div>
   <a class="back" href="./index.html">← pi×tau 主教程</a>
+  <a class="back" href="./advanced.html">进阶篇 →</a>
   <nav class="sections">
     <a href="#myth">正名</a><a href="#explorer">代码浏览器</a><a href="#patterns">结构化输出</a><a href="#gaia">GAIA 评测</a><a href="#bridge">对比循环</a><a href="#local">本地模型</a><a href="#follow">跟着学</a>
   </nav>
@@ -204,24 +205,24 @@ footer a{color:var(--rust)}
 
 <section class="hero"><div class="wrap">
   <div class="kicker">pi×tau 教程 · 第 12 章延伸 · 代码层面精读</div>
-  <h1>读 <span class="r">rust-ai-agent</span> 的 634 行真代码<br>——agent 的"前传"长什么样</h1>
-  <p class="sub">B 站《用 Rust 构建 AI Agent》（UP 主「软件工艺师」）的配套代码。本页基于克隆到本地的<b>真实源码</b>（commit <span class="num">76047df</span>，逐文件读完）做代码级讲解——不是概念摘要，是可以点开每个文件对照着读的浏览器。</p>
+  <h1>读 <span class="r">rust-ai-agent</span> 的 713 行真代码<br>——agent 的"前传"长什么样</h1>
+  <p class="sub">B 站《用 Rust 构建 AI Agent》（UP 主「软件工艺师」）的配套代码。本页基于克隆到本地的<b>真实源码</b>（commit <span class="num">e6ee55d</span> / ep05，逐文件读完，2026-07-16 随 ep05 更新）做代码级讲解——不是概念摘要，是可以点开每个文件对照着读的浏览器。</p>
 
   <div class="mythbox" id="myth">
     <div class="no">
       <h4>✗ 它不是"用 Rust 复刻的 tau"</h4>
-      <p>tau 是 pi 有文档记载的 Python 复刻；rust-ai-agent 和 pi/tau <b>没有复刻关系</b>，也没有 agent 循环、没有工具调用、没有会话。它只是碰巧也是教学项目。</p>
+      <p>tau 是 pi 有文档记载的 Python 复刻；rust-ai-agent 和 pi/tau <b>没有复刻关系</b>，也没有 agent 循环、没有会话。ep05 长出了<b>单轮</b>工具调用——但一轮即止、没有 while，仍不是循环式 agent。</p>
     </div>
     <div class="yes">
       <h4>✓ 它是"增强 LLM + 结构化输出 + 评测"教程</h4>
-      <p>每次 LLM 交互都是<b>单次调用</b>。核心是：4 种调用模式 + 两种结构化输出流派 + 一个跑 <code>GAIA</code> 基准的评测器。站在 Anthropic 光谱的 <b>workflow 端</b>，是 pi/tau（agent 端）的互补前传。</p>
+      <p>LLM 交互至多<b>一轮工具往返</b>（ep05 前是纯单次调用）。核心是：4 种调用模式 + 两种结构化输出流派 + 单轮工具调用 + 一个跑 <code>GAIA</code> 基准的评测器。站在 Anthropic 光谱的 <b>workflow 端</b>，是 pi/tau（agent 端）的互补前传。</p>
     </div>
   </div>
 
   <div class="statrow">
-    <div class="stat"><div class="v num" style="color:var(--rust)">634</div><div class="k">行 Rust（全部读完）</div></div>
-    <div class="stat"><div class="v num">0</div><div class="k">个 agent 循环 / 工具调用</div></div>
-    <div class="stat"><div class="v num">4</div><div class="k">种 LLM 调用模式</div></div>
+    <div class="stat"><div class="v num" style="color:var(--rust)">713</div><div class="k">行 Rust（全部读完）</div></div>
+    <div class="stat"><div class="v num">0</div><div class="k">个 while 循环（一轮即止）</div></div>
+    <div class="stat"><div class="v num">1</div><div class="k">个工具 calculator（ep05 新增）</div></div>
     <div class="stat"><div class="v num">1</div><div class="k">个 GAIA 评测器（pi/tau 缺的）</div></div>
   </div>
 </div></section>
@@ -229,7 +230,7 @@ footer a{color:var(--rust)}
 <section id="explorer"><div class="wrap">
   <div class="kicker">主体 · 可交互</div>
   <h2>代码浏览器：点开每个文件对照读</h2>
-  <p class="lede">左侧是真实模块树（<code>llm</code> 调用层 · <code>models</code> schema · <code>gaia</code> 评测），点文件看<b>逐字真代码</b> + 白话讲解 + 与 pi/tau 的对照。颜色圆点标出文件属于哪一类。</p>
+  <p class="lede">左侧是真实模块树（<code>llm</code> 调用层 · <code>tools</code> ep05 工具 · <code>models</code> schema · <code>gaia</code> 评测），点文件看<b>逐字真代码</b> + 白话讲解 + 与 pi/tau 的对照。颜色圆点标出文件属于哪一类。</p>
   <div class="explorer">
     <div class="filetree" id="filetree" role="tablist" aria-label="源文件"></div>
     <div class="expmain">
@@ -284,7 +285,7 @@ footer a{color:var(--rust)}
 <section id="bridge"><div class="wrap">
   <div class="kicker">桥梁 · 通向主教程</div>
   <h2>单次调用 vs agent 循环</h2>
-  <p class="lede">这是理解 rust-ai-agent 与 pi/tau 差异的关键一图。左边是它的 <code>solver.rs</code>（发一次、拿结果、结束）；右边是主教程第 9 章的 agent 循环。点播放看两者分道扬镳。<b>注意：它的 <code>ActionPlan</code> 有 <code>steps</code> 和 <code>tool_hint</code>，看起来很 agent，但没有执行器——print 出来的 plan 不是 run 起来的 plan。</b></p>
+  <p class="lede">这是理解 rust-ai-agent 与 pi/tau 差异的关键一图。左边是它 ep05 的 <code>complete.rs</code>：工具调用 → 执行 → 回填 → <b>再取一次答案，一轮即止</b>（<code>solver.rs</code> 更简单，连工具都不带）；右边是主教程第 9 章的 agent 循环。点播放看两边在第 ⑤ 步分道扬镳——<b>差的就是一个 <code>while</code></b>。另一个提醒：<code>ActionPlan</code> 有 <code>steps</code> 和 <code>tool_hint</code>，看起来很 agent，但没有执行器——print 出来的 plan 不是 run 起来的 plan。</p>
   <div class="step-ctrl" style="border:1px solid var(--line-soft);border-radius:12px 12px 0 0;border-bottom:none;background:var(--card)">
     <button class="btn primary" id="bPlay">▶ 播放对比</button>
     <button class="btn" id="bReset">↺ 重置</button>
@@ -292,7 +293,7 @@ footer a{color:var(--rust)}
   </div>
   <div class="bridge" style="margin-top:0">
     <div class="brcol rust">
-      <h4>rust-ai-agent · solver.rs</h4>
+      <h4>rust-ai-agent · ep05 complete.rs</h4>
       <div class="brstage" id="brRust"></div>
     </div>
     <div class="brcol loop">
@@ -328,7 +329,7 @@ footer a{color:var(--rust)}
     <div class="card fcard">
       <h3>① 环境与运行</h3>
       <ul>
-        <li>克隆并按集数 checkout：<code>git checkout ep04</code></li>
+        <li>克隆后按集数 checkout：tag 目前到 <code>ep04</code>；ep05（工具调用）在 <code>main</code> 最新提交。</li>
         <li>它用 <b>OpenRouter</b>（模型名 <code>openai/gpt-4.1-mini</code>、<code>anthropic/claude-haiku-4.5</code> 是 OpenRouter slug）。<code>.env</code> 里设 <code>OPENAI_API_KEY</code> = OpenRouter key、<code>OPENAI_BASE_URL</code> = OpenRouter 端点——<code>async-openai</code> 自动读这两个环境变量。</li>
         <li>跑 GAIA 评测还需 <code>HF_TOKEN</code>（从 HuggingFace 拉数据集）。</li>
         <li>两个入口：<code>cargo run</code>（<code>main.rs</code>：ActionPlan 结构化输出 demo）；<code>cargo run --bin gaia</code>（GAIA 评测实验）。</li>
@@ -340,17 +341,18 @@ footer a{color:var(--rust)}
         <tr><td class="ep">ep01–02</td><td><code>llm/complete.rs</code>·<code>stream.rs</code> —— 文本 / 流式基础调用</td></tr>
         <tr><td class="ep">ep03</td><td><code>llm/structured.rs</code>·<code>structured_ds.rs</code> —— 结构化输出两流派</td></tr>
         <tr><td class="ep">ep04</td><td><code>gaia/*</code>·<code>bin/gaia.rs</code> —— GAIA 数据集评测</td></tr>
+        <tr><td class="ep">ep05</td><td><code>tools/calculator/*</code>·<code>llm/complete.rs</code> —— 工具定义/执行 + 单轮工具往返</td></tr>
       </table>
-      <p style="font-size:12px;color:var(--ink-3);margin-top:8px">（仓库当前只有 <code>ep04</code> tag、6 个 commit——早期项目，后续集数可能长出工具循环。）</p>
+      <p style="font-size:12px;color:var(--ink-3);margin-top:8px">（预言兑现中：本页上一版写过"后续集数可能长出工具循环"——ep05 已长出<b>单轮</b>工具调用，离循环只差一个 while。本页随集数更新。）</p>
     </div>
   </div>
   <div class="gift">
-    <b>双向取长补短。</b>想把它升级成 pi/tau 那样的循环式 agent？缺的正是主教程第 9 章 M3–M8 教的：把 <code>solve_problem()</code> 的单次调用包进 <code>while</code>，读 <code>tool_calls</code>（<code>async-openai</code> 原生支持）→ 执行 → 结果回填 → 重复；给 GAIA 配 web-search / read-file / python-exec 工具（而非 coding 的 edit/bash）。<b>反过来</b>，它的 <code>evaluator.rs</code> 恰好是 pi/tau 都缺的评测脊椎——做你的 <a href="./index.html">mini（第 9 章）</a>的 M10 时把它借过来。</div>
+    <b>双向取长补短。</b>想把它升级成 pi/tau 那样的循环式 agent？ep05 已经把「<code>tool_calls</code> → 执行 → 回填 → 再调用」走通了<b>一轮</b>，缺的只剩主教程第 9 章 M3/M4 教的三件事：包一层 <code>while</code>（直到没有 tool_calls）、把写死的 <code>if</code> 换成 name→工具 的注册表分发、给 GAIA 配 web-search / read-file / python-exec 工具（而非 coding 的 edit/bash）。<b>反过来</b>，它的 <code>evaluator.rs</code> 恰好是 pi/tau 都缺的评测脊椎——做你的 <a href="./index.html">mini（第 9 章）</a>的 M10 时把它借过来。多 agent 编排与整套系统蓝图见<a href="./advanced.html">进阶篇</a>。</div>
 </div></section>
 
 <footer><div class="wrap">
   <p><b style="color:var(--ink)">来源与诚实边界</b></p>
-  <p class="provenance">代码逐字取自 <a href="https://github.com/solenovex/rust-ai-agent">github.com/solenovex/rust-ai-agent</a>（commit 76047df，2026-07-13 克隆读取，全部 634 行读完）。B 站《用 Rust 构建 AI Agent》/ UP 主「软件工艺师」。这是随视频推进的早期教学仓库——本页结论限定在当前快照；后续集数若加入工具循环，定性可能变化。</p>
+  <p class="provenance">代码逐字取自 <a href="https://github.com/solenovex/rust-ai-agent">github.com/solenovex/rust-ai-agent</a>（2026-07-13 克隆于 76047df，2026-07-16 更新至 e6ee55d / ep05，全部 713 行读完）。B 站《用 Rust 构建 AI Agent》/ UP 主「软件工艺师」。这是随视频推进的教学仓库——本页结论限定在当前快照：ep05 已有单轮工具调用；若后续长出 while 循环，定性将再更新。</p>
   <p class="provenance">配套：<a href="./index.html">pi×tau 主教程（含循环模拟器、第 9 章从零复刻、第 12 章文字对比）</a> · 主文档 <code>agent-study/pi-vs-tau-架构对比学习指南.md</code> 第 12 章</p>
 </div></footer>
 
@@ -608,16 +610,19 @@ pub async fn gaia_level1_experiment() -> anyhow::Result<()> {
     Ok(())
 }</script>
 
-<script type="text/plain" id="src-complete">use anyhow::Ok;
-use async_openai::types::chat::{
-    ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs,
-    CreateChatCompletionRequestArgs,
+<script type="text/plain" id="src-complete">use async_openai::types::chat::{
+    ChatCompletionMessageToolCalls, ChatCompletionRequestAssistantMessageArgs,
+    ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestToolMessageArgs,
+    ChatCompletionRequestUserMessageArgs, ChatCompletionTools, CreateChatCompletionRequestArgs,
 };
+
+use crate::tools::calculator::execute::{CalculatorArgs, calculator};
 
 pub async fn chat_complete(
     model: &str,
     system: Option<&str>,
     prompt: &str,
+    tools: Vec<ChatCompletionTools>,
 ) -> anyhow::Result<String> {
     let client = async_openai::Client::new();
     let mut messages = vec![];
@@ -640,7 +645,8 @@ pub async fn chat_complete(
 
     let request = CreateChatCompletionRequestArgs::default()
         .model(model)
-        .messages(messages)
+        .messages(messages.clone())
+        .tools(tools.clone())
         .max_tokens(2048u32)
         .build()?;
 
@@ -648,14 +654,153 @@ pub async fn chat_complete(
 
     tracing::info!("Response: {:#?}", response);
 
-    let content = response
+    let message = response
         .choices
         .into_iter()
         .next()
-        .and_then(|c| c.message.content)
+        .ok_or_else(|| anyhow::anyhow!("No choices in response"))?
+        .message;
+
+    if let Some(tool_calls) = message.tool_calls {
+        messages.push(
+            ChatCompletionRequestAssistantMessageArgs::default()
+                .tool_calls(tool_calls.clone())
+                .build()?
+                .into(),
+        );
+
+        for tool_call in tool_calls {
+            match tool_call {
+                ChatCompletionMessageToolCalls::Function(function_call) => {
+                    let function_name = function_call.function.name;
+                    let arguments = function_call.function.arguments;
+
+                    tracing::info!("Function: {function_name}");
+                    tracing::info!("Arguments: {arguments}");
+
+                    if function_name == "calculator" {
+                        let args: CalculatorArgs = serde_json::from_str(&arguments)?;
+                        let result =
+                            calculator(&args.operator, args.first_number, args.second_number);
+
+                        let tool_result = match result {
+                            Ok(calc_result) => calc_result.to_string(),
+                            Err(error) => error,
+                        };
+
+                        tracing::info!("Calculator result: {tool_result}");
+
+                        messages.push(
+                            ChatCompletionRequestToolMessageArgs::default()
+                                .tool_call_id(function_call.id.clone())
+                                .content(tool_result)
+                                .build()?
+                                .into(),
+                        );
+                    }
+                }
+
+                _ => {
+                    tracing::error!("Unsupported tool call type");
+                }
+            }
+        }
+
+        let request = CreateChatCompletionRequestArgs::default()
+            .model(model)
+            .messages(messages.clone())
+            .tools(tools.clone())
+            .max_tokens(2048u32)
+            .build()?;
+
+        let response = client.chat().create(request).await?;
+
+        let content = response
+            .choices
+            .into_iter()
+            .next()
+            .and_then(|c| c.message.content)
+            .ok_or_else(|| anyhow::anyhow!("No content in response"))?;
+
+        return Ok(content);
+    }
+
+    let content = message
+        .content
         .ok_or_else(|| anyhow::anyhow!("No content in response"))?;
 
     Ok(content)
+}</script>
+
+<script type="text/plain" id="src-toolsmod">use async_openai::types::chat::ChatCompletionTools;
+
+use crate::tools::calculator::definition::calculator_tool_definition;
+
+pub mod calculator;
+
+pub fn tools() -> Vec<ChatCompletionTools> {
+    vec![calculator_tool_definition()]
+}</script>
+
+<script type="text/plain" id="src-tooldef">use async_openai::types::chat::{ChatCompletionTool, ChatCompletionTools, FunctionObjectArgs};
+use serde_json::json;
+
+pub fn calculator_tool_definition() -> ChatCompletionTools {
+    ChatCompletionTools::Function(ChatCompletionTool {
+        function: FunctionObjectArgs::default()
+            .name("calculator")
+            .description("Perform basic arithmetic operations.")
+            .parameters(json!({
+                "type": "object",
+                "properties": {
+                    "operator": {
+                        "type": "string",
+                        "description": "Arithmetic operation to perform",
+                        "enum": ["add", "subtract", "multiply", "divide"]
+                    },
+                    "first_number": {
+                        "type": "number",
+                        "description": "First number for the calculation"
+                    },
+                    "second_number": {
+                        "type": "number",
+                        "description": "Second number for the calculation"
+                    }
+                },
+                "required": ["operator", "first_number", "second_number"]
+            }))
+            .build()
+            .expect("failed to build calculator tool definition"),
+    })
+}</script>
+
+<script type="text/plain" id="src-toolexec">use serde::Deserialize;
+
+pub fn calculator(
+    operator: &str,
+    first_number: f64,
+    second_number: f64,
+) -> anyhow::Result<f64, String> {
+    match operator {
+        "add" => Ok(first_number + second_number),
+        "subtract" => Ok(first_number - second_number),
+        "multiply" => Ok(first_number * second_number),
+        "divide" => {
+            if second_number == 0.0 {
+                Err("Cannot divide by zero".to_string())
+            } else {
+                Ok(first_number / second_number)
+            }
+        }
+        other => Err(format!("Unsupported operator: {other}")),
+    }
+}
+
+#[derive(Deserialize, Debug)]
+pub struct CalculatorArgs {
+    pub operator: String,
+    pub first_number: f64,
+    pub second_number: f64,
 }</script>
 
 <script type="text/plain" id="src-stream">use async_openai::types::chat::{
@@ -1026,10 +1171,10 @@ const FILES=[
     note:'三组数据结构：HfResponse/HfRow/GaiaRow（数据集反序列化，用 serde rename 对上 "Question"/"Final answer" 等字段名）；GaiaOutput（模型输出的目标 schema，#[derive(JsonSchema)] + deny_unknown_fields）；GaiaEvalResult（评测结果记录）。',
     contrast:'注意 GaiaOutput 上的 #[derive(JsonSchema)]——这就是 schemars 流派：schema 从 Rust 类型自动生成，类型安全最强。对照 tau 手写 dict、pi TypeBox。'},
  ]},
- {group:'llm —— 调用层（4 种模式）',items:[
-   {id:'src-complete',path:'src/llm/complete.rs',loc:49,dot:'call',
-    note:'最基础的模式：拼 system+user 消息 → chat.create() → 取第一个 choice 的文本。返回 String。这是"增强 LLM"最朴素的形态。',
-    contrast:'pi/tau 的 provider 适配器也做同样的事，但把结果包成中立事件流（text_delta / response_end）供循环消费；这里直接返回字符串给调用方。'},
+ {group:'llm —— 调用层（4 种模式 + ep05 工具往返）',items:[
+   {id:'src-complete',path:'src/llm/complete.rs',loc:121,dot:'call',
+    note:'ep05 大改造：从"纯文本一问一答"长成<b>单轮工具往返</b>。带 tools 发起调用 → 若响应有 tool_calls：assistant(tool_calls) 追加进 messages → 逐个执行（写死 if name=="calculator"）→ ToolMessage 回填 → <b>再调一次</b>取最终文本。第二轮若再要工具？直接走"取 content"的失败路径——没有 while。',
+    contrast:'离 agent 循环只差两步：外面包一层 while（直到没有 tool_calls）；把写死的 if 换成 name→工具 的注册表分发。对照 tau loop.py——这就是主教程第 9 章 M3 要你补上的部分。'},
    {id:'src-stream',path:'src/llm/stream.rs',loc:82,dot:'call',
     note:'流式：用 async-stream 的 stream! 宏把 create_stream() 的 SSE chunk 逐个 yield 出来（choice.delta.content）；外层 with_retry 累积文本并 print!，backon 重试。这是手写 SSE 消费的 Rust 版。',
     contrast:'对照主教程第 9 章 M2：tau 手写 SSE 解析、pi 用官方 SDK——这里用 async-openai 的 create_stream()，再用 async-stream 转成自己的 Stream。三种做法，同一件事。'},
@@ -1042,6 +1187,17 @@ const FILES=[
    {id:'src-semaphore',path:'src/llm/semaphore.rs',loc:9,dot:'infra',
     note:'一个全局 tokio Semaphore(3)：把并发在飞的 LLM 请求限制到 3 个。批量评测时防止把 API 限流打爆。OnceLock 懒初始化。',
     contrast:'批量调用 LLM 的必备件。pi/tau 是交互式单会话，不需要；一旦你做"跑一批任务"（评测、数据处理），这个 9 行文件就是刚需。'},
+ ]},
+ {group:'tools —— ep05 新增（单轮工具调用）',items:[
+   {id:'src-toolsmod',path:'src/tools.rs',loc:8,dot:'infra',
+    note:'工具注册表（最简形态）：tools() 返回 Vec&lt;ChatCompletionTools&gt;——目前清单里只有 calculator 一件。',
+    contrast:'pi/tau 的注册表是 name→AgentTool 的映射，执行时按名字<b>动态分发</b>；这里是编译期写死的清单 + complete.rs 里写死的 if 分发。从"清单"到"注册表 + 分发"正是 M4 的第一步。'},
+   {id:'src-tooldef',path:'src/tools/calculator/definition.rs',loc:30,dot:'schema',
+    note:'工具的"给模型看的那一半"：FunctionObjectArgs + json! 手写参数 schema——operator 枚举（add/subtract/multiply/divide）+ 两个 number，required 全列。',
+    contrast:'注意流派：工具 schema 用 json! <b>手写</b>（≈ tau 的手写 dict 流派），而同仓库的输出 schema 用 schemars <b>derive</b>——一个仓库同时示范了两种 schema 来源。pi 则是第三种：TypeBox。'},
+   {id:'src-toolexec',path:'src/tools/calculator/execute.rs',loc:28,dot:'call',
+    note:'工具的"真干活的那一半"：calculator() 纯函数，除零返回 Err(String)；CalculatorArgs 是 tool_call.arguments 的反序列化目标。',
+    contrast:'对照 pi/tau 的执行器：这里没有超时/截断/取消（纯算术不需要），但"错误作为值回传而非崩溃"的意识已经有了——这是 pi 四守卫之一（异常边界）的雏形。'},
  ]},
  {group:'models / 入口 / 配置',items:[
    {id:'src-actionplan',path:'src/models/action_plan.rs',loc:24,dot:'schema',
@@ -1081,7 +1237,7 @@ selectFile('src-solver');
 /* ---------- 结构化输出两流派 tabs ---------- */
 const PATS=[
  {key:'complete',label:'纯文本 complete',file:'src/llm/complete.rs',src:'src-complete',
-  desc:'<b>没有结构，就是文本。</b>最基础的 chat.create() → 取 content 字符串。返回自由文本，调用方自己解析。'},
+  desc:'<b>基础调用——ep05 起还带单轮工具往返。</b>chat.create() → 若有 tool_calls：执行 calculator、回填、再调一次 → 取 content 字符串返回。'},
  {key:'stream',label:'流式 stream',file:'src/llm/stream.rs',src:'src-stream',
   desc:'<b>同样是文本，但逐 token 到达。</b>用 async-stream 把 SSE chunk yield 出来，边到边 print。打字机效果 + backon 重试。'},
  {key:'schema',label:'结构化·schema 强约束',file:'src/llm/structured.rs',src:'src-structured',
@@ -1159,11 +1315,11 @@ document.getElementById('gReset').addEventListener('click',()=>{gIdx=0;gRender()
 gRender();
 
 /* ---------- 单次调用 vs 循环 bridge ---------- */
-const R_STEPS=['① 拼 system + user 消息','② 一次 chat.create() 调用','③ 反序列化成 GaiaOutput','④ 返回 —— 结束'];
-const L_STEPS=['① 拼上下文','② 一次 LLM 调用','③ 有 tool_calls？→ 执行工具','④ 结果回填 transcript'];
+const R_STEPS=['① 拼消息 + 挂上 tools','② 一次 chat.create() 调用','③ 有 tool_calls → 执行 calculator','④ 回填 ToolMessage，再调一次','⑤ 取 content 返回 —— 结束'];
+const L_STEPS=['① 拼上下文 + tools','② 一次 LLM 调用','③ 有 tool_calls？→ 执行工具','④ 结果回填 transcript','⑤ 回到 ② —— 直到没有 tool_calls'];
 const brRust=document.getElementById('brRust'),brLoop=document.getElementById('brLoop');
 function buildBridge(){
-  brRust.innerHTML=R_STEPS.map((s,i)=>'<div class="brstep" id="r-'+i+'">'+s+'</div>').join('')+'<div class="brend" id="r-end" style="visibility:hidden">■ solver 返回，进程结束（1 次调用）</div>';
+  brRust.innerHTML=R_STEPS.map((s,i)=>'<div class="brstep" id="r-'+i+'">'+s+'</div>').join('')+'<div class="brend" id="r-end" style="visibility:hidden">■ 固定两跳到头：第二轮再要工具就没有然后了（无 while）</div>';
   brLoop.innerHTML=L_STEPS.map((s,i)=>'<div class="brstep" id="l-'+i+'">'+s+'</div>').join('')+'<div class="brloopback" id="l-back" style="visibility:hidden">↑ 只要还有 tool_calls，回到 ②（第 N 圈）</div>';
 }
 buildBridge();
@@ -1178,9 +1334,9 @@ function brPlay(){
   brReset();
   document.getElementById('bPlay').disabled=true;
   document.getElementById('bLbl').textContent='播放中…';
-  let k=0;const seq=[0,1,2,3];
+  let k=0;
   brTimer=setInterval(()=>{
-    if(k<4){
+    if(k<R_STEPS.length){
       document.getElementById('r-'+k).classList.add('on');
       document.getElementById('l-'+k).classList.add('on');
       if(k>0){document.getElementById('r-'+(k-1)).classList.add('done');document.getElementById('l-'+(k-1)).classList.add('done');}
@@ -1189,8 +1345,8 @@ function brPlay(){
       clearInterval(brTimer);brTimer=null;
       document.getElementById('r-end').style.visibility='visible';
       document.getElementById('l-back').style.visibility='visible';
-      document.getElementById('l-2').classList.add('on');   // loop 回到工具/循环
-      document.getElementById('bLbl').innerHTML='rust：1 次调用即止　·　loop：回到 ② 继续转';
+      document.getElementById('l-1').classList.add('on');   // loop 回到 ② 继续转
+      document.getElementById('bLbl').innerHTML='rust：一轮工具往返即止　·　loop：回到 ② 继续转';
       document.getElementById('bPlay').disabled=false;
     }
   },720);
