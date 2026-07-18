@@ -1,0 +1,1356 @@
+<title>rust-ai-agent 代码精读 · pi×tau 教程延伸</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
+  --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
+  --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
+  --pi:#1C5CAB; --tau:#8A5600; --rust:#A6431A; --rust-mark:#C2622D;
+  --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10); --rust-wash:rgba(194,98,45,.10);
+  --good:#006300; --bad:#B03030;
+  --term-bg:#10141B; --term-ink:#C4CCD8; --term-dim:#6B7686; --term-bright:#E8EEF7; --term-line:rgba(184,194,212,.14);
+  /* code token colors (on dark terminal) */
+  --c-kw:#E39366; --c-typ:#7FB2E8; --c-str:#8FC98F; --c-com:#6B7686; --c-mac:#D9A441; --c-attr:#B08CE0;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --shadow:0 1px 2px rgba(10,14,20,.05),0 4px 16px rgba(10,14,20,.06);
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0C0F14; --card:#131720; --card-2:#1A1F2B;
+  --ink:#E8EAEF; --ink-2:#A7ADB9; --ink-3:#767D8A;
+  --line:rgba(232,234,239,.13); --line-soft:rgba(232,234,239,.07);
+  --pi:#6DA7EC; --tau:#EDA100; --rust:#E39366; --rust-mark:#C2622D;
+  --pi-wash:rgba(57,135,229,.13); --tau-wash:rgba(201,133,0,.14); --rust-wash:rgba(194,98,45,.15);
+  --good:#0CA30C; --bad:#E66767;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}}
+:root[data-theme="dark"]{
+  --bg:#0C0F14; --card:#131720; --card-2:#1A1F2B;
+  --ink:#E8EAEF; --ink-2:#A7ADB9; --ink-3:#767D8A;
+  --line:rgba(232,234,239,.13); --line-soft:rgba(232,234,239,.07);
+  --pi:#6DA7EC; --tau:#EDA100; --rust:#E39366; --rust-mark:#C2622D;
+  --pi-wash:rgba(57,135,229,.13); --tau-wash:rgba(201,133,0,.14); --rust-wash:rgba(194,98,45,.15);
+  --good:#0CA30C; --bad:#E66767;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}
+:root[data-theme="light"]{
+  --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
+  --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
+  --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
+  --pi:#1C5CAB; --tau:#8A5600; --rust:#A6431A; --rust-mark:#C2622D;
+  --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10); --rust-wash:rgba(194,98,45,.10);
+  --good:#006300; --bad:#B03030;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--rust);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:currentColor}
+:focus-visible{outline:2px solid var(--rust-mark);outline-offset:2px;border-radius:3px}
+code,pre,kbd{font-family:var(--mono)}
+::selection{background:var(--rust-wash)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header.top{position:sticky;top:0;z-index:50;background:var(--bg);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
+.topbar{display:flex;align-items:center;gap:16px;padding:10px 0;overflow-x:auto;scrollbar-width:none}
+.topbar::-webkit-scrollbar{display:none}
+.brand{font-family:var(--mono);font-weight:700;font-size:14px;white-space:nowrap}
+.brand .r{color:var(--rust)}
+nav.sections{display:flex;gap:4px;margin-left:auto}
+nav.sections a{font-family:var(--mono);font-size:12px;color:var(--ink-2);padding:5px 10px;border-radius:999px;white-space:nowrap;border-bottom:none}
+nav.sections a:hover{background:var(--card-2);color:var(--ink)}
+.back{font-family:var(--mono);font-size:12px;color:var(--ink-3);white-space:nowrap}
+section{padding:60px 0 8px;scroll-margin-top:60px}
+h2{font-family:var(--mono);font-size:23px;line-height:1.3;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+h3{font-size:16px;margin:24px 0 8px}
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rust);margin-bottom:10px}
+.lede{color:var(--ink-2);max-width:64ch;margin:0 0 24px}
+.card{background:var(--card);border:1px solid var(--line-soft);border-radius:12px;box-shadow:var(--shadow)}
+.num{font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
+.tag.rust{color:var(--rust);background:var(--rust-wash);border-color:transparent}
+.tag.pi{color:var(--pi);background:var(--pi-wash);border-color:transparent}
+.tag.tau{color:var(--tau);background:var(--tau-wash);border-color:transparent}
+
+/* hero */
+.hero{padding:64px 0 30px}
+.hero h1{font-family:var(--mono);font-size:clamp(27px,4.4vw,42px);line-height:1.16;margin:12px 0 16px;letter-spacing:-.02em;text-wrap:balance}
+.hero h1 .r{color:var(--rust)}
+.hero .sub{font-size:16px;color:var(--ink-2);max-width:60ch;margin:0 0 18px}
+.mythbox{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line-soft);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);margin-top:8px}
+.mythbox>div{padding:16px 18px}
+.mythbox .no{background:var(--card)}
+.mythbox .yes{background:var(--rust-wash)}
+.mythbox h4{margin:0 0 8px;font-family:var(--mono);font-size:12px;letter-spacing:.04em}
+.mythbox .no h4{color:var(--bad)} .mythbox .yes h4{color:var(--rust)}
+.mythbox p{margin:0;font-size:13px;color:var(--ink-2)}
+.mythbox code{font-size:12px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+.statrow{display:flex;gap:26px;flex-wrap:wrap;margin-top:24px;padding-top:20px;border-top:1px solid var(--line-soft)}
+.stat .v{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-.02em}
+.stat .k{font-size:12px;color:var(--ink-3);margin-top:2px}
+
+/* terminal / code */
+.term{background:var(--term-bg);border-radius:10px;overflow:hidden;border:1px solid rgba(184,194,212,.12)}
+.term-head{display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1px solid var(--term-line);font-family:var(--mono);font-size:11.5px;color:var(--term-dim)}
+.term-head .dots{display:flex;gap:5px}.term-head .dots i{width:9px;height:9px;border-radius:50%;background:var(--term-dim);opacity:.4}
+.code{margin:0;padding:12px 4px 12px 0;font-family:var(--mono);font-size:12.5px;line-height:1.62;overflow-x:auto;color:var(--term-ink);counter-reset:ln}
+.code .row{display:block;white-space:pre;padding:0}
+.code .row::before{content:counter(ln);counter-increment:ln;display:inline-block;width:38px;padding-right:14px;text-align:right;color:var(--term-dim);opacity:.6;user-select:none}
+.code .row.hi{background:rgba(194,98,45,.14)}
+.c-kw{color:var(--c-kw)}.c-typ{color:var(--c-typ)}.c-str{color:var(--c-str)}.c-com{color:var(--c-com);font-style:italic}.c-mac{color:var(--c-mac)}.c-attr{color:var(--c-attr)}
+
+/* code explorer */
+.explorer{display:grid;grid-template-columns:236px minmax(0,1fr);gap:0;border:1px solid var(--line-soft);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);margin-top:20px}
+.filetree{background:var(--card-2);border-right:1px solid var(--line-soft);padding:10px 8px;max-height:640px;overflow-y:auto}
+.ft-group{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:10px 8px 4px}
+.ft-file{display:flex;align-items:baseline;gap:6px;width:100%;text-align:left;font-family:var(--mono);font-size:12px;color:var(--ink-2);background:none;border:none;border-radius:6px;padding:5px 8px;cursor:pointer}
+.ft-file:hover{background:var(--card)}
+.ft-file.sel{background:var(--rust-wash);color:var(--rust);font-weight:700}
+.ft-file .loc{margin-left:auto;font-size:10.5px;color:var(--ink-3)}
+.ft-file.sel .loc{color:var(--rust)}
+.ft-file .dot{width:6px;height:6px;border-radius:50%;flex:none;align-self:center}
+.dot-call{background:var(--rust-mark)}.dot-eval{background:var(--pi)}.dot-schema{background:var(--tau)}.dot-infra{background:var(--ink-3)}
+.expmain{min-width:0;display:flex;flex-direction:column;background:var(--term-bg)}
+.expmeta{padding:12px 16px;border-bottom:1px solid var(--term-line);background:var(--card)}
+.expmeta .fp{font-family:var(--mono);font-size:12.5px;color:var(--ink);font-weight:700}
+.expmeta .note{font-size:13px;color:var(--ink-2);margin-top:6px}
+.expmeta .contrast{font-size:12.5px;color:var(--ink-2);margin-top:8px;padding:8px 11px;background:var(--card-2);border-radius:7px;border-left:3px solid var(--rust-mark)}
+.expmeta .contrast b{color:var(--ink)}
+.expcode{overflow:auto;max-height:560px;padding-left:12px}
+
+/* pattern compare */
+.patterns{margin-top:20px}
+.pat-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.pat-tab{font-family:var(--mono);font-size:12.5px;padding:7px 13px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);border-radius:8px;cursor:pointer}
+.pat-tab[aria-selected="true"]{border-color:var(--rust-mark);color:var(--rust);background:var(--rust-wash);font-weight:700}
+.pat-body{border:1px solid var(--line-soft);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+.pat-desc{padding:13px 16px;background:var(--card);font-size:13.5px;color:var(--ink-2);border-bottom:1px solid var(--line-soft)}
+.pat-desc b{color:var(--ink)}
+.cmptable{width:100%;border-collapse:collapse;margin-top:18px;font-size:12.5px}
+.cmptable th,.cmptable td{padding:8px 12px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top}
+.cmptable th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.cmptable code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+
+/* stepper (gaia pipeline & bridge) */
+.stepper{border:1px solid var(--line-soft);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);margin-top:20px;background:var(--card)}
+.step-ctrl{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.btn{font-family:var(--mono);font-size:12.5px;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--card-2)}
+.btn.primary{background:var(--rust-mark);border-color:var(--rust-mark);color:#fff;font-weight:700}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.step-lbl{font-family:var(--mono);font-size:12px;color:var(--ink-3);margin-left:auto}
+.pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:0}
+.pnode{padding:12px 10px;border-right:1px solid var(--line-soft);font-family:var(--mono);font-size:11.5px;color:var(--ink-3);text-align:center;transition:all .25s}
+.pnode:last-child{border-right:none}
+.pnode .pi-idx{display:block;font-size:16px;color:var(--ink-2);margin-bottom:3px}
+.pnode.on{background:var(--rust-wash);color:var(--rust);font-weight:700}
+.pnode.on .pi-idx{color:var(--rust)}
+.step-note{padding:14px 16px;font-size:13.5px;color:var(--ink-2);min-height:56px;border-top:1px solid var(--line-soft)}
+.step-note b{color:var(--ink)}
+.step-note code{font-size:12px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+
+/* bridge (single call vs loop) */
+.bridge{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+.brcol{border:1px solid var(--line-soft);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);background:var(--card)}
+.brcol h4{margin:0;padding:12px 16px;font-family:var(--mono);font-size:13px;border-bottom:1px solid var(--line-soft)}
+.brcol.rust h4{color:var(--rust);background:var(--rust-wash)}
+.brcol.loop h4{color:var(--pi);background:var(--pi-wash)}
+.brstage{padding:14px 16px;min-height:220px;display:flex;flex-direction:column;gap:8px}
+.brstep{font-family:var(--mono);font-size:12px;padding:7px 11px;border-radius:8px;border:1px solid var(--line);color:var(--ink-2);opacity:.35;transition:opacity .3s}
+.brstep.on{opacity:1;border-color:var(--rust-mark);background:var(--rust-wash);color:var(--ink)}
+.brcol.loop .brstep.on{border-color:var(--pi);background:var(--pi-wash)}
+.brstep.done{opacity:.7}
+.brend{margin-top:auto;font-family:var(--mono);font-size:11.5px;padding:8px 11px;border-radius:8px;text-align:center}
+.brcol.rust .brend{background:var(--rust-wash);color:var(--rust)}
+.brcol.loop .brend{background:var(--pi-wash);color:var(--pi)}
+.brloopback{font-family:var(--mono);font-size:10.5px;color:var(--pi);text-align:center;border-top:1px dashed var(--line);padding-top:6px;margin-top:2px}
+
+/* follow-along */
+.followgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.fcard{padding:16px 18px}
+.fcard h3{margin:0 0 8px;font-size:15px}
+.fcard ol,.fcard ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2)}
+.fcard li{margin:5px 0}
+.fcard code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+.epmap{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+.epmap td{padding:5px 10px 5px 0;border-bottom:1px solid var(--line-soft);vertical-align:top}
+.epmap .ep{font-family:var(--mono);color:var(--rust);white-space:nowrap}
+.gift{margin-top:18px;padding:14px 18px;border-radius:12px;background:var(--rust-wash);border:1px solid transparent}
+.gift b{color:var(--ink)}
+
+footer{margin-top:64px;border-top:1px solid var(--line-soft);padding:24px 0 40px;font-size:12.5px;color:var(--ink-3)}
+footer a{color:var(--rust)}
+.provenance{margin-top:10px;font-size:11.5px}
+
+@media (max-width:900px){
+  .mythbox,.bridge,.followgrid{grid-template-columns:1fr}
+  .explorer{grid-template-columns:1fr}
+  .filetree{max-height:none;border-right:none;border-bottom:1px solid var(--line-soft);display:flex;flex-wrap:wrap;gap:4px}
+  .ft-group{width:100%}
+  .pipe{grid-template-columns:1fr;gap:0}
+  .pnode{border-right:none;border-bottom:1px solid var(--line-soft)}
+  nav.sections{display:none}
+}
+</style>
+
+<header class="top"><div class="wrap topbar">
+  <div class="brand"><span class="r">rust-ai-agent</span> · 代码精读</div>
+  <a class="back" href="./index.html">← pi×tau 主教程</a>
+  <a class="back" href="./advanced.html">进阶篇 →</a>
+  <nav class="sections">
+    <a href="#myth">正名</a><a href="#explorer">代码浏览器</a><a href="#patterns">结构化输出</a><a href="#gaia">GAIA 评测</a><a href="#bridge">对比循环</a><a href="#local">本地模型</a><a href="#follow">跟着学</a>
+  </nav>
+</div></header>
+
+<section class="hero"><div class="wrap">
+  <div class="kicker">pi×tau 教程 · 第 12 章延伸 · 代码层面精读</div>
+  <h1>读 <span class="r">rust-ai-agent</span> 的 713 行真代码<br>——agent 的"前传"长什么样</h1>
+  <p class="sub">B 站《用 Rust 构建 AI Agent》（UP 主「软件工艺师」）的配套代码。本页基于克隆到本地的<b>真实源码</b>（commit <span class="num">e6ee55d</span> / ep05，逐文件读完，2026-07-16 随 ep05 更新）做代码级讲解——不是概念摘要，是可以点开每个文件对照着读的浏览器。</p>
+
+  <div class="mythbox" id="myth">
+    <div class="no">
+      <h4>✗ 它不是"用 Rust 复刻的 tau"</h4>
+      <p>tau 是 pi 有文档记载的 Python 复刻；rust-ai-agent 和 pi/tau <b>没有复刻关系</b>，也没有 agent 循环、没有会话。ep05 长出了<b>单轮</b>工具调用——但一轮即止、没有 while，仍不是循环式 agent。</p>
+    </div>
+    <div class="yes">
+      <h4>✓ 它是"增强 LLM + 结构化输出 + 评测"教程</h4>
+      <p>LLM 交互至多<b>一轮工具往返</b>（ep05 前是纯单次调用）。核心是：4 种调用模式 + 两种结构化输出流派 + 单轮工具调用 + 一个跑 <code>GAIA</code> 基准的评测器。站在 Anthropic 光谱的 <b>workflow 端</b>，是 pi/tau（agent 端）的互补前传。</p>
+    </div>
+  </div>
+
+  <div class="statrow">
+    <div class="stat"><div class="v num" style="color:var(--rust)">713</div><div class="k">行 Rust（全部读完）</div></div>
+    <div class="stat"><div class="v num">0</div><div class="k">个 while 循环（一轮即止）</div></div>
+    <div class="stat"><div class="v num">1</div><div class="k">个工具 calculator（ep05 新增）</div></div>
+    <div class="stat"><div class="v num">1</div><div class="k">个 GAIA 评测器（pi/tau 缺的）</div></div>
+  </div>
+</div></section>
+
+<section id="explorer"><div class="wrap">
+  <div class="kicker">主体 · 可交互</div>
+  <h2>代码浏览器：点开每个文件对照读</h2>
+  <p class="lede">左侧是真实模块树（<code>llm</code> 调用层 · <code>tools</code> ep05 工具 · <code>models</code> schema · <code>gaia</code> 评测），点文件看<b>逐字真代码</b> + 白话讲解 + 与 pi/tau 的对照。颜色圆点标出文件属于哪一类。</p>
+  <div class="explorer">
+    <div class="filetree" id="filetree" role="tablist" aria-label="源文件"></div>
+    <div class="expmain">
+      <div class="expmeta">
+        <div class="fp" id="expPath"></div>
+        <div class="note" id="expNote"></div>
+        <div class="contrast" id="expContrast"></div>
+      </div>
+      <div class="expcode"><pre class="code" id="expCode"></pre></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="patterns"><div class="wrap">
+  <div class="kicker">核心知识点 1</div>
+  <h2>结构化输出的两种流派</h2>
+  <p class="lede">这是 rust-ai-agent 教得最扎实、也最容易被忽视的一课：让模型返回<b>结构化数据</b>有两条路，代码就差一行 <code>ResponseFormat</code>，但适用场景完全不同。点标签切换看真实代码。</p>
+  <div class="patterns">
+    <div class="pat-tabs" id="patTabs" role="tablist"></div>
+    <div class="pat-body">
+      <div class="pat-desc" id="patDesc"></div>
+      <div class="term"><div class="term-head"><div class="dots"><i></i><i></i><i></i></div><span id="patFile"></span></div>
+        <div class="expcode" style="max-height:420px"><pre class="code" id="patCode"></pre></div>
+      </div>
+    </div>
+  </div>
+  <table class="cmptable">
+    <thead><tr><th>流派</th><th>ResponseFormat</th><th>schema 从哪来</th><th>何时用</th><th>代价</th></tr></thead>
+    <tbody>
+      <tr><td><b style="color:var(--rust)">schema 强约束</b></td><td><code>JsonSchema{strict:true}</code></td><td><code>schemars</code> 从 Rust 类型 derive</td><td>端点支持 strict JSON schema（OpenAI、部分 OpenRouter 模型）</td><td>不是所有模型/网关都支持</td></tr>
+      <tr><td><b style="color:var(--tau)">提示词强制</b></td><td><code>JsonObject</code> + schema 写进系统提示词</td><td>同样 <code>schemars</code> derive，但序列化成文本塞进 prompt</td><td>模型只支持"给我 JSON"不支持 schema（如早期 DeepSeek，<code>_ds</code> 由此得名）</td><td>模型可能不严格遵守，需 <code>serde</code> 兜底 + 重试</td></tr>
+    </tbody>
+  </table>
+  <p class="lede" style="margin-top:14px">这正好是<a href="./index.html">主教程第 10 章</a>「逃生舱」思想的 Rust 实现：能力不齐时降级到提示词强制。三个项目凑齐了工具/输出 schema 的三种流派——tau 手写 dict、pi 用 TypeBox、rust-ai-agent 用 <code>schemars</code> derive（类型安全最强）。</p>
+</div></section>
+
+<section id="gaia"><div class="wrap">
+  <div class="kicker">核心知识点 2</div>
+  <h2>GAIA 评测流水线：pi/tau 缺的那块</h2>
+  <p class="lede">主教程 §5.2 标注过 pi/tau 都没有系统化评测。rust-ai-agent 的整个 <code>gaia/</code> 就是"数据集 → 求解 → 打分 → 汇总"的评测循环——正是《Writing effective tools for agents》强调的"从真实任务建 eval"。点「下一步」走一遍真实流程。</p>
+  <div class="stepper">
+    <div class="step-ctrl">
+      <button class="btn primary" id="gNext">下一步 ▸</button>
+      <button class="btn" id="gReset">↺ 重置</button>
+      <span class="step-lbl num" id="gLbl">stage 0 / 5</span>
+    </div>
+    <div class="pipe" id="gPipe"></div>
+    <div class="step-note" id="gNote">点「下一步」：<code>bin/gaia.rs</code> 的实验从加载 GAIA 数据集开始。注意——整条流水线里没有 agent 循环，每道题就是<b>一次</b> LLM 调用。</div>
+  </div>
+</div></section>
+
+<section id="bridge"><div class="wrap">
+  <div class="kicker">桥梁 · 通向主教程</div>
+  <h2>单次调用 vs agent 循环</h2>
+  <p class="lede">这是理解 rust-ai-agent 与 pi/tau 差异的关键一图。左边是它 ep05 的 <code>complete.rs</code>：工具调用 → 执行 → 回填 → <b>再取一次答案，一轮即止</b>（<code>solver.rs</code> 更简单，连工具都不带）；右边是主教程第 9 章的 agent 循环。点播放看两边在第 ⑤ 步分道扬镳——<b>差的就是一个 <code>while</code></b>。另一个提醒：<code>ActionPlan</code> 有 <code>steps</code> 和 <code>tool_hint</code>，看起来很 agent，但没有执行器——print 出来的 plan 不是 run 起来的 plan。</p>
+  <div class="step-ctrl" style="border:1px solid var(--line-soft);border-radius:12px 12px 0 0;border-bottom:none;background:var(--card)">
+    <button class="btn primary" id="bPlay">▶ 播放对比</button>
+    <button class="btn" id="bReset">↺ 重置</button>
+    <span class="step-lbl" id="bLbl">就绪</span>
+  </div>
+  <div class="bridge" style="margin-top:0">
+    <div class="brcol rust">
+      <h4>rust-ai-agent · ep05 complete.rs</h4>
+      <div class="brstage" id="brRust"></div>
+    </div>
+    <div class="brcol loop">
+      <h4>pi / tau / 你的 mini · loop</h4>
+      <div class="brstage" id="brLoop"></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="local"><div class="wrap">
+  <div class="kicker">动手 · 换本地模型</div>
+  <h2>用本地模型跑：把 solver 降级到「提示词强制」</h2>
+  <p class="lede">先说结论：<b>模型不限、接口限</b>。它全程用 <code>async-openai</code> 的 <code>Client::new()</code>，只认 OpenAI Chat Completions 一种 wire 格式（Anthropic/Gemini 原生 API 接不了，但可经 OpenRouter）。<code>async-openai</code> 读环境变量 <code>OPENAI_BASE_URL</code>（0.41 源码确认，非硬编码）——把它指向本地端点就能换成本地模型。<b>唯一的坑是结构化输出</b>：纯文本/流式随便跑，但 <code>solver.rs</code> 用的 <code>JsonSchema{strict:true}</code> 不是所有本地端点都支持。下面是具体改法。</p>
+
+  <div class="term" style="margin-bottom:16px"><div class="term-head"><div class="dots"><i></i><i></i><i></i></div><span>.env + bin/gaia.rs —— 指向本地</span></div>
+    <pre class="code" id="envCode"></pre>
+  </div>
+
+  <div class="pat-tabs" id="localTabs" role="tablist"></div>
+  <div class="pat-body">
+    <div class="pat-desc" id="localDesc"></div>
+    <div class="term"><div class="term-head"><div class="dots"><i></i><i></i><i></i></div><span id="localFile"></span></div>
+      <div class="expcode" style="max-height:440px"><pre class="code" id="localCode"></pre></div>
+    </div>
+  </div>
+  <p class="lede" style="margin-top:14px">两段代码只差一个 <code>ResponseFormat</code> + schema 放哪——这正是本页上面「结构化输出两流派」教的东西，也是主教程第 10 章的<b>逃生舱</b>：端点能力不齐时，从"让服务端强制"降级到"让提示词哄"。Ollama / vLLM / LM Studio / llama.cpp 都提供 OpenAI 兼容端点，纯文本 / 流式（<code>complete.rs</code> / <code>stream.rs</code>）任何一个都能直接跑；只有严格结构化输出这条路需要按上面降级。</p>
+</div></section>
+
+<section id="follow"><div class="wrap">
+  <div class="kicker">动手 · 跟着学</div>
+  <h2>怎么真正跑起来 + 升级成"真 agent"</h2>
+  <div class="followgrid">
+    <div class="card fcard">
+      <h3>① 环境与运行</h3>
+      <ul>
+        <li>克隆后按集数 checkout：tag 目前到 <code>ep04</code>；ep05（工具调用）在 <code>main</code> 最新提交。</li>
+        <li>它用 <b>OpenRouter</b>（模型名 <code>openai/gpt-4.1-mini</code>、<code>anthropic/claude-haiku-4.5</code> 是 OpenRouter slug）。<code>.env</code> 里设 <code>OPENAI_API_KEY</code> = OpenRouter key、<code>OPENAI_BASE_URL</code> = OpenRouter 端点——<code>async-openai</code> 自动读这两个环境变量。</li>
+        <li>跑 GAIA 评测还需 <code>HF_TOKEN</code>（从 HuggingFace 拉数据集）。</li>
+        <li>两个入口：<code>cargo run</code>（<code>main.rs</code>：ActionPlan 结构化输出 demo）；<code>cargo run --bin gaia</code>（GAIA 评测实验）。</li>
+      </ul>
+    </div>
+    <div class="card fcard">
+      <h3>② 集数 → 文件对照</h3>
+      <table class="epmap">
+        <tr><td class="ep">ep01–02</td><td><code>llm/complete.rs</code>·<code>stream.rs</code> —— 文本 / 流式基础调用</td></tr>
+        <tr><td class="ep">ep03</td><td><code>llm/structured.rs</code>·<code>structured_ds.rs</code> —— 结构化输出两流派</td></tr>
+        <tr><td class="ep">ep04</td><td><code>gaia/*</code>·<code>bin/gaia.rs</code> —— GAIA 数据集评测</td></tr>
+        <tr><td class="ep">ep05</td><td><code>tools/calculator/*</code>·<code>llm/complete.rs</code> —— 工具定义/执行 + 单轮工具往返</td></tr>
+      </table>
+      <p style="font-size:12px;color:var(--ink-3);margin-top:8px">（预言兑现中：本页上一版写过"后续集数可能长出工具循环"——ep05 已长出<b>单轮</b>工具调用，离循环只差一个 while。本页随集数更新。）</p>
+    </div>
+  </div>
+  <div class="gift">
+    <b>双向取长补短。</b>想把它升级成 pi/tau 那样的循环式 agent？ep05 已经把「<code>tool_calls</code> → 执行 → 回填 → 再调用」走通了<b>一轮</b>，缺的只剩主教程第 9 章 M3/M4 教的三件事：包一层 <code>while</code>（直到没有 tool_calls）、把写死的 <code>if</code> 换成 name→工具 的注册表分发、给 GAIA 配 web-search / read-file / python-exec 工具（而非 coding 的 edit/bash）。<b>反过来</b>，它的 <code>evaluator.rs</code> 恰好是 pi/tau 都缺的评测脊椎——做你的 <a href="./index.html">mini（第 9 章）</a>的 M10 时把它借过来。多 agent 编排与整套系统蓝图见<a href="./advanced.html">进阶篇</a>。</div>
+</div></section>
+
+<footer><div class="wrap">
+  <p><b style="color:var(--ink)">来源与诚实边界</b></p>
+  <p class="provenance">代码逐字取自 <a href="https://github.com/solenovex/rust-ai-agent">github.com/solenovex/rust-ai-agent</a>（2026-07-13 克隆于 76047df，2026-07-16 更新至 e6ee55d / ep05，全部 713 行读完）。B 站《用 Rust 构建 AI Agent》/ UP 主「软件工艺师」。这是随视频推进的教学仓库——本页结论限定在当前快照：ep05 已有单轮工具调用；若后续长出 while 循环，定性将再更新。</p>
+  <p class="provenance">配套：<a href="./index.html">pi×tau 主教程（含循环模拟器、第 9 章从零复刻、第 12 章文字对比）</a> · <a href="./advanced.html">进阶篇</a> · <a href="./book-map.html">读书地图</a> · 主文档 <code>agent-study/pi-vs-tau-架构对比学习指南.md</code> 第 12 章</p>
+</div></footer>
+
+<!-- ============ 真实源码（text/plain：逐字嵌入，不被 HTML/JS 转义影响） ============ -->
+<script type="text/plain" id="src-solver">use anyhow::Ok;
+use async_openai::types::chat::{
+    ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs,
+    CreateChatCompletionRequestArgs, FinishReason, ResponseFormat, ResponseFormatJsonSchema,
+};
+use backon::{ExponentialBuilder, Retryable};
+
+use crate::gaia::models::GaiaOutput;
+
+pub async fn solve_problem_with_retry(
+    model: &str,
+    system: &str,
+    prompt: &str,
+) -> anyhow::Result<GaiaOutput> {
+    let op = || async { solve_problem(model, system, prompt).await };
+    op.retry(ExponentialBuilder::default().with_max_times(3))
+        .await
+}
+
+async fn solve_problem(model: &str, system: &str, prompt: &str) -> anyhow::Result<GaiaOutput> {
+    let schema = schemars::schema_for!(GaiaOutput);
+    let schema_json = serde_json::to_value(&schema)?;
+    let format_setting = ResponseFormat::JsonSchema {
+        json_schema: ResponseFormatJsonSchema {
+            description: Some("GAIA problem solving output".into()),
+            name: "gaia_output".into(),
+            schema: schema_json,
+            strict: Some(true),
+        },
+    };
+
+    let client = async_openai::Client::new();
+    let request = CreateChatCompletionRequestArgs::default()
+        .model(model)
+        .messages([
+            ChatCompletionRequestSystemMessageArgs::default()
+                .content(system)
+                .build()?
+                .into(),
+            ChatCompletionRequestUserMessageArgs::default()
+                .content(prompt)
+                .build()?
+                .into(),
+        ])
+        .response_format(format_setting)
+        .build()?;
+
+    let response = client.chat().create(request).await?;
+
+    let choice = response
+        .choices
+        .into_iter()
+        .next()
+        .ok_or_else(|| anyhow::anyhow!("No choices in response"))?;
+
+    if choice.finish_reason == Some(FinishReason::ContentFilter) {
+        return Ok(GaiaOutput {
+            is_solvable: false,
+            unsolvable_reason: "Model refuse to answer".to_string(),
+            final_answer: String::new(),
+        });
+    }
+
+    let content = choice
+        .message
+        .content
+        .ok_or_else(|| anyhow::anyhow!("No content in response"))?;
+    let output: GaiaOutput = serde_json::from_str(&content)?;
+
+    Ok(output)
+}</script>
+
+<script type="text/plain" id="src-evaluator">use crate::gaia::{
+    models::{GaiaEvalResult, GaiaRow},
+    solver::solve_problem_with_retry,
+};
+
+pub const GAIA_PROMPT: &str = r#"You are a general AI assistant. I will ask you a question.
+First, determine if you can solve this problem with your current capabilities and set "is_solvable" accordingly.
+If you can solve it, set "is_solvable" to true and provide your answer in "final_answer".
+If you cannot solve it, set "is_solvable" to false and explain why in "unsolvable_reason".
+Your final answer should be a number OR as few words as possible OR a comma-separated list of numbers and/or strings.
+If you are asked for a number, don't use a comma to write your number neither use units such as $ or percent sign unless specified otherwise.
+If you are asked for a string, don't use articles, neither abbreviations (e.g., for cities), and write the digits in plain text unless specified otherwise.
+If you are asked for a comma-separated list, apply the above rules depending on whether the element is a number or a string."#;
+
+fn is_correct(prediction: &str, answer: &str) -> bool {
+    if prediction.is_empty() {
+        false
+    } else {
+        prediction.trim().to_lowercase() == answer.trim().to_lowercase()
+    }
+}
+
+pub async fn evaluate_gaia_single(problem: GaiaRow, model: &str) -> GaiaEvalResult {
+    let result = solve_problem_with_retry(model, GAIA_PROMPT, &problem.question).await;
+    match result {
+        Ok(output) => GaiaEvalResult {
+            task_id: problem.task_id,
+            model: String::from(model),
+            correct: is_correct(&output.final_answer, &problem.final_answer),
+            is_solvable: Some(output.is_solvable),
+            prediction: Some(output.final_answer),
+            answer: problem.final_answer,
+            unsolvable_reason: Some(output.unsolvable_reason),
+            error: None,
+        },
+        Err(err) => GaiaEvalResult {
+            task_id: problem.task_id,
+            model: String::from(model),
+            correct: false,
+            is_solvable: None,
+            prediction: None,
+            answer: problem.final_answer,
+            unsolvable_reason: None,
+            error: Some(err.to_string()),
+        },
+    }
+}</script>
+
+<script type="text/plain" id="src-dataset">use anyhow::Ok;
+
+use crate::gaia::models::{GaiaRow, HfResponse};
+
+pub async fn load_gaia_level1() -> anyhow::Result<Vec<GaiaRow>> {
+    let token = std::env::var("HF_TOKEN")?;
+    let client = reqwest::Client::new();
+    let response = client
+        .get("https://datasets-server.huggingface.co/rows")
+        .query(&[
+            ("dataset", "gaia-benchmark/GAIA"),
+            ("config", "2023_level1"),
+            ("split", "validation"),
+            ("offset", "0"),
+            ("length", "10"),
+        ])
+        .bearer_auth(token)
+        .send()
+        .await?
+        .json::<HfResponse>()
+        .await?;
+    Ok(response.rows.into_iter().map(|r| r.row).collect())
+}</script>
+
+<script type="text/plain" id="src-gmodels">use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Debug)]
+pub struct HfResponse {
+    pub rows: Vec<HfRow>
+}
+
+#[derive(Deserialize, Debug)]
+pub struct HfRow {
+    pub row: GaiaRow
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct GaiaRow {
+    pub task_id: String,
+
+    #[serde(rename = "Question")]
+    pub question: String,
+
+    #[serde(rename = "Level")]
+    pub level: String,
+
+    #[serde(rename = "Final answer")]
+    pub final_answer: String,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema, Debug)]
+#[schemars(deny_unknown_fields)]
+pub struct GaiaOutput {
+    pub is_solvable: bool,
+    pub unsolvable_reason: String,
+    pub final_answer : String,
+}
+
+#[derive(Serialize, Debug)]
+pub struct GaiaEvalResult {
+    pub task_id: String,
+    pub model: String,
+    pub correct: bool,
+    pub is_solvable: Option<bool>,
+    pub prediction: Option<String>,
+    pub answer: String,
+    pub unsolvable_reason: Option<String>,
+    pub error: Option<String>
+}</script>
+
+<script type="text/plain" id="src-bingaia">use std::collections::HashMap;
+
+use ai_agent::{
+    gaia::{dataset::load_gaia_level1, evaluator::evaluate_gaia_single, models::GaiaEvalResult},
+    llm::semaphore::get_semaphore,
+};
+use tokio::task::JoinSet;
+use tracing::Level;
+use tracing_subscriber::FmtSubscriber;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    dotenvy::dotenv().ok();
+
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::INFO)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber)?;
+
+    gaia_level1_experiment().await
+}
+
+const MODELS: &[&str] = &["openai/gpt-4.1-mini", "anthropic/claude-haiku-4.5"];
+
+pub async fn gaia_level1_experiment() -> anyhow::Result<()> {
+    let problems = load_gaia_level1().await?;
+    let mut set = JoinSet::new();
+    for model in MODELS.iter() {
+        for problem in problems.iter() {
+            let problem = problem.clone();
+            set.spawn(async move {
+                let permit = get_semaphore().acquire().await?;
+                let eval = evaluate_gaia_single(problem, model).await;
+                drop(permit);
+                Ok::<_, anyhow::Error>(eval)
+            });
+        }
+    }
+
+    let mut results: HashMap<String, Vec<GaiaEvalResult>> = HashMap::new();
+    while let Some(Ok(result)) = set.join_next().await {
+        match result {
+            Ok(eval) => {
+                tracing::info!("{eval:#?}");
+                results.entry(eval.model.clone()).or_default().push(eval);
+            }
+            Err(e) => tracing::error!("task panicked: {e}"),
+        }
+    }
+
+    for (model, evals) in &results {
+        let correct = evals.iter().filter(|e| e.correct).count();
+        let total = evals.len();
+        tracing::info!(
+            "{model}: {correct}/{total} ({:.1}%)",
+            correct as f64 / total as f64 * 100.0
+        );
+    }
+
+    Ok(())
+}</script>
+
+<script type="text/plain" id="src-complete">use async_openai::types::chat::{
+    ChatCompletionMessageToolCalls, ChatCompletionRequestAssistantMessageArgs,
+    ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestToolMessageArgs,
+    ChatCompletionRequestUserMessageArgs, ChatCompletionTools, CreateChatCompletionRequestArgs,
+};
+
+use crate::tools::calculator::execute::{CalculatorArgs, calculator};
+
+pub async fn chat_complete(
+    model: &str,
+    system: Option<&str>,
+    prompt: &str,
+    tools: Vec<ChatCompletionTools>,
+) -> anyhow::Result<String> {
+    let client = async_openai::Client::new();
+    let mut messages = vec![];
+
+    if let Some(system) = system {
+        messages.push(
+            ChatCompletionRequestSystemMessageArgs::default()
+                .content(system)
+                .build()?
+                .into(),
+        );
+    }
+
+    messages.push(
+        ChatCompletionRequestUserMessageArgs::default()
+            .content(prompt)
+            .build()?
+            .into(),
+    );
+
+    let request = CreateChatCompletionRequestArgs::default()
+        .model(model)
+        .messages(messages.clone())
+        .tools(tools.clone())
+        .max_tokens(2048u32)
+        .build()?;
+
+    let response = client.chat().create(request).await?;
+
+    tracing::info!("Response: {:#?}", response);
+
+    let message = response
+        .choices
+        .into_iter()
+        .next()
+        .ok_or_else(|| anyhow::anyhow!("No choices in response"))?
+        .message;
+
+    if let Some(tool_calls) = message.tool_calls {
+        messages.push(
+            ChatCompletionRequestAssistantMessageArgs::default()
+                .tool_calls(tool_calls.clone())
+                .build()?
+                .into(),
+        );
+
+        for tool_call in tool_calls {
+            match tool_call {
+                ChatCompletionMessageToolCalls::Function(function_call) => {
+                    let function_name = function_call.function.name;
+                    let arguments = function_call.function.arguments;
+
+                    tracing::info!("Function: {function_name}");
+                    tracing::info!("Arguments: {arguments}");
+
+                    if function_name == "calculator" {
+                        let args: CalculatorArgs = serde_json::from_str(&arguments)?;
+                        let result =
+                            calculator(&args.operator, args.first_number, args.second_number);
+
+                        let tool_result = match result {
+                            Ok(calc_result) => calc_result.to_string(),
+                            Err(error) => error,
+                        };
+
+                        tracing::info!("Calculator result: {tool_result}");
+
+                        messages.push(
+                            ChatCompletionRequestToolMessageArgs::default()
+                                .tool_call_id(function_call.id.clone())
+                                .content(tool_result)
+                                .build()?
+                                .into(),
+                        );
+                    }
+                }
+
+                _ => {
+                    tracing::error!("Unsupported tool call type");
+                }
+            }
+        }
+
+        let request = CreateChatCompletionRequestArgs::default()
+            .model(model)
+            .messages(messages.clone())
+            .tools(tools.clone())
+            .max_tokens(2048u32)
+            .build()?;
+
+        let response = client.chat().create(request).await?;
+
+        let content = response
+            .choices
+            .into_iter()
+            .next()
+            .and_then(|c| c.message.content)
+            .ok_or_else(|| anyhow::anyhow!("No content in response"))?;
+
+        return Ok(content);
+    }
+
+    let content = message
+        .content
+        .ok_or_else(|| anyhow::anyhow!("No content in response"))?;
+
+    Ok(content)
+}</script>
+
+<script type="text/plain" id="src-toolsmod">use async_openai::types::chat::ChatCompletionTools;
+
+use crate::tools::calculator::definition::calculator_tool_definition;
+
+pub mod calculator;
+
+pub fn tools() -> Vec<ChatCompletionTools> {
+    vec![calculator_tool_definition()]
+}</script>
+
+<script type="text/plain" id="src-tooldef">use async_openai::types::chat::{ChatCompletionTool, ChatCompletionTools, FunctionObjectArgs};
+use serde_json::json;
+
+pub fn calculator_tool_definition() -> ChatCompletionTools {
+    ChatCompletionTools::Function(ChatCompletionTool {
+        function: FunctionObjectArgs::default()
+            .name("calculator")
+            .description("Perform basic arithmetic operations.")
+            .parameters(json!({
+                "type": "object",
+                "properties": {
+                    "operator": {
+                        "type": "string",
+                        "description": "Arithmetic operation to perform",
+                        "enum": ["add", "subtract", "multiply", "divide"]
+                    },
+                    "first_number": {
+                        "type": "number",
+                        "description": "First number for the calculation"
+                    },
+                    "second_number": {
+                        "type": "number",
+                        "description": "Second number for the calculation"
+                    }
+                },
+                "required": ["operator", "first_number", "second_number"]
+            }))
+            .build()
+            .expect("failed to build calculator tool definition"),
+    })
+}</script>
+
+<script type="text/plain" id="src-toolexec">use serde::Deserialize;
+
+pub fn calculator(
+    operator: &str,
+    first_number: f64,
+    second_number: f64,
+) -> anyhow::Result<f64, String> {
+    match operator {
+        "add" => Ok(first_number + second_number),
+        "subtract" => Ok(first_number - second_number),
+        "multiply" => Ok(first_number * second_number),
+        "divide" => {
+            if second_number == 0.0 {
+                Err("Cannot divide by zero".to_string())
+            } else {
+                Ok(first_number / second_number)
+            }
+        }
+        other => Err(format!("Unsupported operator: {other}")),
+    }
+}
+
+#[derive(Deserialize, Debug)]
+pub struct CalculatorArgs {
+    pub operator: String,
+    pub first_number: f64,
+    pub second_number: f64,
+}</script>
+
+<script type="text/plain" id="src-stream">use async_openai::types::chat::{
+    ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs,
+    CreateChatCompletionRequestArgs,
+};
+use async_stream::stream;
+use backon::{ExponentialBuilder, Retryable};
+use futures::{Stream, StreamExt};
+
+fn chat_stream(
+    model: &str,
+    system: Option<&str>,
+    prompt: &str,
+) -> impl Stream<Item = anyhow::Result<String>> {
+    stream! {
+        let client = async_openai::Client::new();
+        let mut messages = vec![];
+
+        if let Some(system) = system {
+            messages.push(
+                ChatCompletionRequestSystemMessageArgs::default()
+                    .content(system)
+                    .build()?
+                    .into(),
+            );
+        }
+
+        messages.push(
+            ChatCompletionRequestUserMessageArgs::default()
+                .content(prompt)
+                .build()?
+                .into(),
+        );
+
+        let request = CreateChatCompletionRequestArgs::default()
+            .model(model)
+            .messages(messages)
+            .max_tokens(2048u32)
+            .build()?;
+
+        let mut stream = client.chat().create_stream(request).await?;
+
+        while let Some(response_result) = stream.next().await {
+            match response_result {
+                Ok(chunk) => {
+                    if let Some(choice) = chunk.choices.first()
+                        && let Some(new_text) = &choice.delta.content {
+                            yield Ok(new_text.clone())
+                        }
+                }
+                Err(err) => yield Err(err.into())
+            }
+        }
+    }
+}
+
+pub async fn chat_stream_with_retry(model: &str, system: Option<&str>, prompt: &str) -> anyhow::Result<String> {
+    let op = || async {
+        let s = chat_stream(
+            model,
+            system,
+            prompt,
+        );
+
+        futures::pin_mut!(s);
+        let mut output = String::new();
+        while let Some(result) = s.next().await {
+            match result {
+                Ok(txt) => {
+                    output.push_str(&txt);
+                    print!("{txt}");
+                }
+                Err(err) => {
+                    tracing::error!("\nError while streaming: {}", err);
+                    return Err(err);
+                }
+            }
+        }
+        Ok(output)
+    };
+
+    op.retry(ExponentialBuilder::default().with_max_times(3)).await
+}</script>
+
+<script type="text/plain" id="src-structured">use anyhow::Ok;
+use async_openai::types::chat::{
+    ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs,
+    CreateChatCompletionRequestArgs, ResponseFormat, ResponseFormatJsonSchema,
+};
+
+use crate::models::action_plan::ActionPlan;
+
+pub async fn chat_complete_structured(
+    model: &str,
+    system: Option<&str>,
+    prompt: &str,
+) -> anyhow::Result<ActionPlan> {
+    let client = async_openai::Client::new();
+    let mut messages = vec![];
+
+    if let Some(system) = system {
+        messages.push(
+            ChatCompletionRequestSystemMessageArgs::default()
+                .content(system)
+                .build()?
+                .into(),
+        );
+    }
+
+    messages.push(
+        ChatCompletionRequestUserMessageArgs::default()
+            .content(prompt)
+            .build()?
+            .into(),
+    );
+
+    let schema = schemars::schema_for!(ActionPlan);
+    let schema_json = schema.as_value().clone();
+    let format_setting = ResponseFormat::JsonSchema {
+        json_schema: ResponseFormatJsonSchema {
+            description: Some("A step-by-step agent action plan with diffifulty and time estimate"
+                .into()),
+            name: "action_plan".into(),
+            schema: schema_json,
+            strict: Some(true),
+        },
+    };
+
+    let request = CreateChatCompletionRequestArgs::default()
+        .model(model)
+        .messages(messages)
+        .response_format(format_setting)
+        .max_tokens(2048u32)
+        .build()?;
+
+    let response = client.chat().create(request).await?;
+
+    tracing::info!("Response: {:#?}", response);
+
+    let plan: ActionPlan = response
+        .choices
+        .into_iter()
+        .next()
+        .and_then(|c| c.message.content)
+        .ok_or_else(|| anyhow::anyhow!("No content in response"))
+        .and_then(|s|serde_json::from_str(&s).map_err(Into::into))?;
+
+    Ok(plan)
+}</script>
+
+<script type="text/plain" id="src-structuredds">use anyhow::Ok;
+use async_openai::types::chat::{
+    ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs,
+    CreateChatCompletionRequestArgs, ResponseFormat,
+};
+use schemars::schema_for;
+
+use crate::models::action_plan::ActionPlan;
+
+pub async fn chat_complete_structured_ds(model: &str, prompt: &str) -> anyhow::Result<ActionPlan> {
+    let client = async_openai::Client::new();
+    let messages = vec![
+        ChatCompletionRequestSystemMessageArgs::default()
+            .content(build_system_prompt())
+            .build()?
+            .into(),
+        ChatCompletionRequestUserMessageArgs::default()
+            .content(prompt)
+            .build()?
+            .into(),
+    ];
+
+    let format_setting = ResponseFormat::JsonObject;
+
+    let request = CreateChatCompletionRequestArgs::default()
+        .model(model)
+        .messages(messages)
+        .response_format(format_setting)
+        .max_tokens(2048u32)
+        .build()?;
+
+    let response = client.chat().create(request).await?;
+
+    tracing::info!("Response: {:#?}", response);
+
+    let plan: ActionPlan = response
+        .choices
+        .into_iter()
+        .next()
+        .and_then(|c| c.message.content)
+        .ok_or_else(|| anyhow::anyhow!("No content in response"))
+        .and_then(|s| serde_json::from_str(&s).map_err(Into::into))?;
+
+    Ok(plan)
+}
+
+fn build_system_prompt() -> String {
+    let schema = schema_for!(ActionPlan);
+    let schema_str = serde_json::to_string_pretty(&schema).unwrap();
+
+    format!(
+        r#"You are a planning assistant. Analyze the user's request and respond with a JSON object.
+
+The output must be valid JSON that strictly conforms to this JSON Schema:
+
+{schema_str}
+
+Rules:
+- Output ONLY the raw JSON object, no markdown fences, no explanation
+- All required fields must be present
+- `difficulty` must be exactly one of: "Easy", "Medium", "Hard"
+- `steps` must be a non-empty array
+- Respond with JSON only"#
+    )
+}</script>
+
+<script type="text/plain" id="src-semaphore">use std::sync::OnceLock;
+
+use tokio::sync::Semaphore;
+
+static SEMAPHORE: OnceLock<Semaphore> = OnceLock::new();
+
+pub fn get_semaphore() -> &'static Semaphore {
+    SEMAPHORE.get_or_init(|| Semaphore::new(3))
+}</script>
+
+<script type="text/plain" id="src-actionplan">use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct ActionPlan {
+    pub goal: String,
+    pub steps: Vec<ActionStep>,
+    pub difficulty: Difficulty,
+    pub estimated_minutes: u32
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct ActionStep {
+    pub index: u8,
+    pub description: String,
+    pub tool_hint: Option<String>
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub enum Difficulty {
+    Easy,
+    Medium,
+    Hard
+}</script>
+
+<script type="text/plain" id="src-main">use ai_agent::{constant::GPT_OSS_120B_MODEL, llm::{structured::chat_complete_structured}};
+use anyhow::Ok;
+use tracing::Level;
+use tracing_subscriber::FmtSubscriber;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    dotenvy::dotenv()?;
+
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::INFO)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber)?;
+
+    let plan = chat_complete_structured(
+        GPT_OSS_120B_MODEL,
+        Some("你是一个全能的助手"),
+        "我要去美加墨世界杯观看比赛，如果安排？",
+    )
+    .await?;
+
+    println!("Response: {plan:#?}");
+
+    Ok(())
+}</script>
+
+<script type="text/plain" id="src-env"># .env —— async-openai 读这两个变量（0.41 源码确认，OPENAI_BASE_URL 非硬编码）
+OPENAI_BASE_URL=http://localhost:11434/v1   # Ollama；vLLM 用 :8000/v1，LM Studio 用 :1234/v1
+OPENAI_API_KEY=ollama                        # 占位即可，本地端点不校验
+
+# 再把 bin/gaia.rs 的 MODELS 换成本地模型名（去掉 OpenRouter 的 provider/ 前缀）：
+#   const MODELS: &[&str] = &["qwen2.5-coder:7b"];</script>
+
+<script type="text/plain" id="src-cloud">// solver.rs —— 云端 / OpenRouter：端点支持 strict JSON schema（当前默认写法）
+let schema = schemars::schema_for!(GaiaOutput);
+let format_setting = ResponseFormat::JsonSchema {
+    json_schema: ResponseFormatJsonSchema {
+        name: "gaia_output".into(),
+        schema: serde_json::to_value(&schema)?,
+        strict: Some(true),          // ← 服务端强制返回合法 JSON
+        description: Some("GAIA problem solving output".into()),
+    },
+};
+// system 直接用 GAIA_PROMPT（原样）
+// ...拼 messages、chat.create、serde_json::from_str 反序列化成 GaiaOutput</script>
+
+<script type="text/plain" id="src-local">// solver.rs —— 本地 Ollama/llama.cpp：多半不支持 strict schema，降级到「提示词强制」
+// （抄 structured_ds.rs 的思路：schema 塞进系统提示词 + 只要求 JsonObject）
+let schema = schemars::schema_for!(GaiaOutput);
+let schema_str = serde_json::to_string_pretty(&schema)?;
+let system = format!(                 // ← schema 写进系统提示词，而不是 response_format
+    "{system}\n\n只输出符合下面 JSON Schema 的原始 JSON，不要 markdown 围栏：\n{schema_str}"
+);
+
+let format_setting = ResponseFormat::JsonObject;   // ← 只要求"给我 JSON"，不要求 strict schema
+
+// 其余不变：用上面的 system、chat.create、serde_json::from_str 兜底解析
+// backon 重试照旧——本地模型可能偶尔不守规矩，重试 + serde 报错就是安全网</script>
+
+<script>
+/* ---------- Rust 语法高亮（单遍分词，对原始源码操作后转义，避免 &lt; 误伤泛型） ---------- */
+const KW = new Set('pub async fn let mut use impl match if else return await for while loop in const static move as self crate mod where dyn ref struct enum trait unsafe'.split(' '));
+function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function hl(src){
+  const re=/(r#"[\s\S]*?"#|r"[\s\S]*?")|(\/\/[^\n]*)|("(?:[^"\\]|\\.)*")|(#\[[^\]]*\])|([A-Za-z_]\w*!)|([A-Z][A-Za-z0-9_]*)|([a-z_]\w*)/g;
+  let out='',last=0,m;
+  while((m=re.exec(src))){
+    out+=escHtml(src.slice(last,m.index));
+    const [full,rawstr,com,str,attr,mac,typ,word]=m;
+    if(rawstr!==undefined) out+='<span class="c-str">'+escHtml(rawstr)+'</span>';
+    else if(com!==undefined) out+='<span class="c-com">'+escHtml(com)+'</span>';
+    else if(str!==undefined) out+='<span class="c-str">'+escHtml(str)+'</span>';
+    else if(attr!==undefined) out+='<span class="c-attr">'+escHtml(attr)+'</span>';
+    else if(mac!==undefined) out+='<span class="c-mac">'+escHtml(mac)+'</span>';
+    else if(typ!==undefined) out+='<span class="c-typ">'+escHtml(typ)+'</span>';
+    else if(word!==undefined) out+=KW.has(word)?'<span class="c-kw">'+word+'</span>':escHtml(word);
+    last=m.index+full.length;
+  }
+  out+=escHtml(src.slice(last));
+  return out;
+}
+function srcOf(id){return document.getElementById(id).textContent.replace(/^\n/,'').replace(/\s+$/,'');}
+/* 高亮后按行切分，并在跨行 span（多行 raw string）边界重开/重闭标签，保证每行 HTML 自平衡 */
+function splitHighlighted(html){
+  const out=[]; let open=[];
+  for(const raw of html.split('\n')){
+    const line0=open.join('')+raw;
+    const re=/<span class="[^"]*">|<\/span>/g; let m;
+    while((m=re.exec(raw))){ if(m[0]==='</span>')open.pop(); else open.push(m[0]); }
+    let line=line0;
+    line+='</span>'.repeat(open.length);
+    out.push(line);
+  }
+  return out;
+}
+function renderCode(el,src,hiRanges){
+  const lines=splitHighlighted(hl(src));
+  const hi=new Set();
+  (hiRanges||[]).forEach(([a,b])=>{for(let i=a;i<=b;i++)hi.add(i);});
+  el.innerHTML=lines.map((ln,i)=>'<span class="row'+(hi.has(i+1)?' hi':'')+'">'+(ln||' ')+'</span>').join('');
+}
+
+/* ---------- 代码浏览器数据 ---------- */
+const FILES=[
+ {group:'gaia —— 评测层',items:[
+   {id:'src-solver',path:'src/gaia/solver.rs',loc:72,dot:'call',
+    note:'评测的核心，但它<b>不是 agent</b>：solve_problem() 就是一次 chat.create() 调用——系统提示词 + 题目 → 用 schemars 生成的 JSON Schema 强制结构化输出 → 反序列化成 GaiaOutput。外层 solve_problem_with_retry 用 backon 指数退避重试 3 次。没有 while、没有工具、没有把结果喂回模型。',
+    contrast:'对照 pi/tau：这里没有循环。<b>把这 10 行控制流包进 while + 读 tool_calls + 结果回填，就是主教程第 9 章 M3 的 agent 循环。</b>'},
+   {id:'src-evaluator',path:'src/gaia/evaluator.rs',loc:48,dot:'eval',
+    note:'GAIA 官方系统提示词（要求模型先自评 is_solvable，再给最简答案）+ is_correct()（去空格转小写的精确匹配）+ evaluate_gaia_single（调 solver 拿结果、和标准答案比对、包成 GaiaEvalResult）。',
+    contrast:'这就是 pi/tau <b>都缺</b>的评测脊椎（主教程 §5.2）。做你的 mini 的 M10 评测扩展时，直接借这个"prompt → solve → is_correct → 结构化结果"骨架。'},
+   {id:'src-dataset',path:'src/gaia/dataset.rs',loc:24,dot:'eval',
+    note:'从 HuggingFace datasets-server 拉 GAIA 2023 level-1 validation 的前 10 道题（需 HF_TOKEN）。纯 reqwest + serde 反序列化，一次 HTTP。',
+    contrast:'评测驱动开发的第一步永远是"拿到真实任务集"。pi/tau 没有这一层——它们的"任务"是用户实时输入的。'},
+   {id:'src-gmodels',path:'src/gaia/models.rs',loc:46,dot:'schema',
+    note:'三组数据结构：HfResponse/HfRow/GaiaRow（数据集反序列化，用 serde rename 对上 "Question"/"Final answer" 等字段名）；GaiaOutput（模型输出的目标 schema，#[derive(JsonSchema)] + deny_unknown_fields）；GaiaEvalResult（评测结果记录）。',
+    contrast:'注意 GaiaOutput 上的 #[derive(JsonSchema)]——这就是 schemars 流派：schema 从 Rust 类型自动生成，类型安全最强。对照 tau 手写 dict、pi TypeBox。'},
+ ]},
+ {group:'llm —— 调用层（4 种模式 + ep05 工具往返）',items:[
+   {id:'src-complete',path:'src/llm/complete.rs',loc:121,dot:'call',
+    note:'ep05 大改造：从"纯文本一问一答"长成<b>单轮工具往返</b>。带 tools 发起调用 → 若响应有 tool_calls：assistant(tool_calls) 追加进 messages → 逐个执行（写死 if name=="calculator"）→ ToolMessage 回填 → <b>再调一次</b>取最终文本。第二轮若再要工具？直接走"取 content"的失败路径——没有 while。',
+    contrast:'离 agent 循环只差两步：外面包一层 while（直到没有 tool_calls）；把写死的 if 换成 name→工具 的注册表分发。对照 tau loop.py——这就是主教程第 9 章 M3 要你补上的部分。'},
+   {id:'src-stream',path:'src/llm/stream.rs',loc:82,dot:'call',
+    note:'流式：用 async-stream 的 stream! 宏把 create_stream() 的 SSE chunk 逐个 yield 出来（choice.delta.content）；外层 with_retry 累积文本并 print!，backon 重试。这是手写 SSE 消费的 Rust 版。',
+    contrast:'对照主教程第 9 章 M2：tau 手写 SSE 解析、pi 用官方 SDK——这里用 async-openai 的 create_stream()，再用 async-stream 转成自己的 Stream。三种做法，同一件事。'},
+   {id:'src-structured',path:'src/llm/structured.rs',loc:65,dot:'call',
+    note:'结构化输出·流派一（schema 强约束）：schemars::schema_for!(ActionPlan) 生成 JSON Schema → ResponseFormat::JsonSchema{ strict:true } → 模型被端点强制返回符合 schema 的 JSON → 反序列化成 ActionPlan。',
+    contrast:'关键行是 strict:Some(true)。端点在服务端保证输出合法。下面 structured_ds 是它的"降级版"。'},
+   {id:'src-structuredds',path:'src/llm/structured_ds.rs',loc:65,dot:'call',
+    note:'结构化输出·流派二（提示词强制，_ds ≈ DeepSeek 式）：ResponseFormat 只用 JsonObject（"给我 JSON"），把 schema 序列化成文本塞进系统提示词，靠提示词+serde 兜底。给不支持 strict schema 的模型/网关用。',
+    contrast:'这正是主教程第 10 章「逃生舱」思想：能力不齐时降级。build_system_prompt() 把 schema 写进提示词——观察它和 structured.rs 只差一个 ResponseFormat。'},
+   {id:'src-semaphore',path:'src/llm/semaphore.rs',loc:9,dot:'infra',
+    note:'一个全局 tokio Semaphore(3)：把并发在飞的 LLM 请求限制到 3 个。批量评测时防止把 API 限流打爆。OnceLock 懒初始化。',
+    contrast:'批量调用 LLM 的必备件。pi/tau 是交互式单会话，不需要；一旦你做"跑一批任务"（评测、数据处理），这个 9 行文件就是刚需。'},
+ ]},
+ {group:'tools —— ep05 新增（单轮工具调用）',items:[
+   {id:'src-toolsmod',path:'src/tools.rs',loc:8,dot:'infra',
+    note:'工具注册表（最简形态）：tools() 返回 Vec&lt;ChatCompletionTools&gt;——目前清单里只有 calculator 一件。',
+    contrast:'pi/tau 的注册表是 name→AgentTool 的映射，执行时按名字<b>动态分发</b>；这里是编译期写死的清单 + complete.rs 里写死的 if 分发。从"清单"到"注册表 + 分发"正是 M4 的第一步。'},
+   {id:'src-tooldef',path:'src/tools/calculator/definition.rs',loc:30,dot:'schema',
+    note:'工具的"给模型看的那一半"：FunctionObjectArgs + json! 手写参数 schema——operator 枚举（add/subtract/multiply/divide）+ 两个 number，required 全列。',
+    contrast:'注意流派：工具 schema 用 json! <b>手写</b>（≈ tau 的手写 dict 流派），而同仓库的输出 schema 用 schemars <b>derive</b>——一个仓库同时示范了两种 schema 来源。pi 则是第三种：TypeBox。'},
+   {id:'src-toolexec',path:'src/tools/calculator/execute.rs',loc:28,dot:'call',
+    note:'工具的"真干活的那一半"：calculator() 纯函数，除零返回 Err(String)；CalculatorArgs 是 tool_call.arguments 的反序列化目标。',
+    contrast:'对照 pi/tau 的执行器：这里没有超时/截断/取消（纯算术不需要），但"错误作为值回传而非崩溃"的意识已经有了——这是 pi 四守卫之一（异常边界）的雏形。'},
+ ]},
+ {group:'models / 入口 / 配置',items:[
+   {id:'src-actionplan',path:'src/models/action_plan.rs',loc:24,dot:'schema',
+    note:'一个"行动计划"的 schema：goal + steps(Vec<ActionStep>，每步有 index/description/tool_hint) + difficulty(枚举) + estimated_minutes。用 #[derive(JsonSchema)] 供结构化输出使用。',
+    contrast:'⚠️ 陷阱题：它有 steps 和 tool_hint，看起来很"agent 规划"，但<b>没有任何执行器</b>——main.rs 生成它之后只是 println!。<b>print 出来的 plan 不是 run 起来的 plan。</b>这是"看起来像 agent"和"是 agent"的分界线。'},
+   {id:'src-bingaia',path:'src/bin/gaia.rs',loc:61,dot:'eval',
+    note:'GAIA 实验入口（cargo run --bin gaia）：load 数据集 → 对每个 (模型 × 题目) 用 JoinSet 并发 spawn（受 semaphore 限流）→ evaluate_gaia_single → 汇总每个模型的 correct/total 百分比。MODELS 是 OpenRouter slug。',
+    contrast:'这是整个仓库唯一的"编排"，但编排的是<b>评测任务</b>而非 agent 步骤。对照主教程第 11 章：这属于"预定义管道"（workflow），不是"模型驱动循环"（agent）。'},
+   {id:'src-main',path:'src/main.rs',loc:25,dot:'infra',
+    note:'默认入口（cargo run）：调 chat_complete_structured 生成一个 ActionPlan（提示词是中文"我要去美加墨世界杯观看比赛，如何安排？"）然后 println!。结构化输出的最小 demo。',
+    contrast:'注意它用的模型是 constant.rs 里的 openai/gpt-oss-120b:free——又一个 OpenRouter slug（:free 后缀是 OpenRouter 特有）。'},
+ ]},
+];
+const META=Object.fromEntries(FILES.flatMap(g=>g.items.map(f=>[f.id,f])));
+const tree=document.getElementById('filetree');
+FILES.forEach(g=>{
+  const h=document.createElement('div');h.className='ft-group';h.textContent=g.group;tree.appendChild(h);
+  g.items.forEach(f=>{
+    const b=document.createElement('button');b.className='ft-file';b.type='button';b.setAttribute('role','tab');b.dataset.id=f.id;
+    b.innerHTML='<span class="dot dot-'+f.dot+'"></span>'+f.path.replace(/^.*\//,'')+'<span class="loc num">'+f.loc+'</span>';
+    b.title=f.path;
+    b.addEventListener('click',()=>selectFile(f.id));
+    tree.appendChild(b);
+  });
+});
+function selectFile(id){
+  const f=META[id];
+  document.querySelectorAll('.ft-file').forEach(b=>{const on=b.dataset.id===id;b.classList.toggle('sel',on);b.setAttribute('aria-selected',on?'true':'false');});
+  document.getElementById('expPath').textContent=f.path+'  ·  '+f.loc+' 行';
+  document.getElementById('expNote').innerHTML=f.note;
+  document.getElementById('expContrast').innerHTML='<b>对照 pi/tau：</b>'+f.contrast;
+  renderCode(document.getElementById('expCode'),srcOf(id));
+  document.getElementById('expCode').parentElement.scrollTop=0;
+}
+selectFile('src-solver');
+
+/* ---------- 结构化输出两流派 tabs ---------- */
+const PATS=[
+ {key:'complete',label:'纯文本 complete',file:'src/llm/complete.rs',src:'src-complete',
+  desc:'<b>基础调用——ep05 起还带单轮工具往返。</b>chat.create() → 若有 tool_calls：执行 calculator、回填、再调一次 → 取 content 字符串返回。'},
+ {key:'stream',label:'流式 stream',file:'src/llm/stream.rs',src:'src-stream',
+  desc:'<b>同样是文本，但逐 token 到达。</b>用 async-stream 把 SSE chunk yield 出来，边到边 print。打字机效果 + backon 重试。'},
+ {key:'schema',label:'结构化·schema 强约束',file:'src/llm/structured.rs',src:'src-structured',
+  desc:'<b>流派一：让端点保证结构。</b>schemars 生成 schema → <code>ResponseFormat::JsonSchema{strict:true}</code> → 服务端强制合法 JSON → 反序列化成 ActionPlan。看第 35–43 行。'},
+ {key:'ds',label:'结构化·提示词强制',file:'src/llm/structured_ds.rs',src:'src-structuredds',
+  desc:'<b>流派二：让提示词哄出结构。</b>只用 <code>ResponseFormat::JsonObject</code>，把 schema 序列化成文本塞进系统提示词（build_system_prompt，第 47 行起）。给不支持 strict schema 的模型用——主教程第 10 章的「逃生舱」。'},
+];
+const HIL={schema:[[33,43]],ds:[[23,23],[47,65]]};
+const patTabs=document.getElementById('patTabs');
+PATS.forEach((p,i)=>{
+  const b=document.createElement('button');b.className='pat-tab';b.type='button';b.setAttribute('role','tab');b.textContent=p.label;
+  b.addEventListener('click',()=>selectPat(p.key));
+  b.dataset.key=p.key;patTabs.appendChild(b);
+});
+function selectPat(key){
+  const p=PATS.find(x=>x.key===key);
+  document.querySelectorAll('#patTabs .pat-tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.key===key?'true':'false'));
+  document.getElementById('patDesc').innerHTML=p.desc;
+  document.getElementById('patFile').textContent=p.file;
+  renderCode(document.getElementById('patCode'),srcOf(p.src),HIL[key]);
+}
+selectPat('schema');
+
+/* ---------- 本地模型：env 块 + solver 云端/本地切换 ---------- */
+function renderEnv(el,src){
+  el.innerHTML=src.split('\n').map(l=>{
+    if(/^\s*#/.test(l)) return '<span class="row"><span class="c-com">'+escHtml(l)+'</span></span>';
+    const m=l.match(/^([A-Z_]+)=(.*)$/);
+    if(m) return '<span class="row"><span class="c-typ">'+escHtml(m[1])+'</span>=<span class="c-str">'+escHtml(m[2])+'</span></span>';
+    return '<span class="row">'+(escHtml(l)||' ')+'</span>';
+  }).join('');
+}
+renderEnv(document.getElementById('envCode'),srcOf('src-env'));
+const LOCALS=[
+ {key:'cloud',label:'云端 · strict schema（当前默认）',file:'solver.rs（现状）',src:'src-cloud',
+  desc:'<b>让服务端强制。</b>OpenRouter / OpenAI 支持 <code>ResponseFormat::JsonSchema{strict:true}</code>，端点保证输出合法 JSON——solver.rs 现在就这么写。'},
+ {key:'local',label:'本地 · JsonObject + 提示词',file:'solver.rs（改后）',src:'src-local',
+  desc:'<b>让提示词哄。</b>本地端点多半不支持 strict schema，就把 schema 塞进系统提示词、只用 <code>JsonObject</code>，靠 serde + backon 兜底——即 structured_ds.rs 的路子。'},
+];
+const localTabs=document.getElementById('localTabs');
+LOCALS.forEach(p=>{
+  const b=document.createElement('button');b.className='pat-tab';b.type='button';b.setAttribute('role','tab');b.textContent=p.label;b.dataset.key=p.key;
+  b.addEventListener('click',()=>selectLocal(p.key));
+  localTabs.appendChild(b);
+});
+function selectLocal(key){
+  const p=LOCALS.find(x=>x.key===key);
+  document.querySelectorAll('#localTabs .pat-tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.key===key?'true':'false'));
+  document.getElementById('localDesc').innerHTML=p.desc;
+  document.getElementById('localFile').textContent=p.file;
+  renderCode(document.getElementById('localCode'),srcOf(p.src));
+}
+selectLocal('cloud');
+
+/* ---------- GAIA 评测流水线 stepper ---------- */
+const GSTAGES=[
+ {t:'load_gaia_level1',d:'从 HuggingFace 拉 GAIA level-1 的 10 道题（<code>dataset.rs</code>）。评测驱动开发的第一步：拿到真实任务集。'},
+ {t:'spawn 任务矩阵',d:'对每个 <b>模型 × 题目</b> 用 <code>JoinSet</code> 并发 spawn（<code>bin/gaia.rs</code>）——2 模型 × 10 题 = 20 个任务，受 <code>Semaphore(3)</code> 限流最多 3 个在飞。'},
+ {t:'solve_problem（单次调用）',d:'每个任务调 <code>solver.rs</code>：系统提示词 + 题目 → 一次结构化 LLM 调用 → GaiaOutput。<b>这里没有循环</b>——GAIA level-1 常需网页检索，没工具就靠模型自评 is_solvable 老实认怂。'},
+ {t:'is_correct 打分',d:'<code>evaluator.rs</code> 把模型答案和标准答案做去空格转小写的<b>精确匹配</b>，包成 GaiaEvalResult。'},
+ {t:'汇总每模型准确率',d:'按模型聚合 correct/total，打印 <code>gpt-4.1-mini: X/10 (Y%)</code>。这就是一次可复现的模型对比实验——pi/tau 完全没有的东西。'},
+];
+let gIdx=0;
+const gPipe=document.getElementById('gPipe');
+GSTAGES.forEach((s,i)=>{const n=document.createElement('div');n.className='pnode';n.id='gp-'+i;n.innerHTML='<span class="pi-idx num">'+(i+1)+'</span>'+s.t;gPipe.appendChild(n);});
+function gRender(){
+  document.getElementById('gLbl').textContent='stage '+gIdx+' / '+GSTAGES.length;
+  GSTAGES.forEach((s,i)=>document.getElementById('gp-'+i).classList.toggle('on',i===gIdx-1));
+  document.getElementById('gNote').innerHTML=gIdx>0?('<b>'+GSTAGES[gIdx-1].t+'：</b>'+GSTAGES[gIdx-1].d):'点「下一步」：<code>bin/gaia.rs</code> 的实验从加载 GAIA 数据集开始。注意——整条流水线里没有 agent 循环，每道题就是<b>一次</b> LLM 调用。';
+  document.getElementById('gNext').disabled=gIdx>=GSTAGES.length;
+  document.getElementById('gNext').textContent=gIdx>=GSTAGES.length?'完成 ✓':'下一步 ▸';
+}
+document.getElementById('gNext').addEventListener('click',()=>{if(gIdx<GSTAGES.length){gIdx++;gRender();}});
+document.getElementById('gReset').addEventListener('click',()=>{gIdx=0;gRender();});
+gRender();
+
+/* ---------- 单次调用 vs 循环 bridge ---------- */
+const R_STEPS=['① 拼消息 + 挂上 tools','② 一次 chat.create() 调用','③ 有 tool_calls → 执行 calculator','④ 回填 ToolMessage，再调一次','⑤ 取 content 返回 —— 结束'];
+const L_STEPS=['① 拼上下文 + tools','② 一次 LLM 调用','③ 有 tool_calls？→ 执行工具','④ 结果回填 transcript','⑤ 回到 ② —— 直到没有 tool_calls'];
+const brRust=document.getElementById('brRust'),brLoop=document.getElementById('brLoop');
+function buildBridge(){
+  brRust.innerHTML=R_STEPS.map((s,i)=>'<div class="brstep" id="r-'+i+'">'+s+'</div>').join('')+'<div class="brend" id="r-end" style="visibility:hidden">■ 固定两跳到头：第二轮再要工具就没有然后了（无 while）</div>';
+  brLoop.innerHTML=L_STEPS.map((s,i)=>'<div class="brstep" id="l-'+i+'">'+s+'</div>').join('')+'<div class="brloopback" id="l-back" style="visibility:hidden">↑ 只要还有 tool_calls，回到 ②（第 N 圈）</div>';
+}
+buildBridge();
+let brTimer=null;
+function brReset(){
+  if(brTimer){clearInterval(brTimer);brTimer=null;}
+  buildBridge();
+  document.getElementById('bLbl').textContent='就绪';
+  document.getElementById('bPlay').disabled=false;
+}
+function brPlay(){
+  brReset();
+  document.getElementById('bPlay').disabled=true;
+  document.getElementById('bLbl').textContent='播放中…';
+  let k=0;
+  brTimer=setInterval(()=>{
+    if(k<R_STEPS.length){
+      document.getElementById('r-'+k).classList.add('on');
+      document.getElementById('l-'+k).classList.add('on');
+      if(k>0){document.getElementById('r-'+(k-1)).classList.add('done');document.getElementById('l-'+(k-1)).classList.add('done');}
+      k++;
+    }else{
+      clearInterval(brTimer);brTimer=null;
+      document.getElementById('r-end').style.visibility='visible';
+      document.getElementById('l-back').style.visibility='visible';
+      document.getElementById('l-1').classList.add('on');   // loop 回到 ② 继续转
+      document.getElementById('bLbl').innerHTML='rust：一轮工具往返即止　·　loop：回到 ② 继续转';
+      document.getElementById('bPlay').disabled=false;
+    }
+  },720);
+}
+document.getElementById('bPlay').addEventListener('click',brPlay);
+document.getElementById('bReset').addEventListener('click',brReset);
+</script>

@@ -2,10 +2,10 @@
 
 > 以两个真实开源项目为教材，系统学习 coding agent / agent harness 的设计与实现。
 >
-> - **pi** `~/workspace/code/pi` — TypeScript 生产级 agent harness（Mario Zechner / badlogic，v0.80.6）
-> - **tau** `~/workspace/code/tau` — Python 教学级复刻（alejandro-ao，v0.1.5，官方自述 *"A Python implementation of a minimalist Pi-style coding-agent harness"*）
+> - **pi** `~/workspace/code/pi` — TypeScript 生产级 agent harness（Mario Zechner / badlogic，分析基于 v0.80.6，最近复核 2026-07-19 至 v0.80.10）
+> - **tau** `~/workspace/code/tau` — Python 教学级复刻（Alejandro AO，仓库现挂 `huggingface/tau`；分析基于 v0.1.5，最近复核 2026-07-19 至 v0.2.1。官方自述 *"A Python implementation of a minimalist Pi-style coding-agent harness"*）
 >
-> 编写日期：2026-07-11（2026-07-12 增补第 9 章「从零复刻」、第 10 章「模型接入指南」、第 11 章「深度对比主流框架」）。基于 pi commit `4c18610`、tau v0.1.5（2026-07-09）；2026-07-12 复核：pi 已 pull 至 `8479bd84`（新增 5 个修复性小提交，版本仍 0.80.6，分析结论不受影响），tau 无更新（`b344d3e`）。
+> 编写日期：2026-07-11（2026-07-12 增补第 9–11 章：从零复刻 / 模型接入 / 深度对比主流框架；2026-07-13 增补第 12 章：延伸样本 rust-ai-agent 对比；2026-07-16 增补第 13 章：进阶——领域应用 / 多 Agent 编排 / 构架蓝图，配套新交互页 `webui/advanced.html`）。基于 pi commit `4c18610`、tau v0.1.5（2026-07-09）；2026-07-12 复核：pi 已 pull 至 `8479bd84`（版本仍 0.80.6，结论不受影响）；2026-07-16 复核：pi v0.80.7（修复性提交为主）、tau v0.1.6（OAuth provider 对齐、分层定价元数据等，架构结论不受影响）、rust-ai-agent 更新至 `e6ee55d` / ep05（**新增单轮工具调用**，见 §12.7）；**2026-07-19 复核**：pi v0.80.10（内建 llama.cpp 路由与 `/llama` HF 模型搜索、Kimi 动态/延迟工具加载、生成式模型目录数据从 .ts 分离；另发现第五个包 `packages/orchestrator`——2026-06 起孵化、自标 Experimental 的编排包，**L5 留白正被官方试探性填上**）、tau v0.2.1（**0.2.0 采纳 Pi 兼容事件与扩展协议**——Phase 21 扩展系统落地、canonical event streams 文档化、自带 self-knowledge；`loop.py` 318 行 / `tau_agent` 1,750 行 / `messages.py` 277 行，本文各处行数已按 2026-07-19 实测更新）、rust-ai-agent 无变化（仍 `e6ee55d` / ep05）。
 > 英文原始分析笔记见 `sources/`（pi/tau 各一份代码级笔记 + 一份网上最佳实践调研，含全部出处链接）。
 
 ---
@@ -34,7 +34,10 @@
 - [9. 从零复刻：搭建你自己的 mini-harness](#9-从零复刻搭建你自己的-mini-harness)
 - [10. 模型接入指南：格式要求、统一层与本地模型](#10-模型接入指南格式要求统一层与本地模型)
 - [11. 深度对比：pi/tau 与 LangGraph 等主流框架](#11-深度对比pitau-与-langgraph-等主流框架)
-- [12. 参考资料](#12-参考资料)
+- [12. 延伸样本：rust-ai-agent（Rust）和 pi/tau 一样吗？](#12-延伸样本rust-ai-agentrust和-pitau-一样吗)
+- [13. 进阶：领域应用、多 Agent 编排与构架蓝图](#13-进阶领域应用多-agent-编排与构架蓝图)
+- [14. 配套书：《深入理解 AI Agent》读书地图](#14-配套书深入理解-ai-agent读书地图)
+- [15. 参考资料](#15-参考资料)
 
 ---
 
@@ -42,7 +45,7 @@
 
 **为什么选这两个项目对比学习？** 因为 tau 就是 pi 的 Python 教学复刻——两者共享同一套架构蓝图（连文档域名都是数学梗：tau 的文档在 `twotimespi.dev`，因为 τ = 2π）。这给了你一个罕见的学习机会：
 
-1. **同一个设计，两种语言、两种成熟度的实现。** 你可以先读 tau（核心层仅 1,351 行 Python，一个下午读完），建立心智模型；再去 pi 里看同一个概念在生产环境里长成什么样（11 万行 TypeScript，处理了几十个 provider 的兼容性怪癖）。
+1. **同一个设计，两种语言、两种成熟度的实现。** 你可以先读 tau（核心层仅 1,750 行 Python，一个下午读完），建立心智模型；再去 pi 里看同一个概念在生产环境里长成什么样（10 万行 TypeScript，处理了几十个 provider 的兼容性怪癖）。
 2. **tau 的 `dev-notes/` 是一份公开的"建造日志"**：约 40 篇 phase 笔记，每篇都写明"这个功能对应 pi 的什么设计、为什么这样做、怎么测试"。相当于有人替你把 pi 拆解了一遍。
 3. **pi 是"极简 harness"哲学的代表作**（作者 badlogic 的宣言文章是 2025 年 agent 圈被广泛讨论的文本），拿它对照 Anthropic 官方最佳实践、12-Factor Agents、Claude Code 的做法，能看清 agent 设计的几条真正的分歧轴线。
 
@@ -50,7 +53,7 @@
 
 - Agent 的核心是一个 ~10 行的循环：调用 LLM → 执行它要求的工具 → 把结果塞回对话 → 重复，直到模型不再调工具。两个项目的其余十几万行代码，都是围绕这个循环解决**工程问题**：多 provider 适配、流式事件、会话持久化、上下文压缩、可扩展性、终端 UI。
 - 两者共同的关键设计：**三层单向依赖**（provider 层 → agent 大脑 → 产品层）、**事件流作为前端契约**、**默认只给模型 4 个工具**（read/write/edit/bash）、**系统提示词极小**（pi < 1000 tokens）、**JSONL 追加式会话树**、**不做权限弹窗**（要安全就上容器）。
-- 主要差异：pi 有完整的**运行时扩展系统**（33 个事件钩子、自扩展能力）、并行工具执行、真实 token/成本核算、多模态消息、1057 个模型的目录；tau 刻意省略这些（扩展系统明确"推迟到 Phase 21"），换来核心层的极致可读性。
+- 主要差异：pi 有完整的**运行时扩展系统**（33 个事件钩子、自扩展能力）、并行工具执行、真实 token/成本核算、多模态消息、1000+ 个模型的目录；tau 曾刻意省略这些换取核心层的极致可读性——**但 2026-07 的 0.2.0 已把扩展系统落地（Phase 21 兑现，直接采纳 Pi 兼容协议，见 §4.7 增补）**。
 - 学习路线：**先 tau 后 pi**，边读边做第 8 章的实验。
 
 ---
@@ -77,7 +80,7 @@
 | 版本 | 0.80.6（所有包 lockstep 同步版本） | 0.1.5 |
 | 包结构 | 5 个 npm workspace 包 | 1 个包内 3 个顶层模块 |
 | 源码规模 | ≈ 111,700 行（ai 36.7k / agent 8.2k / coding-agent 52.7k / tui 12.1k / orchestrator 2.0k） | ≈ 24,600 行（tau_ai 3.4k / tau_agent 1.35k / tau_coding 19.8k） |
-| 测试规模 | ≈ 83,000 行，vitest + node:test（@xterm/headless 仿真终端） | ≈ 19,200 行，pytest + anyio，~725 个测试 |
+| 测试规模 | ≈ 88,000 行，vitest + node:test（@xterm/headless 仿真终端） | ≈ 25,400 行，pytest + anyio |
 | 核心依赖 | @anthropic-ai/sdk、openai、@google/genai 等官方 SDK（懒加载）；TUI 零重依赖 | **不用任何厂商 SDK**：httpx 手写 SSE；pydantic v2、Textual、Rich、typer |
 | 类型/校验 | TypeScript strict + TypeBox（JSON Schema）+ AJV 校验 | mypy --strict + pydantic（extra="forbid"）|
 | 构建工具链 | tsgo（TS 7 原生编译器预览）、Biome、npm workspaces、husky | uv、ruff、hatchling |
@@ -116,7 +119,7 @@ while True:
         messages.append(tool_result(call.id, result))  # 4. 结果塞回对话，回到 1
 ```
 
-tau 的 `src/tau_agent/loop.py`（276 行）就是这个循环的"注释加强版"；pi 的 `packages/agent/src/agent-loop.ts` 是它的工程加强版（加了 steering 注入、并行执行、截断守卫等，见 4.2）。**先把这 10 行焊在脑子里，后面所有内容都是给它做加法。**
+tau 的 `src/tau_agent/loop.py`（318 行）就是这个循环的"注释加强版"；pi 的 `packages/agent/src/agent-loop.ts` 是它的工程加强版（加了 steering 注入、并行执行、截断守卫等，见 4.2）。**先把这 10 行焊在脑子里，后面所有内容都是给它做加法。**
 
 ### 2.3 "薄 harness"哲学
 
@@ -305,6 +308,8 @@ Guidelines: <工具自带的 guidelines 去重 + "Be concise…">
 
 **tau 现状**：只有 skills（严格 Agent Skills 规范——ADR 0003 详细分析了 pi 的双模式兼容包袱后决定"pre-1.0 直接走严格路线"，裸 `.md` 给迁移警告）+ prompt templates（`{{ arguments }}` 占位符）+ `custom` 会话条目（为未来扩展留的钩子）。`/skill:name` 在 tau 里刻意**不是** slash 命令而是提示词展开。
 
+**2026-07-19 增补：Phase 21 兑现了。** tau 0.2.0（2026-07-17 前后）正式落地 extensions（`src/tau_coding/extensions/{api,loader}.py`，examples：`hello_tool.py`、`permission_gate.py`，并自带 `create-tau-extension` skill），而且**直接采纳 Pi 兼容的事件与扩展协议**（#375 adopt Pi-compatible event and extension protocol、#376 Pi-shaped extension turn metadata、#377 canonical event streams 文档化）。同版本还打包了 self-knowledge（`tau_coding/data/docs/`——agent 随身携带自己的架构文档，渐进披露思想的自我应用）。两个含义：①「pi 的灵魂子系统」从此两边都有，上一段的对比升级为"协议级兼容"；②一个独立实现主动采纳另一个实现的事件协议，是第 13 章 L1「事件流是唯一契约」价值的最好上游实证——契约稳定，实现可以各自演化甚至互操作。
+
 **评注**：扩展系统是"极简核心"能成立的另一半——pi 拒绝内置 MCP/权限/计划模式的每一条，README 都跟着一句"用扩展自己装一个"。学习价值：pi 的 `ExtensionAPI` 类型定义（`extensions/types.ts`）本身就是一份"agent harness 有哪些可拦截点"的清单，值得通读。
 
 ### 4.8 安全与权限
@@ -433,8 +438,8 @@ pi 的供应链清单值得单独收藏——2025-2026 npm 投毒潮后，这是
 **第一周：tau 建立心智模型**（每步都是一次可完成的阅读）
 
 1. `tau/README.md` + 官网三篇：`what-is-tau`、`internals/architecture`、`internals/design-principles`（7 条设计原则背下来）
-2. 数据模型：`src/tau_agent/messages.py`（47 行）→ `tools.py` → `events.py`
-3. **核心**：`src/tau_agent/loop.py`（276 行，对照官网 `internals/agent-loop` 页逐步读）
+2. 数据模型：`src/tau_agent/messages.py`（277 行——0.2.0 起承载 Pi 兼容协议类型）→ `tools.py` → `events.py`
+3. **核心**：`src/tau_agent/loop.py`（318 行，对照官网 `internals/agent-loop` 页逐步读）
 4. `src/tau_agent/harness.py`（298 行：队列、取消、transcript 修复）
 5. 会话：`src/tau_agent/session/`（entries → jsonl → tree → memory，注意 `SessionState.from_entries` 这个 reducer）+ 根目录 `session-temp.jsonl` 真实样本
 6. Provider：`src/tau_ai/provider.py` + `events.py` + `anthropic.py`（看 SSE 怎么手工解析）
@@ -450,7 +455,7 @@ pi 的供应链清单值得单独收藏——2025-2026 npm 投毒潮后，这是
 5. `core/system-prompt.ts`、`core/compaction/compaction.ts`、`docs/session-format.md`
 6. `packages/ai/src/types.ts`（9 种 API、compat 开关）、`utils/overflow.ts`（感受兼容性长尾）
 7. **扩展系统**：`extensions/types.ts` 的 ExtensionAPI + `examples/extensions/` 逐个跑
-8. 外围文章：badlogic 的 pi 宣言、Armin Ronacher 的评测（链接见第 12 章）
+8. 外围文章：badlogic 的 pi 宣言、Armin Ronacher 的评测（链接见第 15 章）
 
 ### 8.2 动手实验（由浅入深 12 个）
 
@@ -576,7 +581,7 @@ class AgentTool:
 
 **验收**：每个类型 JSON round-trip 测试；给消息塞未知字段必须报错（`extra="forbid"` 生效）。
 
-**对照**：tau `tau_agent/messages.py`（47 行）/`tools.py`/`events.py`；pi `packages/ai/src/types.ts`。
+**对照**：tau `tau_agent/messages.py`（277 行）/`tools.py`/`events.py`；pi `packages/ai/src/types.ts`。
 
 ### 9.3 M2 · Provider 层：FakeProvider 先行 + 一个真适配器（1–2 天）
 
@@ -653,7 +658,7 @@ async def run_agent_loop(*, provider, model, system, messages, tools,
 - 断言结束时 transcript 里每个 tool_call 都有 tool_result；
 - 分别触发四个守卫的测试各一个。
 
-**对照**：tau `tau_agent/loop.py`（276 行，你的答案纸）；pi `packages/agent/src/agent-loop.ts`（看多了什么：steering 双轮询、并行执行、prepareNextTurn 钩子）。
+**对照**：tau `tau_agent/loop.py`（318 行，你的答案纸）；pi `packages/agent/src/agent-loop.ts`（看多了什么：steering 双轮询、并行执行、prepareNextTurn 钩子）。
 
 ### 9.5 M4 · 四个工具：坑最密集的一站（2–3 天）
 
@@ -918,7 +923,7 @@ default_model = "qwen3:32b"
 
 注意 tau **有意只读用户级 overlay**（没有项目级 `.tau/catalog.toml`）——克隆一个仓库不能悄悄把你的 provider 重定向到恶意 base_url。超时/重试/自定义 header 放 `~/.tau/providers.json`。
 
-**③ pi 接 Ollama**——`~/.pi/agent/models.json`（示例核对自官方 `docs/models.md` 的 Minimal Example）：
+**③ pi 接 Ollama**——`~/.pi/agent/models.json`（示例核对自官方 `docs/models.md` 的 Minimal Example）。**2026-07-19 补充**：pi 0.80.8 起还**内建了 llama.cpp 路由**——`/login` 里直接连 llama.cpp，`/llama` 命令搜索/下载 Hugging Face 模型、显式装载卸载带进度（官方 `docs/llama-cpp.md`）；本地模型从"手写 models.json"升级成了一等公民入口：
 
 ```json
 {
@@ -1090,11 +1095,199 @@ Anthropic 的多 agent 研究系统实际就是这个形状：orchestrator 是�
 
 ---
 
-## 12. 参考资料
+## 12. 延伸样本：rust-ai-agent（Rust）和 pi/tau 一样吗？
+
+> 有读者问：GitHub 上的 [`solenovex/rust-ai-agent`](https://github.com/solenovex/rust-ai-agent)（B 站 UP 主「软件工艺师」的视频系列《用 Rust 构建 AI Agent》配套代码）和 pi/tau 是一类东西吗？
+>
+> **简答：genre 相同（都是教学项目），但 shape 不同——它当前不是 coding-agent harness，甚至不是"循环式 agent"，而是"增强 LLM + 结构化输出 + 评测驱动"的另一种范式。** 它恰好是本文档最好的一个反例样本：帮你看清"AI Agent"这个词覆盖的范围有多宽，也正好补上 pi/tau 缺的那一块（评测）。
+>
+> 分析基于 2026-07-13 快照（约 24 star、6 个 commit、按集数打 tag `ep01…ep04`、edition 2024、MIT 前提待核）。**这是一个早期、随视频推进的教学仓库，后续集数可能长出工具循环——本节结论限定在当前快照。** 未逐文件精读，架构判断来自 Cargo.toml + 目录结构 + `gaia/solver.rs` 摘要。（同日已补全文精读；**2026-07-16 更新：ep05 长出了单轮工具调用，预言部分兑现——见 §12.7**，全部 713 行逐文件读毕。）
+
+### 12.1 它是什么
+
+`async-openai` SDK + `tokio` + `reqwest` + `schemars`（从 Rust 结构体 derive JSON Schema）+ `backon`（指数退避重试）搭起来的教学工程。目录透露了它的骨架：
+
+- **`src/llm/`** —— LLM 交互层，但组织维度是**交互模式**而非 provider：`complete.rs`（非流式）、`stream.rs`（流式）、`structured.rs` + `structured_ds.rs`（结构化输出 + schema 约束）、`semaphore.rs`（并发/限流控制）。注意这里没有"多 provider 中立层"——它直接吃 `async-openai` 的 OpenAI 兼容 wire 格式。
+- **`src/gaia/`** —— 全盘围绕 **GAIA 基准**组织（GAIA = General AI Assistants，Meta + HuggingFace 2023 年提出的通用助手评测集，题目需要网页检索、文件解析、数学、多模态）：`dataset.rs`（加载数据集）、`solver.rs`（求解一道题）、`evaluator.rs`（给答案打分）、`models.rs`。
+- **`src/bin/gaia.rs`** —— 可运行入口。
+
+**最关键的一点**：`solver.rs` 的 `solve_problem()` 是**单次 LLM 调用**——系统提示词 + 用户题目 → 强制 JSON 结构化输出（`GaiaOutput` 由 schemars 生成 schema）→ 反序列化 → 用 `backon` 重试。**没有 `while` 循环、没有工具调用、没有把工具结果喂回模型。** 这不是 agent 循环，是"增强 LLM"直接答题，外面套一个数据集评测器。
+
+### 12.2 三条轴上和 pi/tau 的定位
+
+用本文档一直在用的坐标系来放它：
+
+| 轴 | rust-ai-agent（当前快照） | pi / tau |
+|---|---|---|
+| **意图 genre** | ✅ 教学项目（和 tau 同类——"为学习而写"） | tau 教学 / pi 生产 |
+| **控制流范式**（§2.1、§11.1） | **增强 LLM / workflow 端**：单次调用 + 结构化输出，无循环 | **agent 端**：模型驱动的 tool-use 循环 |
+| **领域** | 通用助手 / 跑基准（GAIA answer-only） | 终端 coding（read/write/edit/bash + 会话 + TUI） |
+| **provider 层** | 单一，直接用 `async-openai` SDK | 自建中立层（tau 5 适配器 / pi 9 协议）+ 事件流 |
+| **工具 schema** | `schemars` 从 Rust 类型 **derive**（第三种流派） | tau 手写 dict / pi TypeBox |
+| **有没有 agent 循环** | ❌ 当前没有 | ✅ 核心就是循环 |
+| **有没有系统评测** | ✅ **有**（`evaluator.rs` 对 GAIA 数据集打分） | ❌ 两者都缺（见 §5.2） |
+
+一句话：**它和 tau 共享"教学"的灵魂，但站在 Anthropic《Building Effective Agents》光谱的另一端**——pi/tau 在"agent"（模型自主循环），rust-ai-agent 在"workflow / 增强 LLM"（预定义的单步 + 结构化输出）。这不是谁高级，是两种建造块（§2.1）。
+
+### 12.3 为什么它对学习反而有价值：三个互补点
+
+正因为不一样，它填的是 pi/tau 教不了的空白：
+
+1. **它是"增强 LLM"建造块的干净样本。** §2.1 讲过 workflow 和 agent 的区别；rust-ai-agent 让你看见"没有循环的 AI 应用"长什么样——很多生产系统其实就停在这里，一次结构化调用足矣（Anthropic 的第一条建议："能用单次调用就别上 agent"）。
+2. **它有 pi/tau 都缺的评测脊椎。** §5.2 专门标注过：pi/tau 都没有系统化 evals。而 rust-ai-agent 的整个 `gaia/` 就是"数据集 → solver → evaluator 打分"的评测循环——这正是《Writing effective tools for agents》反复强调的"从真实任务建 eval"。**想给你的 mini（第 9 章）补 M10 评测扩展，这就是现成的参照结构。**
+3. **它示范了 Rust 的结构化输出流派。** `schemars` 从类型 derive schema，是继 tau 手写 dict、pi TypeBox 之后的第三种工具/输出 schema 做法，类型安全最强。想理解"schema 从哪来"的三种权衡，三个项目正好凑齐。
+
+### 12.4 如果你想把它变成"真 agent"
+
+它现在缺的，恰好是第 9 章 M3–M8 教的东西。把它升级成 pi/tau 那样的循环式 agent，路线图就是：
+
+- **加循环（M3）**：把 `solve_problem()` 的单次调用包进 `while`，读 `tool_calls`（`async-openai` 原生支持 function calling）→ 执行 → 结果回填 → 重复。四大守卫照搬。
+- **加工具（M4）**：GAIA 需要网页检索/文件解析——正好给它 web-search、read-file、python-exec 工具（GAIA 的典型工具面），而不是 coding 的 edit/bash。
+- **加会话（M7）**：多步求解要留痕，追加式 JSONL 条目树同样适用。
+- 它已有的 `evaluator.rs` 反而是 pi/tau 要补的——**双向取长补短**。
+
+> 顺带一提：如果你找的是"Rust 版的 pi"（真正对标的 coding-agent harness），社区里有 [`Dicklesworthstone/pi_agent_rust`](https://github.com/Dicklesworthstone/pi_agent_rust)（自称"零 unsafe 的高性能 Rust coding agent CLI"）更接近；Rust 原生 agent 框架生态另有 Rig、AutoAgents、OpenFANG 等（对应第 6 章光谱的"框架"档）。rust-ai-agent 与它们都不同——它是**教你从头写**的视频教程，不是拿来即用的框架。这一点上，它和 tau 的定位最像，只是选了"评测驱动的通用助手"而非"终端 coding"作为教学载体。
+
+### 12.5 结论
+
+「和 pi/tau 一样吗？」——**教学初心一样，技术形态不一样**。把三者并排，你得到的是一张更完整的地图：
+
+- **tau**：教你写 *coding-agent 循环*（Python，agent 端）
+- **pi**：同一套设计的 *生产形态*（TypeScript，agent 端，带扩展/多 provider/会话全家桶）
+- **rust-ai-agent**：教你写 *增强-LLM + 评测*（Rust，workflow 端，结构化输出 + GAIA 打分）
+
+学习建议：**主线仍是先 tau 后 pi**（第 8 章）建立 agent 循环的完整直觉；rust-ai-agent 作为**支线**看两样东西——「没有循环的 AI 应用」的样子，以及「评测驱动开发」怎么组织。等你做第 9 章的 mini 时，把它的 `evaluator.rs` 思路借过来做 M10。
+
+### 12.6 补充：它能接什么模型？本地能跑吗？
+
+读完全部代码 + 核对 `async-openai` 0.41 源码后的精确答案（不是笼统的"都行"）：
+
+- **接口类型：限。只认 OpenAI Chat Completions 一种 wire 格式。** 全程用 `async_openai::Client::new()`，说的是 OpenAI `/chat/completions` 协议。**Anthropic 原生 API、Gemini 原生 API 不能直接接**——它没有 pi/tau 那样的自建多-provider 中立层。
+- **换模型：几乎不限，但要经 OpenAI 兼容层。** `async-openai` 读环境变量 `OPENAI_BASE_URL`（源码确认，非硬编码），指向任何 OpenAI 兼容端点即可换模型。它默认就这么干——模型名 `openai/gpt-4.1-mini`、`anthropic/claude-haiku-4.5` 是 **OpenRouter slug**，即它通过 OpenRouter 这个网关去调 GPT 和 Claude。想用 Claude/Gemini，走 OpenRouter（正是第 10 章"一个 OpenAI 适配器吃遍 90%"的活例子）。**它把"多 provider"外包给了网关，而不是像 pi/tau 那样自己实现。**
+- **本地模型：能接，但有一个关键前提——结构化输出支持。** 设 `OPENAI_BASE_URL=http://localhost:11434/v1` + 占位 key，Ollama / vLLM / LM Studio / llama.cpp 都能接。分两种：
+  - `complete.rs` / `stream.rs`（纯文本 / 流式）——**任何**本地 OpenAI 兼容服务都能跑。
+  - `solver.rs` / `structured.rs`（用 `ResponseFormat::JsonSchema{strict:true}`，即 OpenAI 严格结构化输出）——**不是所有本地端点都支持** strict json_schema（Ollama/llama.cpp 参差，vLLM 有 guided decoding）。不支持就会失败。
+  - 兜底现成的：仓库里 `structured_ds.rs`（`ResponseFormat::JsonObject` + 把 schema 塞进提示词）就是给这种情况的降级方案。**想用本地模型跑 GAIA，多半要把 `solver.rs` 从 strict-schema 改成 `_ds` 那条路**——具体 before/after diff 见交互页《rust-ai-agent 代码精读》的「本地模型」一节。
+
+一句话：**模型不限、接口限（只认 OpenAI 兼容）；本地能接，纯文本/流式无障碍，但默认的严格结构化输出不是所有本地端点都支持，需要时降级到提示词强制方案。**
+
+### 12.7 2026-07-16 增补：ep05 长出了单轮工具调用
+
+仓库更新至 `e6ee55d`（ep05，共 713 行，全部逐文件精读）。新增 `src/tools/`——calculator 工具拆成两半：`definition.rs`（给模型看的那半：`FunctionObjectArgs` + `json!` **手写**参数 schema，operator 枚举 + 两个 number）与 `execute.rs`（真干活的那半：纯函数，除零返回 `Err(String)`）。`llm/complete.rs` 从 49 行长到 121 行：带 tools 发起调用 → 若响应含 `tool_calls`：追加 assistant(tool_calls) → 逐个执行（写死 `if name == "calculator"`）→ 回填 ToolMessage → **再调一次**取最终文本。
+
+**定性更新**：从「无工具调用」变为「**单轮工具往返**」——但**仍不是 agent 循环**：
+
+- 没有 `while`：第二轮若再要工具，代码直接走「取 content」的失败路径，没有然后了；
+- 分发写死：`if name == "calculator"` 而非 name→工具 的注册表（对照 tau 的 `dict[str, AgentTool]`）；
+- 有趣的流派细节：**工具 schema 手写 `json!`**（≈ tau 的手写 dict 流派），而同仓库的**输出 schema 用 schemars derive**——一个仓库同时示范两种 schema 来源（pi 是第三种：TypeBox）。
+
+§12.2 定位表与 §12.5 结论在「它站在 workflow 端」这点上不变；前文「无工具调用」的表述以本节为准。离真循环只差 M3/M4 的两步：包一层 `while`（直到没有 tool_calls）+ 注册表分发。交互页《rust-ai-agent 代码精读》已同步：正名框改口、代码浏览器新增 `tools/` 组（三个新文件逐字嵌入）、「对比循环」动画改为「单轮往返 vs while」。
+
+---
+
+## 13. 进阶：领域应用、多 Agent 编排与构架蓝图
+
+> 2026-07-16 新增。本章配套**新交互页 `webui/advanced.html`（进阶篇）**——领域配方选择器、五种编排模式的消息流向动画、可点选的 7+4 蓝图、三项目覆盖矩阵、M0–M11 施工路线都在网页上；本章是文字版纲要，便于检索与离线阅读。
+
+### 13.1 领域 Agent 配方：换领域 ≠ 换框架
+
+pi 三层架构的价值在这里兑现：**大脑（harness + 循环）一行不改**，动的只是产品层。
+
+> **领域 Agent = 循环（不变）× 系统提示词 × 工具集 × 上下文策略 × 守卫 × 评测**
+
+| 领域 | 工具集（动词命名、个位数） | 上下文策略 | 关键守卫 | 评测 |
+|---|---|---|---|---|
+| **编码**（基线 = pi 本体） | read / edit / write / bash / grep | diff 回显；截断 + 续读 footer；compaction | truncation guard；bash 进沙箱/容器（pi `security.md`：权限弹窗是剧场，真隔离用容器） | 仓库测试套件通过率 |
+| **深度研究** | web_search / web_fetch / save_note / read_notes | 检索原文**不进**上下文——落盘笔记（文件即外部记忆） | 网页内容一律视为数据（防注入）；结论必须带出处 | GAIA 风格问答对（rust 的 `evaluator.rs` 即雏形） |
+| **数据分析** | run_python（沙箱）/ query_sql（只读）/ save_chart | 数据帧永不进上下文，只进摘要统计；中间结果落盘 | 执行沙箱 + 资源限额；SQL 只读账号；原始数据不外发 | 已知答案的数据集问答对 |
+| **客服 / 业务** | kb_search / get_order / create_ticket / escalate_to_human | 按用户隔离 session（JSONL 会话树天然支持） | **无出处不作答**；PII 脱敏；写操作白名单；F7「联系人类也是工具」 | 标注对话回归集 + 红线用例 |
+| **DevOps / 运维** | kubectl_get / logs（只读）/ run_runbook（白名单）/ page_oncall | runbook 渐进披露（skills 式索引）；JSONL session 即**审计日志** | 读写分离；高危动作过闸门（或 pi 式整机容器隔离） | 故障演练场景库：注入已知故障测定位率 |
+
+空白模板四问：提示词（角色/边界/输出形态）？工具（≤10 个、错误可行动）？上下文（什么进、什么落盘）？守卫（哪些动作要确认）？——外加 20 个问答对起步的评测。
+
+### 13.2 多 Agent 编排：先泼冷水，再给五个模式
+
+**成本事实**（Anthropic《How we built our multi-agent research system》）：单 agent ≈ 4× 对话 token，多 agent 系统 ≈ **15×**。**工程警告**（Cognition《Don't Build Multi-Agents》）：并行子 agent 看不见彼此的中间决策，产出携带互相冲突的隐式假设——先把单线程 + 上下文工程做到头。**三判据**（至少中两条再上）：① 子任务只读、独立、可并行；② 主上下文确实会爆；③ 子任务需要异构工具/提示词。
+
+| 模式 | 一句话 | 通信契约 | 真实样本 |
+|---|---|---|---|
+| **子代理即工具** | 「派活」= 一次普通 tool call；子 agent 自跑循环，只回结论 | 子 agent 最终文本 / JSON 作为 tool_result；过程不进主上下文 | Claude Code 的 Task；Anthropic Research 系统；pi/tau 上注册一个会 new Harness 的工具即可 |
+| **并行 fan-out** | N 个只读子任务并发 + barrier 汇总 | 各 worker 返回**同一 schema** 的结果 | rust-ai-agent `bin/gaia.rs`：`JoinSet + Semaphore(3)`，逐字可抄 |
+| **流水线** | 阶段间传结构化交接物，不传全文 transcript | **schema 即接口**（strict JSON 校验） | rust 的 `ActionPlan` 正是交接物形态；断点续跑免费 |
+| **生成-评审** | 独立上下文的 critic 挑刺，带 issues 回炉（≤K 轮） | verdict `{ok, issues[]}`；只回 issues 不回推理全文 | 机械 critic 永远优先：测试套件 / exact-match（rust `is_correct`）/ lint |
+| **路由 / 分诊** | 便宜模型结构化输出 route，领域 agent 接管 | `{route, confidence}`；tool 形（所有权不动）vs handoff 形（转移，OpenAI Agents SDK） | 低置信度永远兜底转人工 |
+
+编排层选型三档：**自写并发原语**（默认：`asyncio.TaskGroup` / `JoinSet`，≤一屏代码）→ **LangGraph**（真需要图回退 / 断点 / 审批卡点，先过第 11 章 7 问）→ **Temporal**（编排要跨天跨机器存活：外层引擎 + 内层薄 harness）。
+
+### 13.3 现代最佳实践构架蓝图：7 层 + 4 横切
+
+不是发明，是整理：pi 已经做对的分层 × 12-Factor Agents × Anthropic 三篇工程文章。上层只依赖下层（M0 的依赖方向守卫锁死这一点）；横梁贯穿所有层。
+
+| 层 | 职责一句话 | pi 0.80.10 | tau 0.2.1 | rust-ai-agent ep05 |
+|---|---|---|---|---|
+| **L6 产品层** | 每个前端只是事件流的一种消费方式 | ● TUI+print+RPC | ● TUI+print | ◐ CLI bins |
+| **L5 编排（可选）** | §13.2 的五模式 + 限流 + 预算 | ◐ 实验性 `pi-orchestrator` 包孵化中（IPC/supervisor/多实例） | ○ 留白 | ◐ fan-out 雏形 |
+| **L4 会话与上下文** | JSONL 树 + 无状态 reducer + compaction | ● | ● | — |
+| **L3 工具层** | schema + 校验 + 执行 + 防呆 | ● | ● | ◐ calculator，分发写死 |
+| **L2 循环与守卫** | while + 4 守卫 + steering | ● | ● | ◐ 单轮往返，无 while |
+| **L1 事件流契约** | AgentEvent 是唯一前端接口，错误也是事件 | ● | ● | — |
+| **L0 Provider 适配** | 多厂商 wire → 统一类型；流永不 throw | ● 9 种 API | ◐ OpenAI 兼容为主 | ◐ 单格式 + OpenRouter 网关 |
+| **横切 X1–X4** | 重试退避 / 可观测 / 评测 / 安全 | ●/●/—/◐ | ●/●/—/○ | ●/◐/**●**/— |
+
+（● 完整 ◐ 部分 ○ 刻意留白 — 没有。注意 X3 评测列：rust-ai-agent **反超**——`evaluator.rs` 是 pi/tau 都缺的评测脊椎。L5 曾经三家全留白——编排长在 harness 之上，「子代理即工具」只需注册一个工具；**2026-07-19 更新：pi 的实验性 `orchestrator` 包证明留白终会被填，但作为独立的第五个包出现——依然在 harness 之上，分层判断成立**。）
+
+施工顺序即第 9 章 M0–M10；**本次新增 M11（编排里程碑）**：在 mini 上实现「子代理即工具」+ fan-out，验收 = 主 agent 派 2 个子调研并汇总（交互页建造路线一节有 12 行总表）。
+
+### 13.4 十条贴墙清单
+
+1. **拥有你的循环**——框架可选，那 ~130 行必须看得懂改得动（12-Factor F8）
+2. **系统提示词极小 + 前缀稳定**——KV-cache 命中率是最被低估的性能杠杆（Manus）
+3. **工具个位数、动词命名、错误可行动**——工具是给模型看的 API（Anthropic）
+4. **上下文三板斧：截断、落盘、压缩**——大而冷的落盘，小而热的进上下文（Manus / Chroma context rot）
+5. **事件流是唯一前端契约**——错误也是事件，改内部不破坏任何前端（pi）
+6. **会话 append-only + 无状态 reducer**——可回放、可分支、可审计，resume 免费（12-Factor F12）
+7. **结构化输出是 agent 之间的母语**——交接、路由、评审全走 schema（rust 两流派）
+8. **评测先行**——20 个问答对起步，exact-match 都比没有强（rust `evaluator.rs`）
+9. **人在环是一个工具**——escalate/contact_human 注册成工具，高危动作过闸门（12-Factor F7）
+10. **多 agent 是最后手段**——先单 agent + 好工具 + 好上下文；要上，先过三判据（Anthropic / Cognition）
+
+---
+
+## 14. 配套书：《深入理解 AI Agent》读书地图
+
+> 2026-07-19 新增（读者提议）。配套交互页 **`webui/book-map.html`**——十章接线表、公式对照、三种读法都在网页上；本章是纲要。
+
+**它是什么**：李博杰《深入理解 AI Agent：设计原理与工程实践》，全文开源（Apache-2.0，`github.com/bojieli/ai-agent-book`）：十章正文 6,845 行 markdown + v1.1 编译版 PDF + 每章一组配套示例代码。核心公式 **Agent = LLM + 上下文 + 工具**，并强调「Harness 工程——模型之外的一切工程能力才是竞争力」——与本教程的薄 harness 论点完全同源。
+
+**定位互补**：书给**纵深与全景**（原理推导、评估学、模型后训练、多模态、自我进化、Agent 社会）；本教程给**横剖与动手**（三份真代码逐行、从零复刻 M0–M11、领域配方与编排模式）。分界线清晰：书 ch7（后训练）跨进模型侧，正是 harness 侧教程刻意止步之处。
+
+**十章接线**（详表见交互页）：
+
+| 书 | 教程对应 | 蓝图层 | 一句话 |
+|---|---|---|---|
+| ch1 基础/Harness 工程 | 主教程 §2 + 蓝图总览 | 全图 | 完全共识：模型之外的工程才是竞争力 |
+| ch2 上下文工程 | 蓝图 L4 + 清单 02/04 + §4.4/§4.6 | L4 | 书光谱更全（状态栏元信息）；教程有 pi/tau 实测参数 |
+| ch3 记忆与知识库 | 领域配方·研究/客服卡 | L4 外延 | 教程一笔带过，纵深在书 |
+| ch4 工具/MCP/异步 | 蓝图 L3 + §4.3 + MCP 之辩 | L3 | 书讲分类学与生态；教程讲防呆细节 |
+| ch5 Coding Agent | **整个教程就是这章的活标本** | 全图 | 书论证元能力；pi/tau 是标本 |
+| ch6 评估 | rust 页 GAIA + X3 + M10 | X3 | 书是评估学全景；rust evaluator 是最小起点 |
+| ch7 模型后训练 | 教程刻意不覆盖 | 模型侧 | 书独有；harness/模型侧分界线本身是一课 |
+| ch8 自我进化/工具创造者 | pi 自我扩展闭环 + §4.7 | L6+扩展 | 书讲理论，pi 已产品化（registerTool + /reload） |
+| ch9 多模态与实时 | 教程不覆盖 | — | 书独有；接回蓝图=换 L3 工具 + 新 L1 事件类型 |
+| ch10 多 Agent 协作 | 进阶篇 A2 五模式 + §13.2 | L5 | 书给分类框架与失败模式；教程给可抄代码与三判据 |
+
+**三种读法**：①动手派（推荐）——mini M0–M3 → 书 ch1/2 → M4–M7 → 书 ch4/6 → M10 → 书 ch10 → 进阶篇 A2；②通读派——一晚一章通读，再回教程逐章看落地；③按病抓药——上表当索引。
+
+**元彩蛋**：仓库 `cursor-chats/` 有 269 段作者与 AI 结对写书写码的真实对话——「用 agent 写一本讲 agent 的书」，是 ch5 与本教程「操作手册」（进阶篇 A3）的高手实况样本；`EXPERIMENT_TRIAGE.md` 连反例实验都留档（与本教程「结论限定在当前快照」同味）。
+
+---
+
+## 15. 参考资料
 
 **项目本体**
 - pi：仓库 `~/workspace/code/pi` · https://pi.dev · https://github.com/earendil-works/pi
-- tau：仓库 `~/workspace/code/tau` · https://twotimespi.dev · https://github.com/alejandro-ao/tau · PyPI `tau-ai`
+- tau：仓库 `~/workspace/code/tau` · https://twotimespi.dev · https://github.com/huggingface/tau · PyPI `tau-ai`
+- 《深入理解 AI Agent：设计原理与工程实践》（李博杰，开源书 Apache-2.0）：https://github.com/bojieli/ai-agent-book —— 逐章接线见第 14 章
 
 **必读文章（按学习顺序）**
 1. Thorsten Ball, *How to Build an Agent*（2025-04）— https://ampcode.com/how-to-build-an-agent
@@ -1113,7 +1306,13 @@ Anthropic 的多 agent 研究系统实际就是这个形状：orchestrator 是�
 
 **基准与生态**
 - Terminal-Bench 2.0 — https://www.tbench.ai/ · SWE-bench Verified · MCP — https://modelcontextprotocol.io/
+- GAIA 基准（通用助手评测）— Meta + HuggingFace, 2023
 - 框架官方文档：Claude Agent SDK（code.claude.com/docs）· OpenAI Agents SDK · LangGraph · smolagents · PydanticAI · Vercel AI SDK · Google ADK
+
+**第 12 章延伸样本**
+- rust-ai-agent（教学）— https://github.com/solenovex/rust-ai-agent · B 站《用 Rust 构建 AI Agent》/ UP 主「软件工艺师」
+- pi_agent_rust（对标 pi 的 Rust coding agent）— https://github.com/Dicklesworthstone/pi_agent_rust
+- Rust 原生 agent 框架：Rig · AutoAgents · OpenFANG
 
 **本目录**
 - `sources/pi-architecture-notes.md` — pi 代码级分析（英文，含 file:line 出处）

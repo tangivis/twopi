@@ -1,0 +1,210 @@
+<title>读书地图：《深入理解 AI Agent》× 三份真代码 · pi×tau 教程</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
+  --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
+  --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
+  --pi:#1C5CAB; --tau:#8A5600; --rust:#A6431A; --adv:#6C3FC5; --arch:#0B6E62;
+  --book:#A8326E; --book-mark:#C2477F;
+  --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10); --rust-wash:rgba(194,98,45,.10);
+  --adv-wash:rgba(124,82,214,.10); --arch-wash:rgba(14,126,112,.10); --book-wash:rgba(194,71,127,.10);
+  --good:#006300; --bad:#B03030;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --shadow:0 1px 2px rgba(10,14,20,.05),0 4px 16px rgba(10,14,20,.06);
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0C0F14; --card:#131720; --card-2:#1A1F2B;
+  --ink:#E8EAEF; --ink-2:#A7ADB9; --ink-3:#767D8A;
+  --line:rgba(232,234,239,.13); --line-soft:rgba(232,234,239,.07);
+  --pi:#6DA7EC; --tau:#EDA100; --rust:#E39366; --adv:#B79BEC; --arch:#3FBFAC;
+  --book:#E58BB4; --book-mark:#C2477F;
+  --pi-wash:rgba(57,135,229,.13); --tau-wash:rgba(201,133,0,.14); --rust-wash:rgba(194,98,45,.15);
+  --adv-wash:rgba(124,82,214,.16); --arch-wash:rgba(14,126,112,.16); --book-wash:rgba(194,71,127,.16);
+  --good:#0CA30C; --bad:#E66767;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}}
+:root[data-theme="dark"]{
+  --bg:#0C0F14; --card:#131720; --card-2:#1A1F2B;
+  --ink:#E8EAEF; --ink-2:#A7ADB9; --ink-3:#767D8A;
+  --line:rgba(232,234,239,.13); --line-soft:rgba(232,234,239,.07);
+  --pi:#6DA7EC; --tau:#EDA100; --rust:#E39366; --adv:#B79BEC; --arch:#3FBFAC;
+  --book:#E58BB4; --book-mark:#C2477F;
+  --pi-wash:rgba(57,135,229,.13); --tau-wash:rgba(201,133,0,.14); --rust-wash:rgba(194,98,45,.15);
+  --adv-wash:rgba(124,82,214,.16); --arch-wash:rgba(14,126,112,.16); --book-wash:rgba(194,71,127,.16);
+  --good:#0CA30C; --bad:#E66767;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}
+:root[data-theme="light"]{
+  --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
+  --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
+  --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
+  --pi:#1C5CAB; --tau:#8A5600; --rust:#A6431A; --adv:#6C3FC5; --arch:#0B6E62;
+  --book:#A8326E; --book-mark:#C2477F;
+  --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10); --rust-wash:rgba(194,98,45,.10);
+  --adv-wash:rgba(124,82,214,.10); --arch-wash:rgba(14,126,112,.10); --book-wash:rgba(194,71,127,.10);
+  --good:#006300; --bad:#B03030;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--book);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:currentColor}
+:focus-visible{outline:2px solid var(--book-mark);outline-offset:2px;border-radius:3px}
+code,pre{font-family:var(--mono)}
+::selection{background:var(--book-wash)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header.top{position:sticky;top:0;z-index:50;background:var(--bg);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
+.topbar{display:flex;align-items:center;gap:16px;padding:10px 0;overflow-x:auto;scrollbar-width:none}
+.topbar::-webkit-scrollbar{display:none}
+.brand{font-family:var(--mono);font-weight:700;font-size:14px;white-space:nowrap}
+.brand .b{color:var(--book)}
+nav.sections{display:flex;gap:4px;margin-left:auto}
+nav.sections a{font-family:var(--mono);font-size:12px;color:var(--ink-2);padding:5px 10px;border-radius:999px;white-space:nowrap;border-bottom:none}
+nav.sections a:hover{background:var(--card-2);color:var(--ink)}
+.back{font-family:var(--mono);font-size:12px;color:var(--ink-3);white-space:nowrap;border-bottom:none}
+section{padding:56px 0 8px;scroll-margin-top:60px}
+h2{font-family:var(--mono);font-size:23px;line-height:1.3;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--book);margin-bottom:10px}
+.lede{color:var(--ink-2);max-width:66ch;margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--line-soft);border-radius:12px;box-shadow:var(--shadow)}
+.num{font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:999px;border:1px solid transparent}
+.tag.pi{color:var(--pi);background:var(--pi-wash)} .tag.tau{color:var(--tau);background:var(--tau-wash)}
+.tag.rust{color:var(--rust);background:var(--rust-wash)} .tag.adv{color:var(--adv);background:var(--adv-wash)}
+.tag.arch{color:var(--arch);background:var(--arch-wash)} .tag.book{color:var(--book);background:var(--book-wash)}
+.hero{padding:60px 0 26px}
+.hero h1{font-family:var(--mono);font-size:clamp(25px,4vw,38px);line-height:1.2;margin:12px 0 16px;letter-spacing:-.02em;text-wrap:balance}
+.hero h1 .b{color:var(--book)}
+.hero .sub{font-size:16px;color:var(--ink-2);max-width:62ch;margin:0 0 18px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line-soft);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);margin-top:8px}
+.duo>div{padding:16px 18px}
+.duo .left{background:var(--book-wash)}
+.duo .right{background:var(--card)}
+.duo h4{margin:0 0 8px;font-family:var(--mono);font-size:12.5px}
+.duo .left h4{color:var(--book)} .duo .right h4{color:var(--pi)}
+.duo p{margin:0;font-size:13px;color:var(--ink-2)}
+.statrow{display:flex;gap:26px;flex-wrap:wrap;margin-top:24px;padding-top:20px;border-top:1px solid var(--line-soft)}
+.stat .v{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--book)}
+.stat .k{font-size:12px;color:var(--ink-3);margin-top:2px}
+.formula{padding:18px;display:grid;gap:12px}
+.frow{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:baseline}
+.frow .who{font-family:var(--mono);font-size:11.5px;text-align:right}
+.frow .eq{font-family:var(--mono);font-size:clamp(12px,1.8vw,14.5px);overflow-x:auto;white-space:nowrap}
+.frow.book .who{color:var(--book)} .frow.book .eq b{color:var(--book)}
+.frow.tut .who{color:var(--adv)} .frow.tut .eq b{color:var(--adv)}
+.fnote{font-size:13px;color:var(--ink-2);border-top:1px dashed var(--line);padding-top:12px}
+.maptable{width:100%;border-collapse:collapse;font-size:12.5px}
+.maptable th,.maptable td{padding:9px 12px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top}
+.maptable th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.maptable .bch{font-weight:700;color:var(--ink);white-space:nowrap}
+.maptable .bch small{display:block;font-weight:400;color:var(--ink-3);font-size:11px;white-space:normal}
+.maptable a{font-family:var(--mono);font-size:12px}
+.lchip{display:inline-block;font-family:var(--mono);font-size:10.5px;padding:1px 8px;border-radius:6px;background:var(--arch-wash);color:var(--arch);white-space:nowrap}
+.routes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.route{padding:14px 16px}
+.route h4{margin:0 0 8px;font-family:var(--mono);font-size:13px;color:var(--book)}
+.route ol{margin:0;padding-left:18px;font-size:12.5px;color:var(--ink-2)}
+.route li{margin:4px 0}
+.route p{margin:0 0 6px;font-size:12.5px;color:var(--ink-2)}
+.route code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+.meta-egg{margin-top:18px;padding:16px 18px;border-left:3px solid var(--book-mark)}
+.meta-egg p{margin:6px 0;font-size:13.5px;color:var(--ink-2)}
+.meta-egg b{color:var(--ink)}
+footer{margin-top:64px;border-top:1px solid var(--line-soft);padding:24px 0 40px;font-size:12.5px;color:var(--ink-3)}
+footer a{color:var(--book)}
+.provenance{margin-top:10px;font-size:11.5px}
+@media (max-width:900px){
+  .duo,.routes{grid-template-columns:1fr}
+  .frow{grid-template-columns:1fr}.frow .who{text-align:left}
+  nav.sections{display:none}
+}
+</style>
+
+<header class="top"><div class="wrap topbar">
+  <div class="brand"><span class="b">读书地图</span> · 深入理解 AI Agent</div>
+  <a class="back" href="./index.html">← 主教程</a>
+  <a class="back" href="./advanced.html">进阶篇</a>
+  <a class="back" href="./rust-ai-agent.html">🦀 rust 精读</a>
+  <nav class="sections">
+    <a href="#what">这本书</a><a href="#formula">公式对照</a><a href="#map">章节映射</a><a href="#route">三种读法</a><a href="#meta">元彩蛋</a>
+  </nav>
+</div></header>
+
+<section class="hero" id="what"><div class="wrap">
+  <div class="kicker">第四坐标 · 理论纵深 · 2026-07-19 纳入</div>
+  <h1>一本书 × 三份真代码：<br><span class="b">《深入理解 AI Agent》</span>读书地图</h1>
+  <p class="sub">李博杰的开源书（Apache-2.0）：十章正文全文开源（6,845 行 markdown，v1.1 有编译好的 PDF），每章配一组可运行示例代码。本页不是书评，是<b>接线图</b>——书的每一章接到本教程的哪一站、蓝图的哪一层；重叠处谁深谁浅、互补处缺什么补什么。</p>
+  <div class="duo">
+    <div class="left"><h4>📕 书给你「纵深与全景」</h4><p>原理推导 + 全景覆盖：上下文工程的完整光谱、评估学、<b>模型后训练（RL/SFT）</b>、<b>多模态与实时交互</b>、自我进化、Agent 社会——这些是本教程（harness 侧）刻意不碰的领地。</p></div>
+    <div class="right"><h4>⚙️ 教程给你「横剖与动手」</h4><p>三份真代码逐行横剖（pi 生产级 / tau 教学级 / rust 前传）+ 从零复刻 M0–M11 + 领域配方与编排模式。书里讲的原理，在这里能摸到对应的<b>真实实现文件</b>。</p></div>
+  </div>
+  <div class="statrow">
+    <div class="stat"><div class="v num">10</div><div class="k">章正文（+引言/后记）</div></div>
+    <div class="stat"><div class="v num">6,845</div><div class="k">行 markdown 全文开源</div></div>
+    <div class="stat"><div class="v num">10</div><div class="k">组配套章节代码</div></div>
+    <div class="stat"><div class="v num">269</div><div class="k">段 cursor 对话（元彩蛋 ↓）</div></div>
+  </div>
+</div></section>
+
+<section id="formula"><div class="wrap">
+  <div class="kicker">对照 · 第 1 站</div>
+  <h2>两个公式，同一个命题</h2>
+  <p class="lede">书的核心公式和本教程的配方公式，是同一命题的两种展开——而且两边对「什么最值钱」的判断完全一致：<b>模型之外的工程（Harness）才是竞争力</b>。</p>
+  <div class="card formula">
+    <div class="frow book"><div class="who">书 · 第 1 章</div><div class="eq">Agent <span style="color:var(--ink-3)">=</span> LLM <span style="color:var(--ink-3)">+</span> <b>上下文</b> <span style="color:var(--ink-3)">+</span> <b>工具</b>　<span style="color:var(--ink-3)">（＋Harness 工程 = 模型之外的一切竞争力）</span></div></div>
+    <div class="frow tut"><div class="who">本教程 · 进阶篇</div><div class="eq">领域 Agent <span style="color:var(--ink-3)">=</span> <b>循环</b>(不变) <span style="color:var(--ink-3)">×</span> 提示词 <span style="color:var(--ink-3)">×</span> 工具集 <span style="color:var(--ink-3)">×</span> 上下文策略 <span style="color:var(--ink-3)">×</span> <b>守卫</b> <span style="color:var(--ink-3)">×</span> <b>评测</b></div></div>
+    <div class="fnote">书把「上下文 + 工具」两个名词展开成十章原理（ch2 上下文、ch3 记忆、ch4 工具、ch6 评估…）；教程把「循环 × 守卫 × 评测」落成三份真代码和 M0–M11 施工图。书回答「为什么这样设计」，教程回答「设计落到第几行代码」——合起来正好一张完整地图。分界线也清晰：<b>书的 ch7（后训练）跨进了模型侧</b>，那是 harness 侧教程（本站）刻意止步的地方——这条界线本身就是一课。</div>
+  </div>
+</div></section>
+
+<section id="map"><div class="wrap">
+  <div class="kicker">对照 · 第 2 站</div>
+  <h2>十章逐一接线：书 ↔ 教程 ↔ 蓝图</h2>
+  <p class="lede">每行一句话讲清「谁深谁浅」。蓝图层指<a href="./advanced.html#arch">进阶篇的 7 层 + 4 横切</a>。</p>
+  <div class="card" style="padding:6px 18px 14px;overflow-x:auto">
+    <table class="maptable">
+      <tr><th>书的章</th><th>教程对应</th><th>蓝图层</th><th>谁深谁浅（对读建议）</th></tr>
+      <tr><td class="bch">ch1 · Agent 基础<small>公式 / Harness 工程</small></td><td><a href="./index.html#loop">主教程 §2 循环本质</a> · <a href="./advanced.html#arch">蓝图总览</a></td><td><span class="lchip">全图</span></td><td>完全共识——「模型之外的工程才是竞争力」就是 badlogic 薄 harness 宣言的另一种说法。两边随便先读哪个。</td></tr>
+      <tr><td class="bch">ch2 · 上下文工程<small>KV Cache 友好 / 动态提示词与 Skills / 状态栏 / 压缩</small></td><td><a href="./advanced.html#arch">蓝图 L4</a> · <a href="./advanced.html#checklist">清单 02/04</a> · 文档 §4.4/§4.6</td><td><span class="lchip">L4 上下文</span></td><td>书的光谱更全（「状态栏元信息」教程没讲）；教程有 pi/tau 的实测参数（reserve 16384 / keepRecent 20000 / 切点不劈工具对）。互为注脚的典范。</td></tr>
+      <tr><td class="bch">ch3 · 用户记忆与知识库<small>记忆系统 / RAG / 知识图谱</small></td><td><a href="./advanced.html#usage">领域配方 · 研究/客服卡</a>（笔记落盘 / kb_search）</td><td><span class="lchip">L4 外延</span></td><td>教程只有配方级一笔带过——纵深全在书里。要做记忆/RAG 类 agent，这章是必读补课。</td></tr>
+      <tr><td class="bch">ch4 · 工具<small>设计原则 / MCP / 感知·执行·协作 / 异步</small></td><td><a href="./advanced.html#arch">蓝图 L3</a> · 文档 §4.3 · 主教程「MCP 之辩」卡</td><td><span class="lchip">L3 工具</span></td><td>书讲分类学与 MCP 生态全景；教程讲防呆细节（oldText 必须唯一、截断 footer、错误可行动）。先书后代码。</td></tr>
+      <tr><td class="bch">ch5 · Coding Agent<small>代码 = 通用 Agent 的元能力</small></td><td><b>整个教程就是这一章的活标本</b>（pi 生产级 / tau 教学级）</td><td><span class="lchip">全图</span></td><td>书论证「为什么 coding 是元能力」；pi/tau 给出生产级与教学级两个标本，逐行可对照。读这章时把 tau 打开放旁边。</td></tr>
+      <tr><td class="bch">ch6 · 评估<small>数据集 / 指标 / 显著性 / 可观测</small></td><td><a href="./rust-ai-agent.html#gaia">rust 页 GAIA 流水线</a> · 蓝图 X3 · mini M10</td><td><span class="lchip">X3 评测</span></td><td>书是评估学全景（统计显著性、评估驱动选型）；rust 的 <code>evaluator.rs</code> 是它的最小可跑起点。从 20 题 exact-match 起步，再按书升级。</td></tr>
+      <tr><td class="bch">ch7 · 模型后训练<small>SFT / RL / RLHF / 工具调用训练</small></td><td>教程<b>刻意不覆盖</b>（harness 侧止步于此）</td><td><span class="lchip">模型侧</span></td><td>书独有。harness 侧（教程全部内容）与模型侧（这一章）的分界线，就是「你该把工程精力花在哪」的答案图。</td></tr>
+      <tr><td class="bch">ch8 · 自我进化<small>经验学习 / 工具发现 / 工具创造者</small></td><td>pi 的自我扩展闭环（运行中 <code>registerTool</code> + <code>/reload</code>）· 文档 §4.7</td><td><span class="lchip">L6 + 扩展</span></td><td>惊人对应：书讲「从工具使用者到工具创造者」，pi 已把它产品化——agent 读自带文档、写扩展、热加载给自己用。理论与产品同时在场。</td></tr>
+      <tr><td class="bch">ch9 · 多模态与实时<small>语音三范式 / Computer Use / 机器人</small></td><td>教程不覆盖（coding 是纯文本域）</td><td><span class="lchip">—</span></td><td>书独有。接回蓝图的方式：多模态 = 换一套 L3 工具（看屏/点击）+ 新的 L1 事件类型——分层不变。</td></tr>
+      <tr><td class="bch">ch10 · 多 Agent 协作<small>分类框架 / 共享 vs 不共享上下文 / 失败模式</small></td><td><a href="./advanced.html#orch">进阶篇 A2 五模式 + 冷水框</a> · 文档 §13.2</td><td><span class="lchip">L5 编排</span></td><td>书给分类框架与失败模式学；教程给可抄代码骨架与三判据。两边引用同一批来源（Anthropic/Cognition），结论互相印证——先过教程冷水框，再用书补理论。</td></tr>
+    </table>
+  </div>
+</div></section>
+
+<section id="route"><div class="wrap">
+  <div class="kicker">怎么配合用 · 第 3 站</div>
+  <h2>三种读法，按你的性格挑</h2>
+  <div class="routes">
+    <div class="card route"><h4>① 动手派（推荐默认）</h4>
+      <ol><li>教程 mini M0–M3（先让循环转起来）</li><li>书 ch1/ch2（回头补"为什么"）</li><li>教程 M4–M7（工具 + 会话）</li><li>书 ch4/ch6（工具分类学 + 评估学）</li><li>教程 M10 评测 → 书 ch10 → <a href="./advanced.html#orch">进阶篇 A2</a></li></ol></div>
+    <div class="card route"><h4>② 通读派</h4>
+      <p>书从引言到 ch10 通读一遍（一晚一章，两周）；然后回到教程，按上面映射表逐章"看真代码怎么落地"——ch5 配 tau 源码、ch6 配 rust 评测页、ch10 配编排模式动画。</p></div>
+    <div class="card route"><h4>③ 按病抓药</h4>
+      <p>把映射表当索引用：<br>· 上下文总爆 → 书 ch2 + <a href="./advanced.html#arch">蓝图 L4</a><br>· 工具设计纠结 → 书 ch4 + 文档 §4.3<br>· 不知道好不好 → 书 ch6 + <a href="./rust-ai-agent.html#gaia">rust 评测页</a><br>· 想上多 agent → 先<a href="./advanced.html#orch">冷水框</a>再书 ch10</p></div>
+  </div>
+</div></section>
+
+<section id="meta"><div class="wrap">
+  <div class="kicker">元彩蛋 · 第 4 站</div>
+  <h2>这本书本身就是一个 agent 使用示范</h2>
+  <div class="card meta-egg">
+    <p><b>仓库里有个 <code>cursor-chats/</code> 目录：269 段作者与 AI 结对写书、写实验代码的真实对话记录。</b>「用 agent 写一本讲 agent 的书」——这既是书 ch5（代码是元能力）的现身说法，也是<a href="./advanced.html#operate">进阶篇「操作手册」</a>的高手实况：怎么下任务、怎么贴报错全文、怎么中途纠偏，一段段全是样本。</p>
+    <p>另有 <code>EXPERIMENT_TRIAGE.md</code> 记录实验分诊（哪些跑通、哪些是反例）——比如「阶段脚手架实测<b>不</b>饱和」这类反例也留在仓库里。诚实的实验记录，和本教程「结论限定在当前快照」是同一种味道。</p>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <p><b style="color:var(--ink)">本系列</b>：<a href="./index.html">主教程</a> · <a href="./advanced.html">进阶篇（应用 × 构架）</a> · <a href="./rust-ai-agent.html">rust-ai-agent 精读</a> · 本页（读书地图）</p>
+  <p>书：<a href="https://github.com/bojieli/ai-agent-book">github.com/bojieli/ai-agent-book</a>《深入理解 AI Agent：设计原理与工程实践》· 李博杰 · Apache-2.0 · v1.1（含编译版 PDF）</p>
+  <p class="provenance">2026-07-19 克隆读取（commit 0ab5d1e）：README、全书章节结构与正文小节标题已对读；映射基于章节结构与教程内容的对照，逐章精读后如有修订将随版本更新。配套文档见主文档第 14 章。</p>
+</div></footer>
