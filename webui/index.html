@@ -324,26 +324,26 @@ footer p{margin:4px 0}
     <div>
       <div class="kicker">交互式教程 · 对比学习 Agent 开发</div>
       <h1>一个循环，两种实现<br><span class="rel">τ = 2π：tau 是 pi 的 Python 教学复刻</span></h1>
-      <p class="sub">Coding agent 的核心只是十行循环：<b>问模型 → 执行工具 → 结果回填 → 重复</b>。这两个真实开源项目共享同一张架构蓝图——先在 tau 的 1,351 行核心里看懂它，再到 pi 的 11 万行里看它的生产形态。</p>
+      <p class="sub">Coding agent 的核心只是十行循环：<b>问模型 → 执行工具 → 结果回填 → 重复</b>。这两个真实开源项目共享同一张架构蓝图——先在 tau 的 1,750 行核心里看懂它，再到 pi 的 10 万行里看它的生产形态。</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <a class="btn primary" href="#loop" style="border-bottom:none">▶ 先玩循环模拟器</a>
         <a class="btn" href="#path" style="border-bottom:none">直接看学习路径</a>
       </div>
       <div class="statrow">
-        <div class="stat"><div class="v num" style="color:var(--pi)">111.7k</div><div class="k">pi 源码行数（TS）</div></div>
-        <div class="stat"><div class="v num" style="color:var(--tau)">24.6k</div><div class="k">tau 源码行数（Py）</div></div>
+        <div class="stat"><div class="v num" style="color:var(--pi)">100.6k</div><div class="k">pi 源码行数（TS · 五包 src）</div></div>
+        <div class="stat"><div class="v num" style="color:var(--tau)">31.9k</div><div class="k">tau 源码行数（Py · src）</div></div>
         <div class="stat"><div class="v num">4</div><div class="k">默认工具（两者相同）</div></div>
         <div class="stat"><div class="v num">&lt;1k</div><div class="k">pi 的 harness token 开销</div></div>
       </div>
     </div>
     <div class="projcards">
       <div class="projcard pi">
-        <div class="pname">pi <small>TypeScript · v0.80.7 · Mario Zechner (badlogic)</small></div>
-        <p>生产级极简 harness。npm 五件套：pi-ai（统一 1,057 个模型）/ pi-agent-core / pi-coding-agent / pi-tui。运行时扩展系统 + 自我扩展能力。Terminal-Bench 2.0 上与 Codex/Cursor 同级。</p>
+        <div class="pname">pi <small>TypeScript · v0.80.10 · Mario Zechner (badlogic)</small></div>
+        <p>生产级极简 harness。npm 五件套：pi-ai（统一 1,000+ 模型）/ pi-agent-core / pi-coding-agent / pi-tui / pi-orchestrator（实验）。运行时扩展系统 + 自我扩展能力 + 内建 llama.cpp 路由。Terminal-Bench 2.0 上与 Codex/Cursor 同级。</p>
       </div>
       <div class="projcard tau">
-        <div class="pname">tau <small>Python · v0.1.6 · Alejandro AO · huggingface/tau</small></div>
-        <p>"为阅读而生"的教学复刻：tau_ai / tau_agent / tau_coding 三层，核心循环 276 行。40 篇 dev-notes 逐阶段记录"这对应 pi 的什么设计"。也是能真用的终端 agent（PyPI：tau-ai）。</p>
+        <div class="pname">tau <small>Python · v0.2.1 · Alejandro AO · huggingface/tau</small></div>
+        <p>"为阅读而生"的教学复刻：tau_ai / tau_agent / tau_coding 三层，核心循环 318 行。40+ 篇 dev-notes 逐阶段记录"这对应 pi 的什么设计"。0.2.0 起采纳 Pi 兼容事件与扩展协议。也是能真用的终端 agent（PyPI：tau-ai）。</p>
       </div>
       <div class="projcard" style="border-left:3px solid var(--ink-3)">
         <div class="pname" style="font-size:13px">学习策略 <small>本教程的用法</small></div>
@@ -413,21 +413,21 @@ footer p{margin:4px 0}
     <details class="layer" open>
       <summary>
         <div class="lt"><div class="role">产品层 · coding agent 本体</div><div class="desc">CLI / TUI / 内置工具 / 系统提示词 / 会话落盘 / 压缩 / skills / 配置凭据</div></div>
-        <div class="side pi"><div class="pkg">pi-coding-agent</div><div class="loc num">52,660 行 · TUI/print/JSON/RPC 四模式</div></div>
-        <div class="side tau"><div class="pkg">tau_coding</div><div class="loc num">19,832 行 · TUI/print 两模式</div></div>
+        <div class="side pi"><div class="pkg">pi-coding-agent</div><div class="loc num">54,662 行 · TUI/print/JSON/RPC 四模式</div></div>
+        <div class="side tau"><div class="pkg">tau_coding</div><div class="loc num">25,948 行 · TUI/print 两模式</div></div>
       </summary>
       <div class="detail">
         <div><h5 style="color:var(--pi)">pi</h5><ul>
-          <li>中枢 <code>AgentSession</code>（3,246 行）：持久化 + 扩展 + 自动压缩 + 自动重试 + 模型切换</li>
+          <li>中枢 <code>AgentSession</code>（3,283 行）：持久化 + 扩展 + 自动压缩 + 自动重试 + 模型切换</li>
           <li>7 个工具实现，默认启用 4 个；grep 走 ripgrep、find 走 fd（自动下载二进制）</li>
           <li><b>RPC 模式</b>：30+ 命令经 stdin/stdout 驱动外部前端</li>
           <li>扩展 / skills / prompt 模板 / 主题 / packages 五级定制</li>
         </ul></div>
         <div><h5 style="color:var(--tau)">tau</h5><ul>
-          <li>中枢 <code>CodingSession</code>（2,274 行）：同职责减去扩展系统</li>
+          <li>中枢 <code>CodingSession</code>（2,627 行）：同职责（0.2.0 起也长出扩展系统）</li>
           <li>恰好 4 个工具；搜索靠 bash 里的 grep</li>
-          <li>Textual TUI（4,384 行）隔在 100 行 <code>adapter.py</code> 后面（ADR 0001）</li>
-          <li>skills + prompt 模板；extensions 明确推迟（Phase 21）</li>
+          <li>Textual TUI（tui/ 目录 9,378 行）隔在 99 行 <code>adapter.py</code> 后面（ADR 0001）</li>
+          <li>skills + prompt 模板 + extensions（0.2.0 落地：Pi 兼容协议，Phase 21 兑现）</li>
         </ul></div>
       </div>
     </details>
@@ -436,7 +436,7 @@ footer p{margin:4px 0}
       <summary>
         <div class="lt"><div class="role">大脑层 · 可移植 agent 运行时</div><div class="desc">循环 / 事件 / 消息模型 / 工具接口 / steering 队列 / 会话数据结构</div></div>
         <div class="side pi"><div class="pkg">pi-agent-core</div><div class="loc num">8,244 行 · 纯函数 loop + Agent 类 + harness</div></div>
-        <div class="side tau"><div class="pkg">tau_agent</div><div class="loc num">1,351 行 · loop.py 276 行一次读完</div></div>
+        <div class="side tau"><div class="pkg">tau_agent</div><div class="loc num">1,750 行 · loop.py 318 行一次读完</div></div>
       </summary>
       <div class="detail">
         <div><h5 style="color:var(--pi)">pi</h5><ul>
@@ -523,7 +523,7 @@ footer p{margin:4px 0}
     <details class="mech"><summary><span class="mtitle">扩展系统</span><span class="mhint">pi 的灵魂</span></summary>
       <div class="mbody"><div class="cols">
         <div><h6 class="pi">pi</h6><ul><li>TS 扩展 jiti 热加载：33 个事件，可拦截 input/tool_call/context/provider 请求</li><li>运行中 registerTool 立即可用 + /reload 闭环 → <b>agent 自己扩展自己</b></li><li>skills / 模板 / 主题 / packages</li></ul></div>
-        <div><h6 class="tau">tau</h6><ul><li>只有 skills（严格 Agent Skills 规范，ADR 0003）+ prompt 模板</li><li>extensions 推迟到 Phase 21</li><li>custom 会话条目留了钩子</li></ul></div>
+        <div><h6 class="tau">tau</h6><ul><li>skills（严格 Agent Skills 规范，ADR 0003）+ prompt 模板</li><li><b>0.2.0 起 extensions 落地（Phase 21 兑现）</b>：直接采纳 Pi 兼容扩展协议，examples 带 hello_tool.py / permission_gate.py + create-tau-extension skill</li><li>还打包了 self-knowledge：agent 随身带自己的架构文档</li></ul></div>
       </div><div class="bp"><b>极简核心成立的另一半</b>：pi 拒绝内置 MCP/权限/计划模式的每一条，都跟着"用扩展自己装一个"。ExtensionAPI 类型定义就是一份"harness 有哪些可拦截点"的清单。</div></div>
     </details>
 
@@ -552,17 +552,18 @@ footer p{margin:4px 0}
 
   <div class="card chartcard" id="locChart">
     <h3>各层源码行数对比</h3>
-    <p class="csub">单位：千行（k LOC）· 不含测试 · pi v0.80.6 / tau v0.1.5</p>
+    <p class="csub">单位：千行（k LOC）· 不含测试 · pi v0.80.10 / tau v0.2.1（2026-07-19 实测，口径：各包 src 下 .ts/.py）</p>
     <div class="legend"><span><i style="background:var(--pi-mark)"></i>pi (TypeScript)</span><span><i style="background:var(--tau-mark)"></i>tau (Python)</span></div>
     <div id="locBars"></div>
     <details class="tablefold"><summary>表格视图</summary>
       <table><thead><tr><th>层</th><th>pi 包</th><th>pi 行数</th><th>tau 包</th><th>tau 行数</th></tr></thead>
       <tbody>
-        <tr><td>Provider 层</td><td>pi-ai</td><td class="num">36,702</td><td>tau_ai</td><td class="num">3,404</td></tr>
-        <tr><td>大脑层</td><td>pi-agent-core</td><td class="num">8,244</td><td>tau_agent</td><td class="num">1,351</td></tr>
-        <tr><td>产品层</td><td>pi-coding-agent</td><td class="num">52,660</td><td>tau_coding</td><td class="num">19,832</td></tr>
-        <tr><td>TUI</td><td>pi-tui</td><td class="num">12,144</td><td>（用 Textual）</td><td class="num">—</td></tr>
-        <tr><td>测试</td><td>全仓</td><td class="num">≈83,000</td><td>tests/</td><td class="num">≈19,156</td></tr>
+        <tr><td>Provider 层</td><td>pi-ai</td><td class="num">23,590</td><td>tau_ai</td><td class="num">4,253</td></tr>
+        <tr><td>大脑层</td><td>pi-agent-core</td><td class="num">8,244</td><td>tau_agent</td><td class="num">1,750</td></tr>
+        <tr><td>产品层</td><td>pi-coding-agent</td><td class="num">54,662</td><td>tau_coding</td><td class="num">25,948</td></tr>
+        <tr><td>TUI</td><td>pi-tui</td><td class="num">12,166</td><td>（用 Textual）</td><td class="num">—</td></tr>
+        <tr><td>编排层（实验）</td><td>pi-orchestrator</td><td class="num">1,982</td><td>—</td><td class="num">—</td></tr>
+        <tr><td>测试</td><td>全仓</td><td class="num">≈88,000</td><td>tests/</td><td class="num">≈25,379</td></tr>
       </tbody></table>
     </details>
   </div>
@@ -589,7 +590,7 @@ footer p{margin:4px 0}
         <tr><td>F3 拥有上下文窗口</td><td class="st"><span class="yes">✓ 满分</span></td><td>transformContext / 压缩 / 溢出恢复全部自持</td></tr>
         <tr><td>F4 工具只是结构化输出</td><td class="st"><span class="yes">✓</span></td><td>TypeBox / 手写 JSON Schema，无魔法装饰器</td></tr>
         <tr><td>F6 启动/暂停/恢复 API</td><td class="st"><span class="yes">✓</span></td><td>prompt / steer / follow_up / abort + JSONL resume</td></tr>
-        <tr><td>F8 拥有控制流</td><td class="st"><span class="yes">✓</span></td><td>循环就是自己的一个函数（276 行读完）</td></tr>
+        <tr><td>F8 拥有控制流</td><td class="st"><span class="yes">✓</span></td><td>循环就是自己的一个函数（318 行读完）</td></tr>
         <tr><td>F9 错误压入上下文</td><td class="st"><span class="yes">✓</span></td><td>异常 → ok=false 工具结果；模型看见失败才会修</td></tr>
         <tr><td>F12 无状态 reducer</td><td class="st"><span class="yes">✓</span></td><td><code>SessionState.from_entries()</code> 字面实现</td></tr>
         <tr><td>F7 用工具调用联系人类（HITL）</td><td class="st"><span class="no">✗ 无内置</span></td><td>pi 的答案："用扩展自己装"（tool_call 钩子可拦截）</td></tr>
@@ -640,8 +641,8 @@ footer p{margin:4px 0}
       <div class="psub">每一步都是一次可完成的阅读</div>
       <ol>
         <li>README + 官网 <code>internals/architecture</code>、<code>design-principles</code>（背下 7 条原则）</li>
-        <li>数据模型：<code>tau_agent/messages.py</code>（47 行）→ <code>tools.py</code> → <code>events.py</code></li>
-        <li><b>核心：<code>loop.py</code>（276 行）</b>，对照官网 agent-loop 页逐步读</li>
+        <li>数据模型：<code>tau_agent/messages.py</code>（277 行，0.2.0 起承载 Pi 兼容协议类型）→ <code>tools.py</code> → <code>events.py</code></li>
+        <li><b>核心：<code>loop.py</code>（318 行）</b>，对照官网 agent-loop 页逐步读</li>
         <li><code>harness.py</code>：双队列、取消、transcript 修复</li>
         <li><code>session/</code>：entries → tree → memory（reducer！）+ 根目录 JSONL 样本</li>
         <li><code>tau_ai/provider.py</code> + <code>anthropic.py</code>：手写 SSE 长什么样</li>
@@ -700,6 +701,13 @@ footer p{margin:4px 0}
     </div>
   </div>
 
+  <div class="card pathcard" style="margin-top:16px;border-left:3px solid #C2477F">
+    <h3>配套书：《深入理解 AI Agent》读书地图</h3>
+    <div class="psub">主文档第 14 章 · 第四坐标 · 理论纵深（2026-07-19 纳入）</div>
+    <p style="font-size:13px;color:var(--ink-2);margin:0 0 12px">李博杰的开源书（Apache-2.0，十章正文全文 + 每章配套代码）。核心公式「Agent = LLM + 上下文 + 工具」与本教程同源；书给<b>纵深与全景</b>（评估学、模型后训练、多模态、自我进化、多 Agent 失败模式学），教程给<b>横剖与动手</b>。读书地图页把十章逐一接线到教程站点与蓝图层，附三种配合读法。彩蛋：仓库里 269 段作者与 AI 结对写书的真实对话——用 agent 写 agent 书的现场示范。</p>
+    <a class="btn" style="text-decoration:none;border-bottom:none;display:inline-block" href="./book-map.html">📕 打开读书地图 →</a>
+  </div>
+
   <div class="card labs">
     <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><h3 style="margin:0">12 个动手实验</h3><span class="psub" style="margin:0">由浅入深 · 勾选保存进度</span></div>
     <div class="progress"><div class="meter"><i id="labBar" style="width:0%;background:var(--good)"></i></div><span class="pct num" id="labPct">0 / 12</span></div>
@@ -713,11 +721,12 @@ footer p{margin:4px 0}
       <p><b style="color:var(--ink)">配套资料</b></p>
       <p>完整详细文档：<code>agent-study/pi-vs-tau-架构对比学习指南.md</code></p>
       <p>代码级分析笔记（含 file:line 出处）：<code>agent-study/sources/</code></p>
+      <p>配套书接线：<a href="./book-map.html">读书地图</a>（《深入理解 AI Agent》· 李博杰）</p>
     </div>
     <div>
       <p><b style="color:var(--ink)">项目</b></p>
-      <p>pi：<a href="https://pi.dev">pi.dev</a> · github.com/earendil-works/pi · v0.80.7</p>
-      <p>tau：<a href="https://twotimespi.dev">twotimespi.dev</a> · github.com/huggingface/tau · v0.1.6</p>
+      <p>pi：<a href="https://pi.dev">pi.dev</a> · github.com/earendil-works/pi · v0.80.10</p>
+      <p>tau：<a href="https://twotimespi.dev">twotimespi.dev</a> · github.com/huggingface/tau · v0.2.1</p>
     </div>
     <div>
       <p><b style="color:var(--ink)">必读三篇</b></p>
@@ -726,7 +735,7 @@ footer p{margin:4px 0}
       <p><a href="https://mariozechner.at/posts/2025-11-30-pi-coding-agent/">pi 设计宣言</a>（badlogic）</p>
     </div>
   </div>
-  <p style="margin-top:20px">生成于 2026-07-11 · 数据基于 pi v0.80.6（commit 4c18610）与 tau v0.1.5 · 2026-07-16 复核至 pi v0.80.7 / tau v0.1.6（仓库现挂 huggingface/tau）· 本页为单文件离线可用</p>
+  <p style="margin-top:20px">生成于 2026-07-11 · 数据基于 pi v0.80.6（commit 4c18610）与 tau v0.1.5 · 2026-07-19 复核至 pi v0.80.10 / tau v0.2.1（0.2.0 采纳 Pi 兼容事件与扩展协议；行数为当日实测）· 本页为单文件离线可用</p>
 </div></footer>
 
 <div class="viztip" id="viztip"></div>
@@ -972,12 +981,13 @@ render();
 
 /* ================= 图表 ================= */
 const LOC=[
- {g:'Provider 层',pi:36.7,tau:3.4,pn:'pi-ai',tn:'tau_ai',note:'差距 = 兼容性长尾：10 种 thinking 方言、24 条溢出正则、1057 个模型目录、OAuth×3'},
- {g:'大脑层',pi:8.2,tau:1.35,pn:'pi-agent-core',tn:'tau_agent',note:'核心循环两边几乎同构；pi 多了并行执行、钩子系统、可移植 harness'},
- {g:'产品层',pi:52.7,tau:19.8,pn:'pi-coding-agent',tn:'tau_coding',note:'pi 多出扩展系统、RPC 模式、packages、7 个工具、会话迁移'},
- {g:'TUI',pi:12.1,tau:0,pn:'pi-tui（自研差分渲染）',tn:'tau 用 Textual（不计入）',note:'pi 自研 vs tau 借力生态——最典型的取舍'},
+ {g:'Provider 层',pi:23.6,tau:4.25,pn:'pi-ai',tn:'tau_ai',note:'差距 = 兼容性长尾：10 种 thinking 方言、24 条溢出正则、OAuth×N。0.80.x 已把 1000+ 模型目录拆成生成数据，.ts 因此从 36.7k 瘦身'},
+ {g:'大脑层',pi:8.2,tau:1.75,pn:'pi-agent-core',tn:'tau_agent',note:'核心循环两边几乎同构；pi 多了并行执行、钩子系统、可移植 harness。pi 侧三个月零增长——核心已收敛'},
+ {g:'产品层',pi:54.7,tau:25.9,pn:'pi-coding-agent',tn:'tau_coding',note:'pi 多出 RPC 模式、packages、7 个工具、会话迁移；扩展系统 0.2.0 起两边都有（tau 采纳 Pi 兼容协议）'},
+ {g:'TUI',pi:12.2,tau:0,pn:'pi-tui（自研差分渲染）',tn:'tau 用 Textual（不计入）',note:'pi 自研 vs tau 借力生态——最典型的取舍'},
+ {g:'编排层（实验）',pi:2.0,tau:0,pn:'pi-orchestrator',tn:'—',note:'2026-06 起孵化的第五个包：IPC/supervisor/多实例存储——蓝图 L5 的留白正被官方试探性填上（README 自标 Experimental）'},
 ];
-const MAX=52.7;
+const MAX=54.7;
 const locBars=$('locBars');
 LOC.forEach(d=>{
   const g=document.createElement('div');g.className='bargroup';

@@ -2,10 +2,10 @@
 
 > 以两个真实开源项目为教材，系统学习 coding agent / agent harness 的设计与实现。
 >
-> - **pi** `~/workspace/code/pi` — TypeScript 生产级 agent harness（Mario Zechner / badlogic，分析基于 v0.80.6，2026-07-16 复核至 v0.80.7）
-> - **tau** `~/workspace/code/tau` — Python 教学级复刻（Alejandro AO，仓库现挂 `huggingface/tau`；分析基于 v0.1.5，2026-07-16 复核至 v0.1.6。官方自述 *"A Python implementation of a minimalist Pi-style coding-agent harness"*）
+> - **pi** `~/workspace/code/pi` — TypeScript 生产级 agent harness（Mario Zechner / badlogic，分析基于 v0.80.6，最近复核 2026-07-19 至 v0.80.10）
+> - **tau** `~/workspace/code/tau` — Python 教学级复刻（Alejandro AO，仓库现挂 `huggingface/tau`；分析基于 v0.1.5，最近复核 2026-07-19 至 v0.2.1。官方自述 *"A Python implementation of a minimalist Pi-style coding-agent harness"*）
 >
-> 编写日期：2026-07-11（2026-07-12 增补第 9–11 章：从零复刻 / 模型接入 / 深度对比主流框架；2026-07-13 增补第 12 章：延伸样本 rust-ai-agent 对比；2026-07-16 增补第 13 章：进阶——领域应用 / 多 Agent 编排 / 构架蓝图，配套新交互页 `webui/advanced.html`）。基于 pi commit `4c18610`、tau v0.1.5（2026-07-09）；2026-07-12 复核：pi 已 pull 至 `8479bd84`（版本仍 0.80.6，结论不受影响）；2026-07-16 复核：pi v0.80.7（修复性提交为主）、tau v0.1.6（OAuth provider 对齐、分层定价元数据等，架构结论不受影响）、rust-ai-agent 更新至 `e6ee55d` / ep05（**新增单轮工具调用**，见 §12.7）。
+> 编写日期：2026-07-11（2026-07-12 增补第 9–11 章：从零复刻 / 模型接入 / 深度对比主流框架；2026-07-13 增补第 12 章：延伸样本 rust-ai-agent 对比；2026-07-16 增补第 13 章：进阶——领域应用 / 多 Agent 编排 / 构架蓝图，配套新交互页 `webui/advanced.html`）。基于 pi commit `4c18610`、tau v0.1.5（2026-07-09）；2026-07-12 复核：pi 已 pull 至 `8479bd84`（版本仍 0.80.6，结论不受影响）；2026-07-16 复核：pi v0.80.7（修复性提交为主）、tau v0.1.6（OAuth provider 对齐、分层定价元数据等，架构结论不受影响）、rust-ai-agent 更新至 `e6ee55d` / ep05（**新增单轮工具调用**，见 §12.7）；**2026-07-19 复核**：pi v0.80.10（内建 llama.cpp 路由与 `/llama` HF 模型搜索、Kimi 动态/延迟工具加载、生成式模型目录数据从 .ts 分离；另发现第五个包 `packages/orchestrator`——2026-06 起孵化、自标 Experimental 的编排包，**L5 留白正被官方试探性填上**）、tau v0.2.1（**0.2.0 采纳 Pi 兼容事件与扩展协议**——Phase 21 扩展系统落地、canonical event streams 文档化、自带 self-knowledge；`loop.py` 318 行 / `tau_agent` 1,750 行 / `messages.py` 277 行，本文各处行数已按 2026-07-19 实测更新）、rust-ai-agent 无变化（仍 `e6ee55d` / ep05）。
 > 英文原始分析笔记见 `sources/`（pi/tau 各一份代码级笔记 + 一份网上最佳实践调研，含全部出处链接）。
 
 ---
@@ -36,7 +36,8 @@
 - [11. 深度对比：pi/tau 与 LangGraph 等主流框架](#11-深度对比pitau-与-langgraph-等主流框架)
 - [12. 延伸样本：rust-ai-agent（Rust）和 pi/tau 一样吗？](#12-延伸样本rust-ai-agentrust和-pitau-一样吗)
 - [13. 进阶：领域应用、多 Agent 编排与构架蓝图](#13-进阶领域应用多-agent-编排与构架蓝图)
-- [14. 参考资料](#14-参考资料)
+- [14. 配套书：《深入理解 AI Agent》读书地图](#14-配套书深入理解-ai-agent读书地图)
+- [15. 参考资料](#15-参考资料)
 
 ---
 
@@ -44,7 +45,7 @@
 
 **为什么选这两个项目对比学习？** 因为 tau 就是 pi 的 Python 教学复刻——两者共享同一套架构蓝图（连文档域名都是数学梗：tau 的文档在 `twotimespi.dev`，因为 τ = 2π）。这给了你一个罕见的学习机会：
 
-1. **同一个设计，两种语言、两种成熟度的实现。** 你可以先读 tau（核心层仅 1,351 行 Python，一个下午读完），建立心智模型；再去 pi 里看同一个概念在生产环境里长成什么样（11 万行 TypeScript，处理了几十个 provider 的兼容性怪癖）。
+1. **同一个设计，两种语言、两种成熟度的实现。** 你可以先读 tau（核心层仅 1,750 行 Python，一个下午读完），建立心智模型；再去 pi 里看同一个概念在生产环境里长成什么样（10 万行 TypeScript，处理了几十个 provider 的兼容性怪癖）。
 2. **tau 的 `dev-notes/` 是一份公开的"建造日志"**：约 40 篇 phase 笔记，每篇都写明"这个功能对应 pi 的什么设计、为什么这样做、怎么测试"。相当于有人替你把 pi 拆解了一遍。
 3. **pi 是"极简 harness"哲学的代表作**（作者 badlogic 的宣言文章是 2025 年 agent 圈被广泛讨论的文本），拿它对照 Anthropic 官方最佳实践、12-Factor Agents、Claude Code 的做法，能看清 agent 设计的几条真正的分歧轴线。
 
@@ -52,7 +53,7 @@
 
 - Agent 的核心是一个 ~10 行的循环：调用 LLM → 执行它要求的工具 → 把结果塞回对话 → 重复，直到模型不再调工具。两个项目的其余十几万行代码，都是围绕这个循环解决**工程问题**：多 provider 适配、流式事件、会话持久化、上下文压缩、可扩展性、终端 UI。
 - 两者共同的关键设计：**三层单向依赖**（provider 层 → agent 大脑 → 产品层）、**事件流作为前端契约**、**默认只给模型 4 个工具**（read/write/edit/bash）、**系统提示词极小**（pi < 1000 tokens）、**JSONL 追加式会话树**、**不做权限弹窗**（要安全就上容器）。
-- 主要差异：pi 有完整的**运行时扩展系统**（33 个事件钩子、自扩展能力）、并行工具执行、真实 token/成本核算、多模态消息、1057 个模型的目录；tau 刻意省略这些（扩展系统明确"推迟到 Phase 21"），换来核心层的极致可读性。
+- 主要差异：pi 有完整的**运行时扩展系统**（33 个事件钩子、自扩展能力）、并行工具执行、真实 token/成本核算、多模态消息、1000+ 个模型的目录；tau 曾刻意省略这些换取核心层的极致可读性——**但 2026-07 的 0.2.0 已把扩展系统落地（Phase 21 兑现，直接采纳 Pi 兼容协议，见 §4.7 增补）**。
 - 学习路线：**先 tau 后 pi**，边读边做第 8 章的实验。
 
 ---
@@ -79,7 +80,7 @@
 | 版本 | 0.80.6（所有包 lockstep 同步版本） | 0.1.5 |
 | 包结构 | 5 个 npm workspace 包 | 1 个包内 3 个顶层模块 |
 | 源码规模 | ≈ 111,700 行（ai 36.7k / agent 8.2k / coding-agent 52.7k / tui 12.1k / orchestrator 2.0k） | ≈ 24,600 行（tau_ai 3.4k / tau_agent 1.35k / tau_coding 19.8k） |
-| 测试规模 | ≈ 83,000 行，vitest + node:test（@xterm/headless 仿真终端） | ≈ 19,200 行，pytest + anyio，~725 个测试 |
+| 测试规模 | ≈ 88,000 行，vitest + node:test（@xterm/headless 仿真终端） | ≈ 25,400 行，pytest + anyio |
 | 核心依赖 | @anthropic-ai/sdk、openai、@google/genai 等官方 SDK（懒加载）；TUI 零重依赖 | **不用任何厂商 SDK**：httpx 手写 SSE；pydantic v2、Textual、Rich、typer |
 | 类型/校验 | TypeScript strict + TypeBox（JSON Schema）+ AJV 校验 | mypy --strict + pydantic（extra="forbid"）|
 | 构建工具链 | tsgo（TS 7 原生编译器预览）、Biome、npm workspaces、husky | uv、ruff、hatchling |
@@ -118,7 +119,7 @@ while True:
         messages.append(tool_result(call.id, result))  # 4. 结果塞回对话，回到 1
 ```
 
-tau 的 `src/tau_agent/loop.py`（276 行）就是这个循环的"注释加强版"；pi 的 `packages/agent/src/agent-loop.ts` 是它的工程加强版（加了 steering 注入、并行执行、截断守卫等，见 4.2）。**先把这 10 行焊在脑子里，后面所有内容都是给它做加法。**
+tau 的 `src/tau_agent/loop.py`（318 行）就是这个循环的"注释加强版"；pi 的 `packages/agent/src/agent-loop.ts` 是它的工程加强版（加了 steering 注入、并行执行、截断守卫等，见 4.2）。**先把这 10 行焊在脑子里，后面所有内容都是给它做加法。**
 
 ### 2.3 "薄 harness"哲学
 
@@ -307,6 +308,8 @@ Guidelines: <工具自带的 guidelines 去重 + "Be concise…">
 
 **tau 现状**：只有 skills（严格 Agent Skills 规范——ADR 0003 详细分析了 pi 的双模式兼容包袱后决定"pre-1.0 直接走严格路线"，裸 `.md` 给迁移警告）+ prompt templates（`{{ arguments }}` 占位符）+ `custom` 会话条目（为未来扩展留的钩子）。`/skill:name` 在 tau 里刻意**不是** slash 命令而是提示词展开。
 
+**2026-07-19 增补：Phase 21 兑现了。** tau 0.2.0（2026-07-17 前后）正式落地 extensions（`src/tau_coding/extensions/{api,loader}.py`，examples：`hello_tool.py`、`permission_gate.py`，并自带 `create-tau-extension` skill），而且**直接采纳 Pi 兼容的事件与扩展协议**（#375 adopt Pi-compatible event and extension protocol、#376 Pi-shaped extension turn metadata、#377 canonical event streams 文档化）。同版本还打包了 self-knowledge（`tau_coding/data/docs/`——agent 随身携带自己的架构文档，渐进披露思想的自我应用）。两个含义：①「pi 的灵魂子系统」从此两边都有，上一段的对比升级为"协议级兼容"；②一个独立实现主动采纳另一个实现的事件协议，是第 13 章 L1「事件流是唯一契约」价值的最好上游实证——契约稳定，实现可以各自演化甚至互操作。
+
 **评注**：扩展系统是"极简核心"能成立的另一半——pi 拒绝内置 MCP/权限/计划模式的每一条，README 都跟着一句"用扩展自己装一个"。学习价值：pi 的 `ExtensionAPI` 类型定义（`extensions/types.ts`）本身就是一份"agent harness 有哪些可拦截点"的清单，值得通读。
 
 ### 4.8 安全与权限
@@ -435,8 +438,8 @@ pi 的供应链清单值得单独收藏——2025-2026 npm 投毒潮后，这是
 **第一周：tau 建立心智模型**（每步都是一次可完成的阅读）
 
 1. `tau/README.md` + 官网三篇：`what-is-tau`、`internals/architecture`、`internals/design-principles`（7 条设计原则背下来）
-2. 数据模型：`src/tau_agent/messages.py`（47 行）→ `tools.py` → `events.py`
-3. **核心**：`src/tau_agent/loop.py`（276 行，对照官网 `internals/agent-loop` 页逐步读）
+2. 数据模型：`src/tau_agent/messages.py`（277 行——0.2.0 起承载 Pi 兼容协议类型）→ `tools.py` → `events.py`
+3. **核心**：`src/tau_agent/loop.py`（318 行，对照官网 `internals/agent-loop` 页逐步读）
 4. `src/tau_agent/harness.py`（298 行：队列、取消、transcript 修复）
 5. 会话：`src/tau_agent/session/`（entries → jsonl → tree → memory，注意 `SessionState.from_entries` 这个 reducer）+ 根目录 `session-temp.jsonl` 真实样本
 6. Provider：`src/tau_ai/provider.py` + `events.py` + `anthropic.py`（看 SSE 怎么手工解析）
@@ -452,7 +455,7 @@ pi 的供应链清单值得单独收藏——2025-2026 npm 投毒潮后，这是
 5. `core/system-prompt.ts`、`core/compaction/compaction.ts`、`docs/session-format.md`
 6. `packages/ai/src/types.ts`（9 种 API、compat 开关）、`utils/overflow.ts`（感受兼容性长尾）
 7. **扩展系统**：`extensions/types.ts` 的 ExtensionAPI + `examples/extensions/` 逐个跑
-8. 外围文章：badlogic 的 pi 宣言、Armin Ronacher 的评测（链接见第 14 章）
+8. 外围文章：badlogic 的 pi 宣言、Armin Ronacher 的评测（链接见第 15 章）
 
 ### 8.2 动手实验（由浅入深 12 个）
 
@@ -578,7 +581,7 @@ class AgentTool:
 
 **验收**：每个类型 JSON round-trip 测试；给消息塞未知字段必须报错（`extra="forbid"` 生效）。
 
-**对照**：tau `tau_agent/messages.py`（47 行）/`tools.py`/`events.py`；pi `packages/ai/src/types.ts`。
+**对照**：tau `tau_agent/messages.py`（277 行）/`tools.py`/`events.py`；pi `packages/ai/src/types.ts`。
 
 ### 9.3 M2 · Provider 层：FakeProvider 先行 + 一个真适配器（1–2 天）
 
@@ -655,7 +658,7 @@ async def run_agent_loop(*, provider, model, system, messages, tools,
 - 断言结束时 transcript 里每个 tool_call 都有 tool_result；
 - 分别触发四个守卫的测试各一个。
 
-**对照**：tau `tau_agent/loop.py`（276 行，你的答案纸）；pi `packages/agent/src/agent-loop.ts`（看多了什么：steering 双轮询、并行执行、prepareNextTurn 钩子）。
+**对照**：tau `tau_agent/loop.py`（318 行，你的答案纸）；pi `packages/agent/src/agent-loop.ts`（看多了什么：steering 双轮询、并行执行、prepareNextTurn 钩子）。
 
 ### 9.5 M4 · 四个工具：坑最密集的一站（2–3 天）
 
@@ -920,7 +923,7 @@ default_model = "qwen3:32b"
 
 注意 tau **有意只读用户级 overlay**（没有项目级 `.tau/catalog.toml`）——克隆一个仓库不能悄悄把你的 provider 重定向到恶意 base_url。超时/重试/自定义 header 放 `~/.tau/providers.json`。
 
-**③ pi 接 Ollama**——`~/.pi/agent/models.json`（示例核对自官方 `docs/models.md` 的 Minimal Example）：
+**③ pi 接 Ollama**——`~/.pi/agent/models.json`（示例核对自官方 `docs/models.md` 的 Minimal Example）。**2026-07-19 补充**：pi 0.80.8 起还**内建了 llama.cpp 路由**——`/login` 里直接连 llama.cpp，`/llama` 命令搜索/下载 Hugging Face 模型、显式装载卸载带进度（官方 `docs/llama-cpp.md`）；本地模型从"手写 models.json"升级成了一等公民入口：
 
 ```json
 {
@@ -1220,10 +1223,10 @@ pi 三层架构的价值在这里兑现：**大脑（harness + 循环）一行�
 
 不是发明，是整理：pi 已经做对的分层 × 12-Factor Agents × Anthropic 三篇工程文章。上层只依赖下层（M0 的依赖方向守卫锁死这一点）；横梁贯穿所有层。
 
-| 层 | 职责一句话 | pi 0.80.7 | tau 0.1.6 | rust-ai-agent ep05 |
+| 层 | 职责一句话 | pi 0.80.10 | tau 0.2.1 | rust-ai-agent ep05 |
 |---|---|---|---|---|
 | **L6 产品层** | 每个前端只是事件流的一种消费方式 | ● TUI+print+RPC | ● TUI+print | ◐ CLI bins |
-| **L5 编排（可选）** | §13.2 的五模式 + 限流 + 预算 | ○ 刻意留白 | ○ 同左 | ◐ fan-out 雏形 |
+| **L5 编排（可选）** | §13.2 的五模式 + 限流 + 预算 | ◐ 实验性 `pi-orchestrator` 包孵化中（IPC/supervisor/多实例） | ○ 留白 | ◐ fan-out 雏形 |
 | **L4 会话与上下文** | JSONL 树 + 无状态 reducer + compaction | ● | ● | — |
 | **L3 工具层** | schema + 校验 + 执行 + 防呆 | ● | ● | ◐ calculator，分发写死 |
 | **L2 循环与守卫** | while + 4 守卫 + steering | ● | ● | ◐ 单轮往返，无 while |
@@ -1231,7 +1234,7 @@ pi 三层架构的价值在这里兑现：**大脑（harness + 循环）一行�
 | **L0 Provider 适配** | 多厂商 wire → 统一类型；流永不 throw | ● 9 种 API | ◐ OpenAI 兼容为主 | ◐ 单格式 + OpenRouter 网关 |
 | **横切 X1–X4** | 重试退避 / 可观测 / 评测 / 安全 | ●/●/—/◐ | ●/●/—/○ | ●/◐/**●**/— |
 
-（● 完整 ◐ 部分 ○ 刻意留白 — 没有。注意 X3 评测列：rust-ai-agent **反超**——`evaluator.rs` 是 pi/tau 都缺的评测脊椎。L5 三家都留白不是巧合：编排长在 harness 之上，「子代理即工具」只需注册一个工具。）
+（● 完整 ◐ 部分 ○ 刻意留白 — 没有。注意 X3 评测列：rust-ai-agent **反超**——`evaluator.rs` 是 pi/tau 都缺的评测脊椎。L5 曾经三家全留白——编排长在 harness 之上，「子代理即工具」只需注册一个工具；**2026-07-19 更新：pi 的实验性 `orchestrator` 包证明留白终会被填，但作为独立的第五个包出现——依然在 harness 之上，分层判断成立**。）
 
 施工顺序即第 9 章 M0–M10；**本次新增 M11（编排里程碑）**：在 mini 上实现「子代理即工具」+ fan-out，验收 = 主 agent 派 2 个子调研并汇总（交互页建造路线一节有 12 行总表）。
 
@@ -1250,11 +1253,41 @@ pi 三层架构的价值在这里兑现：**大脑（harness + 循环）一行�
 
 ---
 
-## 14. 参考资料
+## 14. 配套书：《深入理解 AI Agent》读书地图
+
+> 2026-07-19 新增（读者提议）。配套交互页 **`webui/book-map.html`**——十章接线表、公式对照、三种读法都在网页上；本章是纲要。
+
+**它是什么**：李博杰《深入理解 AI Agent：设计原理与工程实践》，全文开源（Apache-2.0，`github.com/bojieli/ai-agent-book`）：十章正文 6,845 行 markdown + v1.1 编译版 PDF + 每章一组配套示例代码。核心公式 **Agent = LLM + 上下文 + 工具**，并强调「Harness 工程——模型之外的一切工程能力才是竞争力」——与本教程的薄 harness 论点完全同源。
+
+**定位互补**：书给**纵深与全景**（原理推导、评估学、模型后训练、多模态、自我进化、Agent 社会）；本教程给**横剖与动手**（三份真代码逐行、从零复刻 M0–M11、领域配方与编排模式）。分界线清晰：书 ch7（后训练）跨进模型侧，正是 harness 侧教程刻意止步之处。
+
+**十章接线**（详表见交互页）：
+
+| 书 | 教程对应 | 蓝图层 | 一句话 |
+|---|---|---|---|
+| ch1 基础/Harness 工程 | 主教程 §2 + 蓝图总览 | 全图 | 完全共识：模型之外的工程才是竞争力 |
+| ch2 上下文工程 | 蓝图 L4 + 清单 02/04 + §4.4/§4.6 | L4 | 书光谱更全（状态栏元信息）；教程有 pi/tau 实测参数 |
+| ch3 记忆与知识库 | 领域配方·研究/客服卡 | L4 外延 | 教程一笔带过，纵深在书 |
+| ch4 工具/MCP/异步 | 蓝图 L3 + §4.3 + MCP 之辩 | L3 | 书讲分类学与生态；教程讲防呆细节 |
+| ch5 Coding Agent | **整个教程就是这章的活标本** | 全图 | 书论证元能力；pi/tau 是标本 |
+| ch6 评估 | rust 页 GAIA + X3 + M10 | X3 | 书是评估学全景；rust evaluator 是最小起点 |
+| ch7 模型后训练 | 教程刻意不覆盖 | 模型侧 | 书独有；harness/模型侧分界线本身是一课 |
+| ch8 自我进化/工具创造者 | pi 自我扩展闭环 + §4.7 | L6+扩展 | 书讲理论，pi 已产品化（registerTool + /reload） |
+| ch9 多模态与实时 | 教程不覆盖 | — | 书独有；接回蓝图=换 L3 工具 + 新 L1 事件类型 |
+| ch10 多 Agent 协作 | 进阶篇 A2 五模式 + §13.2 | L5 | 书给分类框架与失败模式；教程给可抄代码与三判据 |
+
+**三种读法**：①动手派（推荐）——mini M0–M3 → 书 ch1/2 → M4–M7 → 书 ch4/6 → M10 → 书 ch10 → 进阶篇 A2；②通读派——一晚一章通读，再回教程逐章看落地；③按病抓药——上表当索引。
+
+**元彩蛋**：仓库 `cursor-chats/` 有 269 段作者与 AI 结对写书写码的真实对话——「用 agent 写一本讲 agent 的书」，是 ch5 与本教程「操作手册」（进阶篇 A3）的高手实况样本；`EXPERIMENT_TRIAGE.md` 连反例实验都留档（与本教程「结论限定在当前快照」同味）。
+
+---
+
+## 15. 参考资料
 
 **项目本体**
 - pi：仓库 `~/workspace/code/pi` · https://pi.dev · https://github.com/earendil-works/pi
 - tau：仓库 `~/workspace/code/tau` · https://twotimespi.dev · https://github.com/huggingface/tau · PyPI `tau-ai`
+- 《深入理解 AI Agent：设计原理与工程实践》（李博杰，开源书 Apache-2.0）：https://github.com/bojieli/ai-agent-book —— 逐章接线见第 14 章
 
 **必读文章（按学习顺序）**
 1. Thorsten Ball, *How to Build an Agent*（2025-04）— https://ampcode.com/how-to-build-an-agent

@@ -256,6 +256,28 @@ h3{font-size:16px;margin:24px 0 8px}
 .checkcard .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;font-size:11.5px}
 .checkcard .meta a{font-family:var(--mono)}
 
+/* ops manual */
+.ops{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.opscard{padding:14px 16px}
+.opscard h4{margin:0 0 6px;font-size:14px}
+.opscard .dtitle{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:9px 0 3px}
+.opscard ul{margin:0;padding-left:2px;font-size:12.5px;color:var(--ink-2);list-style:none}
+.opscard li{margin:4px 0;padding-left:18px;text-indent:-18px}
+.okx{color:var(--good);font-weight:700}
+.badx{color:var(--bad);font-weight:700}
+.opscard code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+.opscard .mech-src{font-size:11px;color:var(--ink-3)}
+
+/* evolution case study */
+.evhl{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.evhl .card{padding:14px 16px;font-size:13px;color:var(--ink-2)}
+.evhl b{color:var(--ink)}
+.evtable{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:18px}
+.evtable th,.evtable td{padding:8px 12px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top}
+.evtable th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.evtable code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+.lchip{display:inline-block;font-family:var(--mono);font-size:10.5px;padding:1px 8px;border-radius:6px;background:var(--arch-wash);color:var(--arch);white-space:nowrap}
+
 footer{margin-top:64px;border-top:1px solid var(--line-soft);padding:24px 0 40px;font-size:12.5px;color:var(--ink-3)}
 footer a{color:var(--adv)}
 .provenance{margin-top:10px;font-size:11.5px}
@@ -277,7 +299,7 @@ footer a{color:var(--adv)}
   <a class="back" href="./index.html">← pi×tau 主教程</a>
   <a class="back" href="./rust-ai-agent.html">🦀 rust 精读</a>
   <nav class="sections">
-    <a href="#usage">领域配方</a><a href="#orch">多 agent 编排</a><a href="#arch">构架蓝图</a><a href="#matrix">覆盖矩阵</a><a href="#roadmap">建造路线</a><a href="#checklist">十条清单</a>
+    <a href="#usage">领域配方</a><a href="#orch">多 agent 编排</a><a href="#operate">操作手册</a><a href="#arch">构架蓝图</a><a href="#matrix">覆盖矩阵</a><a href="#roadmap">建造路线</a><a href="#evolution">演进案例</a><a href="#checklist">十条清单</a>
   </nav>
 </div></header>
 
@@ -346,6 +368,68 @@ footer a{color:var(--adv)}
   </div>
 </div></section>
 
+<section id="operate"><div class="wrap">
+  <div class="kicker u">应用篇 · 第 3 站</div>
+  <h2>用好你的 agent：操作手册</h2>
+  <p class="lede">前两站讲"搭什么"，这一站讲"怎么开"。六张卡片是坐进驾驶舱的肌肉记忆——每条都对应 pi/tau 的真实机制（标注在条目里），不是泛泛的提示词技巧。</p>
+  <div class="ops">
+    <div class="card opscard"><h4>📋 下任务</h4>
+      <div class="dtitle">做</div><ul>
+        <li><span class="okx">✓</span> 小而可验收：一次一个目标，说清"怎么算完成"（最好是一条能跑的测试）</li>
+        <li><span class="okx">✓</span> 项目约定写进 <code>AGENTS.md</code>（构建/测试命令、代码风格）——harness 每次自动注入，不用重复交代</li>
+        <li><span class="okx">✓</span> 报错就贴<b>全文</b>：错误消息是 agent 最好的路标</li>
+      </ul>
+      <div class="dtitle">别</div><ul>
+        <li><span class="badx">✗</span> "帮我把项目重构一下"——一句话大任务必拆</li>
+      </ul></div>
+    <div class="card opscard"><h4>🎮 过程控制（steering）</h4>
+      <div class="dtitle">做</div><ul>
+        <li><span class="okx">✓</span> 看它跑偏<b>立刻</b>插话——steering 在本轮工具执行后注入，不破坏 transcript 合法性</li>
+        <li><span class="okx">✓</span> 不急的想法排 follow-up 队列，轮到了自然处理</li>
+        <li><span class="okx">✓</span> Esc 取消是安全的：取消回填守卫会补上占位工具结果</li>
+      </ul>
+      <div class="dtitle">别</div><ul>
+        <li><span class="badx">✗</span> 干等一整轮才纠偏；也别十秒一打断——给它完成一次工具往返的机会</li>
+      </ul></div>
+    <div class="card opscard"><h4>🌲 会话管理</h4>
+      <div class="dtitle">做</div><ul>
+        <li><span class="okx">✓</span> 一个任务一个会话；中断了 <code>/resume</code> 原样恢复（JSONL 会话树，tau 0.2.1 起还带搜索）</li>
+        <li><span class="okx">✓</span> 想试危险方案：从当前节点<b>开分支</b>，失败回退零成本（树形会话的意义）</li>
+        <li><span class="okx">✓</span> 超长会话交给 compaction 自动压缩——切点保证不劈开工具调用对</li>
+      </ul>
+      <div class="dtitle">别</div><ul>
+        <li><span class="badx">✗</span> 一个会话连干八件不相干的事——上下文互相污染，模型开始"串台"</li>
+      </ul></div>
+    <div class="card opscard"><h4>🧹 上下文卫生</h4>
+      <div class="dtitle">做</div><ul>
+        <li><span class="okx">✓</span> 让 agent 用 read/grep <b>自己</b>读文件——工具自带截断+续读引导，只取所需</li>
+        <li><span class="okx">✓</span> 大产物落盘，上下文里只留路径（文件即外部记忆）</li>
+        <li><span class="okx">✓</span> 领域知识做成 skills：索引常驻、正文按需加载（渐进披露）</li>
+      </ul>
+      <div class="dtitle">别</div><ul>
+        <li><span class="badx">✗</span> 往对话里贴 5,000 行日志——烧预算，还把真正有用的上下文挤出窗口</li>
+      </ul></div>
+    <div class="card opscard"><h4>🔌 定制与扩展</h4>
+      <div class="dtitle">做</div><ul>
+        <li><span class="okx">✓</span> 从 prompt 模板起步（<code>/name args</code>），重复动作沉淀成 skills</li>
+        <li><span class="okx">✓</span> 要拦截/加工具就写扩展——<b>0.2.0 起 pi/tau 协议互通</b>：tau 自带例子 <code>hello_tool.py</code>（几十行注册一个工具）、<code>permission_gate.py</code>（一个能 block 的 tool_call 钩子＝你的权限系统种子）</li>
+        <li><span class="okx">✓</span> pi 可运行中 <code>registerTool</code> + <code>/reload</code>——让 agent 自己扩展自己</li>
+      </ul>
+      <div class="dtitle">别</div><ul>
+        <li><span class="badx">✗</span> 一上来装框架——先问"注册一个工具够不够"</li>
+      </ul></div>
+    <div class="card opscard"><h4>💰 模型与成本</h4>
+      <div class="dtitle">做</div><ul>
+        <li><span class="okx">✓</span> 粗活（分诊/摘要/批处理）用便宜快模型，硬活换强模型——会话中途可切换</li>
+        <li><span class="okx">✓</span> 本地跑：pi 0.80.8+ <b>内建 llama.cpp 路由</b>（<code>/llama</code> 直接搜 HF 下载模型）；tau 用 <code>catalog.toml</code></li>
+        <li><span class="okx">✓</span> 盯 usage 事件算真实 token/成本——JSONL 会话就是账本</li>
+      </ul>
+      <div class="dtitle">别</div><ul>
+        <li><span class="badx">✗</span> 最贵模型跑所有环节；也别让弱模型硬啃超纲任务——返工比省下的贵</li>
+      </ul></div>
+  </div>
+</div></section>
+
 <div class="wrap"><div class="partband a">Part B · 构架篇 —— 把系统搭起来</div></div>
 
 <section id="arch"><div class="wrap">
@@ -368,9 +452,9 @@ footer a{color:var(--adv)}
     <div class="mlegend"><span style="color:var(--good)">● 完整实现</span><span style="color:var(--tau)">◐ 部分 / 雏形</span><span>○ 留白（刻意不做）</span><span style="opacity:.6">— 没有</span></div>
   </div>
   <div class="callouts">
-    <div class="card callout"><b>pi 是唯一的全覆盖</b>——除了评测（X3）和编排（L5）。前者它靠 Terminal-Bench 等外部基准，后者是哲学：编排属于用户，不属于 harness。</div>
+    <div class="card callout"><b>pi 是唯一的全覆盖</b>——除了评测（X3）和编排（L5）。前者它靠 Terminal-Bench 等外部基准；后者刚从"哲学留白"变成"实验孵化"：orchestrator 作为独立第五包出现在 harness 之外。</div>
     <div class="card callout"><b>rust-ai-agent 反向互补</b>：核心六层基本空白（ep05 刚长出单轮工具调用），却有 pi/tau 都没有的评测脊椎（X3 的 <code>evaluator.rs</code>）+ 重试（backon）+ 并发限流。</div>
-    <div class="card callout"><b>L5 三家都留白不是巧合</b>：编排模式（本页 A 篇）天然长在 harness 之上——「子代理即工具」只需要注册一个工具，不需要改任何一层。</div>
+    <div class="card callout"><b>L5 的留白正在被填</b>：编排天然长在 harness 之上——「子代理即工具」只需注册一个工具。pi 用实验性 orchestrator 包开始官方试探，而它长的位置（独立包、不动七层）恰好证明「编排属于上层」（详见第 4 站演进案例）。</div>
   </div>
 </div></section>
 
@@ -382,17 +466,46 @@ footer a{color:var(--adv)}
   <p style="font-size:12.5px;color:var(--ink-3);margin-top:12px">完整施工图（每步的产出、验收测试、pi/tau 对照文件、十大典型翻车）见 <a href="https://github.com/tangivis/twopi/blob/main/pi-vs-tau-架构对比学习指南.md">主文档</a> 第 9 章；练习工程在仓库 <code>mini/</code> 目录。</p>
 </div></section>
 
-<section id="checklist"><div class="wrap">
+<section id="evolution"><div class="wrap">
   <div class="kicker a">构架篇 · 第 4 站</div>
+  <h2>活案例：72 小时上游演进，全部落进蓝图</h2>
+  <p class="lede">蓝图切得准不准，最硬的检验是：真实世界的改动能不能一格格放进去。2026-07-16 → 07-19 三天里，pi 发了三个版本（0.80.8/9/10）、tau 发了两个（0.2.0/0.2.1）、共 60+ 个提交——下表把主要改动逐条映射到第 1 站的 7+4 蓝图。先看两个「预言兑现」。</p>
+  <div class="evhl">
+    <div class="card"><b>🏆 预言兑现 ①：事件流契约的价值，被上游投票了。</b><br>tau 0.2.0 的核心提交叫 <code>adopt Pi-compatible event and extension protocol</code>——一个独立实现主动采纳另一个实现的事件协议，还把 canonical event streams 写成了文档。本教程 L1 一直讲「事件流是唯一契约」：契约稳定，实现可以各自演化、甚至互操作。这就是证据。</div>
+    <div class="card"><b>🏆 预言兑现 ②：L5 的留白，官方开始填了。</b><br>覆盖矩阵曾把 pi 的编排层标为 ○ 刻意留白。本次复核发现 pi 的第五个包 <code>pi-orchestrator</code>（2026-06 起孵化，README 自标 Experimental：IPC server / supervisor / 多实例存储）。注意它长的<b>位置</b>——harness 之上的独立包。「编排属于上层」的分层判断被官方路线确认。</div>
+  </div>
+  <div class="card" style="padding:6px 18px 14px;overflow-x:auto">
+    <table class="evtable">
+      <tr><th>改动（72 小时内的真实提交）</th><th>蓝图落点</th><th>学到什么</th></tr>
+      <tr><td><span class="tag tau">tau 0.2.0</span> 采纳 Pi 兼容事件 + 扩展协议</td><td><span class="lchip">L1 事件流</span></td><td>契约先行，跨实现互操作</td></tr>
+      <tr><td><span class="tag tau">tau</span> extensions 落地：<code>extensions/{api,loader}.py</code> + hello_tool / permission_gate 例子 + create-tau-extension skill</td><td><span class="lchip">L6 + 扩展</span></td><td>Phase 21 兑现——「pi 的灵魂子系统」两边都有了</td></tr>
+      <tr><td><span class="tag tau">tau</span> 打包 self-knowledge：agent 随身带自己的架构文档</td><td><span class="lchip">L6 提示词</span></td><td>渐进披露思想的自我应用</td></tr>
+      <tr><td><span class="tag tau">tau</span> provider 错误恢复与 TUI 上报修复</td><td><span class="lchip">L0 / X1</span></td><td>「错误进流」的细节打磨</td></tr>
+      <tr><td><span class="tag tau">tau</span> 启动 thinking 等级矫正到模型支持的档位</td><td><span class="lchip">L0 适配</span></td><td>能力协商——逃生舱思想的日常形态</td></tr>
+      <tr><td><span class="tag tau">tau 0.2.1</span> <code>/resume</code> 会话选择器加搜索</td><td><span class="lchip">L6 产品</span></td><td>会话树一多，检索就是刚需</td></tr>
+      <tr><td><span class="tag pi">pi 0.80.8</span> 内建 llama.cpp 路由 + <code>/llama</code> HF 模型搜索下载</td><td><span class="lchip">L0 Provider</span></td><td>本地模型升级为一等公民（↔第 10 章）</td></tr>
+      <tr><td><span class="tag pi">pi</span> 扩展可注册<b>完整 provider</b>（原生认证/模型刷新/流式行为）</td><td><span class="lchip">L0 × 扩展</span></td><td>连 provider 层都可插拔——可拦截点清单又长了一格</td></tr>
+      <tr><td><span class="tag pi">pi 0.80.9</span> Kimi 延迟/动态工具加载（deferred tools）</td><td><span class="lchip">L3 工具</span></td><td>工具目录的渐进披露（↔清单第 3 条）</td></tr>
+      <tr><td><span class="tag pi">pi</span> compaction 队列行为修复</td><td><span class="lchip">L4 上下文</span></td><td>压缩 × 队列的边界 case——L4 决策点的真实回归</td></tr>
+      <tr><td><span class="tag pi">pi</span> OpenAI Responses 早断流 → 自动重试而非终止运行</td><td><span class="lchip">X1 重试</span></td><td>「半截流重试」——蓝图 X1 决策点原文</td></tr>
+      <tr><td><span class="tag pi">pi</span> 生成式模型目录数据从 .ts 源码分离</td><td><span class="lchip">工程卫生</span></td><td>生成数据不混源码：pi-ai 从 36.7k 行瘦到 23.6k</td></tr>
+      <tr><td><span class="tag rust">rust-ai-agent</span> 无变化（仍 ep05 / e6ee55d）</td><td><span class="lchip">—</span></td><td>教学仓库随集数走——下一集见</td></tr>
+    </table>
+  </div>
+  <p style="font-size:12.5px;color:var(--ink-3);margin-top:12px">60+ 个提交，没有一个需要发明新的层——要么是某层内部的打磨，要么是层间接口的兑现。这就是「切在关节上」的蓝图该有的样子。（各数字与提交描述均核对自两仓库 2026-07-19 的 git log 与 CHANGELOG。）</p>
+</div></section>
+
+<section id="checklist"><div class="wrap">
+  <div class="kicker a">构架篇 · 第 5 站</div>
   <h2>十条现代最佳实践（贴墙版）</h2>
   <p class="lede">每条一句话主张 + 半句为什么 + 出处。全部能在本教程的某处看到真代码。</p>
   <div class="checks" id="checkGrid"></div>
 </div></section>
 
 <footer><div class="wrap">
-  <p><b style="color:var(--ink)">本系列</b>：<a href="./index.html">主教程（循环模拟器 / 三层架构 / 十大机制）</a> · <a href="./rust-ai-agent.html">rust-ai-agent 代码精读</a> · 本页（应用 × 构架）</p>
-  <p>项目版本：pi v0.80.7（earendil-works/pi） · tau v0.1.6（huggingface/tau） · rust-ai-agent commit e6ee55d / ep05（solenovex/rust-ai-agent）</p>
-  <p class="provenance">2026-07-16 生成 · 编排模式的成本数字出自 Anthropic《How we built our multi-agent research system》；警告出自 Cognition《Don't Build Multi-Agents》；蓝图对照 12-Factor Agents 与 Anthropic《Building Effective Agents》《Writing effective tools》《Effective context engineering》。本页为单文件、离线可用、无外部依赖。</p>
+  <p><b style="color:var(--ink)">本系列</b>：<a href="./index.html">主教程（循环模拟器 / 三层架构 / 十大机制）</a> · <a href="./rust-ai-agent.html">rust-ai-agent 代码精读</a> · <a href="./book-map.html">读书地图（深入理解 AI Agent）</a> · 本页（应用 × 构架）</p>
+  <p>项目版本：pi v0.80.10（earendil-works/pi，含实验性 pi-orchestrator） · tau v0.2.1（huggingface/tau，0.2.0 起 Pi 兼容协议） · rust-ai-agent commit e6ee55d / ep05（solenovex/rust-ai-agent）</p>
+  <p class="provenance">2026-07-16 生成，2026-07-19 增补「操作手册」「演进案例」两站并同步上游版本 · 编排模式的成本数字出自 Anthropic《How we built our multi-agent research system》；警告出自 Cognition《Don't Build Multi-Agents》；蓝图对照 12-Factor Agents 与 Anthropic《Building Effective Agents》《Writing effective tools》《Effective context engineering》。本页为单文件、离线可用、无外部依赖。</p>
 </div></footer>
 
 <!-- ============ 真代码 / 教学骨架（text/plain，避免 HTML 转义问题） ============ -->
@@ -692,10 +805,10 @@ const LAYERS=[
   dec:['前端<b>只订阅事件</b>，绝不直接摸循环内部状态','print/headless 模式先做——最小可用产品','键盘中断（Esc/Ctrl-C）翻译成 cancel/steer 信号'],
   pins:{pi:'<code>coding-agent</code>：TUI + print + RPC 三形态',tau:'TUI + print（教学版）',rust:'<code>main.rs</code> / <code>bin/gaia.rs</code>：CLI 直出',mini:'M8：print 模式（用它修一个真 bug）'},
   src:'pi 设计宣言：「TUI 只是一个前端」'},
- {id:'L5',name:'编排层（可选）',sub:'多 agent · 并发 · 预算',duty:'子代理即工具 / fan-out / 流水线 / 评审 / 路由（见应用篇）。带并发限流与 token 预算闸门。三个项目都基本留白——刻意：编排长在 harness 之上。',
+ {id:'L5',name:'编排层（可选）',sub:'多 agent · 并发 · 预算',duty:'子代理即工具 / fan-out / 流水线 / 评审 / 路由（见应用篇）。带并发限流与 token 预算闸门。编排长在 harness 之上——pi 的实验性 orchestrator 包以独立第五包的形态出现，恰好印证这个分层。',
   dec:['先单 agent 做到头，再编排（成本 ~15×）','并发必须限流（信号量），预算必须有硬顶','交接物一律结构化 JSON，不传散文'],
-  pins:{pi:'留白——用自定义工具即可挂子代理',tau:'留白（同上）',rust:'<code>JoinSet + Semaphore</code>：fan-out 雏形 ◐',mini:'M11（本页新增）：子代理工具 + fan-out'},
-  src:'Anthropic《How we built our multi-agent research system》'},
+  pins:{pi:'实验性 <code>pi-orchestrator</code> 包孵化中（IPC/supervisor/多实例）◐；自定义工具也可挂子代理',tau:'留白——自定义工具可挂子代理',rust:'<code>JoinSet + Semaphore</code>：fan-out 雏形 ◐',mini:'M11（本页新增）：子代理工具 + fan-out'},
+  src:'Anthropic《How we built our multi-agent research system》· 演进案例（第 4 站）'},
  {id:'L4',name:'会话与上下文',sub:'JSONL 树 · reducer · compaction',duty:'append-only JSONL 条目树 + leaf 指针（分支/回退天然支持）；SessionState 是从条目重放出来的<b>无状态 reducer</b>；上下文快满时结构化压缩。',
   dec:['只追加、不改写——历史即审计','compaction 切点永不劈开 tool_call/tool_result 对','溢出恢复：压一次、重试一次，仍溢出才报错'],
   pins:{pi:'session 格式文档 + <code>compaction.ts</code>（reserve/keepRecent）',tau:'<code>session/</code>：entries → tree → memory',rust:'—（无会话概念）',mini:'M7 会话 + M9 压缩'},
@@ -706,12 +819,12 @@ const LAYERS=[
   src:'Anthropic《Writing effective tools for AI agents》'},
  {id:'L2',name:'循环与守卫',sub:'while + 4 道守卫 + steering',duty:'全系统最重要的 ~130 行：组装请求 → 调 provider → 执行工具 → 回填 → 直到没有 tool_calls。四道守卫兜底，steering 在轮间注入用户插话。',
   dec:['守卫①截断（finish=length 不执行工具）②异常边界 ③未知工具 ④取消回填','transcript 永远保持 provider 合法（成对、有序）','steering / follow-up 双队列，默认一次一条'],
-  pins:{pi:'<code>packages/agent/agent-loop.ts</code>',tau:'<code>tau_agent/loop.py</code>（276 行）',rust:'ep05：单轮工具往返——<b>还差一个 while</b> ◐',mini:'M3：5 条规格测试通关'},
+  pins:{pi:'<code>packages/agent/agent-loop.ts</code>',tau:'<code>tau_agent/loop.py</code>（318 行）',rust:'ep05：单轮工具往返——<b>还差一个 while</b> ◐',mini:'M3：5 条规格测试通关'},
   src:'主教程循环模拟器 = 本层的可视化'},
  {id:'L1',name:'事件流契约',sub:'AgentEvent · 唯一前端接口',duty:'循环对外只说一种话：事件（turn/message/tool 的开始、增量、结束、错误）。前端、日志、编排层都只消费事件——这是解耦的关键一层。',
   dec:['事件是<b>唯一</b>对外契约（改内部不破坏前端）','增量事件让 TUI 流式渲染','错误也是事件，不是异常'],
-  pins:{pi:'<code>agent.ts</code>：订阅者按序结算',tau:'<code>tau_agent/events.py</code>：10 种事件',rust:'—（tracing 日志不是契约）',mini:'M1：与消息类型一起定义'},
-  src:'pi：event stream as the only frontend contract'},
+  pins:{pi:'<code>agent.ts</code>：订阅者按序结算',tau:'<code>tau_agent/events.py</code>——<b>0.2.0 起采纳 Pi 兼容事件协议</b>（canonical event streams 已文档化）',rust:'—（tracing 日志不是契约）',mini:'M1：与消息类型一起定义'},
+  src:'pi：event stream as the only frontend contract——tau 0.2.0 的采纳是最好的上游实证'},
  {id:'L0',name:'Provider 适配层',sub:'多厂商 wire 格式 → 统一类型',duty:'把 Anthropic / OpenAI Chat / OpenAI Responses / Gemini 各说各话的 wire 格式，翻译成统一内部消息与流式增量；产出 usage/cost；<b>流永不 throw</b>——错误编码成流内事件。',
   dec:['内部中立层 + 适配器 + 逃生舱（compat flags），拒绝最小公分母','工具调用是硬性要求（不支持 = 接不了）','FakeProvider 先行：测试永不打真 API'],
   pins:{pi:'<code>pi-ai</code>：9 种 API + compat 开关',tau:'<code>tau_ai/</code>：OpenAI-compatible + 手写 Anthropic SSE ◐',rust:'async-openai 单格式，多模型靠 OpenRouter 网关 ◐',mini:'M2：FakeProvider + 一个真适配器'},
@@ -726,7 +839,7 @@ const XCUTS=[
 const bpStack=$('#bpStack'),bpRail=$('#bpRail'),bpDetail=$('#bpDetail');
 bpStack.innerHTML=LAYERS.map((l,i)=>'<button class="bplayer" role="tab" aria-selected="false" data-k="l'+i+'"><span class="lid">'+l.id+'</span><span class="lname">'+l.name+'</span><span class="lsub">'+l.sub+'</span></button>'+(i<LAYERS.length-1?'<div class="bpdep">↑ 只依赖下层（单向）</div>':'')).join('');
 bpRail.innerHTML+=XCUTS.map((x,i)=>'<button class="bpx" role="tab" aria-selected="false" data-k="x'+i+'">'+x.id+' · '+x.name+'</button>').join('');
-function pinRow(p){return '<table class="pintable"><tr><th><span class="tag pi">pi 0.80.7</span></th><td>'+p.pi+'</td></tr><tr><th><span class="tag tau">tau 0.1.6</span></th><td>'+p.tau+'</td></tr><tr><th><span class="tag rust">rust ep05</span></th><td>'+p.rust+'</td></tr><tr><th><span class="tag arch">mini（你）</span></th><td>'+p.mini+'</td></tr></table>'}
+function pinRow(p){return '<table class="pintable"><tr><th><span class="tag pi">pi 0.80.10</span></th><td>'+p.pi+'</td></tr><tr><th><span class="tag tau">tau 0.2.1</span></th><td>'+p.tau+'</td></tr><tr><th><span class="tag rust">rust ep05</span></th><td>'+p.rust+'</td></tr><tr><th><span class="tag arch">mini（你）</span></th><td>'+p.mini+'</td></tr></table>'}
 function selectLayer(k){
   const isX=k[0]==='x';const d=(isX?XCUTS:LAYERS)[+k.slice(1)];
   document.querySelectorAll('.bplayer,.bpx').forEach(b=>b.setAttribute('aria-selected',b.dataset.k===k));
@@ -742,11 +855,11 @@ selectLayer('l2'); /* 数组下标 2 = L4 会话与上下文（默认展开最�
 /* ============ B2 · 覆盖矩阵 ============ */
 const MROWS=[
  ['L0 Provider 适配','●|9 种 API + compat 逃生舱','◐|OpenAI-compatible 为主 + 手写 Anthropic SSE','◐|async-openai 单格式，多模型靠 OpenRouter 网关','M2'],
- ['L1 事件流契约','●|AgentEvent + 订阅者按序结算','●|10 种事件','—|tracing 日志不构成契约','M1'],
- ['L2 循环与守卫','●|agent-loop.ts：4 守卫 + steering','●|loop.py 276 行','◐|ep05 单轮工具往返，无 while','M3'],
+ ['L1 事件流契约','●|AgentEvent + 订阅者按序结算','●|0.2.0 起采纳 Pi 兼容事件协议（canonical event streams）','—|tracing 日志不构成契约','M1'],
+ ['L2 循环与守卫','●|agent-loop.ts：4 守卫 + steering','●|loop.py 318 行','◐|ep05 单轮工具往返，无 while','M3'],
  ['L3 工具层','●|edit-diff 模糊管线 + 防呆','●|四工具全文教学','◐|calculator：定义/执行分文件，分发写死','M4'],
  ['L4 会话与上下文','●|JSONL 树 + compaction + 溢出恢复','●|entries→tree→memory reducer','—|无会话概念','M7+M9'],
- ['L5 编排（可选）','○|刻意留白：自定义工具可挂子代理','○|同左','◐|JoinSet+Semaphore：fan-out 雏形','M11'],
+ ['L5 编排（可选）','◐|实验性 pi-orchestrator 包孵化中（IPC/supervisor/多实例）','○|留白：自定义工具可挂子代理','◐|JoinSet+Semaphore：fan-out 雏形','M11'],
  ['L6 产品层','●|TUI + print + RPC','●|TUI + print','◐|CLI bins 直出','M8'],
  ['X1 重试退避','●|内建','●|内建','●|backon crate','M9'],
  ['X2 可观测','●|事件+session 即 trace','●|同左','◐|tracing 结构化日志','M1 起'],
@@ -754,7 +867,7 @@ const MROWS=[
  ['X4 安全','◐|security.md 隔离论证（无权限弹窗哲学）','○|教学从简','—|仅 .env 隔离','M9']
 ];
 function mcell(s){const [v,t]=s.split('|');const cls=v==='●'?'full':v==='◐'?'part':v==='○'?'void':'none';return '<td class="c '+cls+'" title="'+t+'">'+v+'</td>'}
-$('#mTable').innerHTML='<tr><th>蓝图层</th><th>pi 0.80.7</th><th>tau 0.1.6</th><th>rust-ai-agent ep05</th><th>mini（你在哪步搭）</th></tr>'
+$('#mTable').innerHTML='<tr><th>蓝图层</th><th>pi 0.80.10</th><th>tau 0.2.1</th><th>rust-ai-agent ep05</th><th>mini（你在哪步搭）</th></tr>'
  +MROWS.map(r=>'<tr><td><b>'+r[0].split(' ')[0]+'</b> '+r[0].split(' ').slice(1).join(' ')+'</td>'+mcell(r[1])+mcell(r[2])+mcell(r[3])+'<td class="c" style="font-family:var(--mono);font-size:11.5px;color:var(--arch)">'+r[4]+'</td></tr>').join('');
 
 /* ============ B3 · 建造路线 ============ */
