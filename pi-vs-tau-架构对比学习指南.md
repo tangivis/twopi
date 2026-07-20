@@ -523,6 +523,8 @@ mini_app     产品层：4 个工具 + 系统提示词 + JSONL 落盘 + CLI（pr
 **节奏纪律**：每个里程碑的验收测试全绿才进下一个；每个里程碑结束打一个 git tag（`m0`、`m1`……），返工时可以精确回退。测试从 M2 起全部基于 FakeProvider——**永远不要让测试套件打真 API**（pi/tau 共同实践）。
 
 > 🚀 **起步工程已就绪**：`agent-study/mini/` 是按本章施工图搭好的练习工程——M0/M1 已完成（`./check.sh` 开箱全绿，git 已 tag 到 m1），FakeProvider 与 6 种 ProviderEvent 已提供，M2（OpenAI 兼容适配器）与 M3（循环）是带 TODO 骨架的练习；M3 附 5 条规格测试（`MINI_MILESTONE=3` 启用），已用参考实现验证可通关（参考答案在 `mini/solutions/`，有剧透警告）。从 `mini/README.md` 开始。
+>
+> 🧭 **融合施工指南（交互页 `webui/build-guide.html`，2026-07-20 新增）**：把本章 M0–M11 每一步 ×「为什么这么搭（对应李博杰书的章节，见第 14 章）」×「四份参考实现对照（mini 答案 / pi 文件 / tau 文件 / 书 `chapter5/coding-agent` 文件）」焊成一张可点的里程碑表。想「参照书 + 真代码一步步搭」就从这页开始——它把「怎么搭（mini）」「为什么（书）」「抄哪份（pi/tau/书）」三件事在每一关摆齐。
 
 ### 9.1 M0 · 骨架与依赖方向守卫（半天）
 

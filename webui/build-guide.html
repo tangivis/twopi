@@ -1,0 +1,371 @@
+<title>跟着搭：M0–M11 融合施工指南 · pi×tau 教程</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
+  --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
+  --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
+  --pi:#1C5CAB; --tau:#8A5600; --rust:#A6431A; --book:#A8326E;
+  --build:#107A54; --build-mark:#14875E;
+  --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10); --rust-wash:rgba(194,98,45,.10);
+  --book-wash:rgba(194,71,127,.10); --build-wash:rgba(16,122,84,.10);
+  --good:#006300; --bad:#B03030;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --shadow:0 1px 2px rgba(10,14,20,.05),0 4px 16px rgba(10,14,20,.06);
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0C0F14; --card:#131720; --card-2:#1A1F2B;
+  --ink:#E8EAEF; --ink-2:#A7ADB9; --ink-3:#767D8A;
+  --line:rgba(232,234,239,.13); --line-soft:rgba(232,234,239,.07);
+  --pi:#6DA7EC; --tau:#EDA100; --rust:#E39366; --book:#E58BB4;
+  --build:#45C78E; --build-mark:#14875E;
+  --pi-wash:rgba(57,135,229,.13); --tau-wash:rgba(201,133,0,.14); --rust-wash:rgba(194,98,45,.15);
+  --book-wash:rgba(194,71,127,.16); --build-wash:rgba(69,199,142,.15);
+  --good:#0CA30C; --bad:#E66767;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}}
+:root[data-theme="dark"]{
+  --bg:#0C0F14; --card:#131720; --card-2:#1A1F2B;
+  --ink:#E8EAEF; --ink-2:#A7ADB9; --ink-3:#767D8A;
+  --line:rgba(232,234,239,.13); --line-soft:rgba(232,234,239,.07);
+  --pi:#6DA7EC; --tau:#EDA100; --rust:#E39366; --book:#E58BB4;
+  --build:#45C78E; --build-mark:#14875E;
+  --pi-wash:rgba(57,135,229,.13); --tau-wash:rgba(201,133,0,.14); --rust-wash:rgba(194,98,45,.15);
+  --book-wash:rgba(194,71,127,.16); --build-wash:rgba(69,199,142,.15);
+  --good:#0CA30C; --bad:#E66767;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}
+:root[data-theme="light"]{
+  --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
+  --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
+  --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
+  --pi:#1C5CAB; --tau:#8A5600; --rust:#A6431A; --book:#A8326E;
+  --build:#107A54; --build-mark:#14875E;
+  --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10); --rust-wash:rgba(194,98,45,.10);
+  --book-wash:rgba(194,71,127,.10); --build-wash:rgba(16,122,84,.10);
+  --good:#006300; --bad:#B03030;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--build);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:currentColor}
+:focus-visible{outline:2px solid var(--build-mark);outline-offset:2px;border-radius:3px}
+code,pre{font-family:var(--mono)}
+::selection{background:var(--build-wash)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header.top{position:sticky;top:0;z-index:50;background:var(--bg);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
+.topbar{display:flex;align-items:center;gap:16px;padding:10px 0;overflow-x:auto;scrollbar-width:none}
+.topbar::-webkit-scrollbar{display:none}
+.brand{font-family:var(--mono);font-weight:700;font-size:14px;white-space:nowrap}
+.brand .g{color:var(--build)}
+nav.sections{display:flex;gap:4px;margin-left:auto}
+nav.sections a{font-family:var(--mono);font-size:12px;color:var(--ink-2);padding:5px 10px;border-radius:999px;white-space:nowrap;border-bottom:none}
+nav.sections a:hover{background:var(--card-2);color:var(--ink)}
+.back{font-family:var(--mono);font-size:12px;color:var(--ink-3);white-space:nowrap;border-bottom:none}
+section{padding:52px 0 8px;scroll-margin-top:60px}
+h2{font-family:var(--mono);font-size:22px;line-height:1.3;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--build);margin-bottom:10px}
+.lede{color:var(--ink-2);max-width:66ch;margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--line-soft);border-radius:12px;box-shadow:var(--shadow)}
+.num{font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:999px}
+.tag.pi{color:var(--pi);background:var(--pi-wash)} .tag.tau{color:var(--tau);background:var(--tau-wash)}
+.tag.rust{color:var(--rust);background:var(--rust-wash)} .tag.book{color:var(--book);background:var(--book-wash)}
+.tag.build{color:var(--build);background:var(--build-wash)}
+/* hero */
+.hero{padding:58px 0 24px}
+.hero h1{font-family:var(--mono);font-size:clamp(25px,4vw,38px);line-height:1.2;margin:12px 0 16px;letter-spacing:-.02em;text-wrap:balance}
+.hero h1 .g{color:var(--build)}
+.hero .sub{font-size:16px;color:var(--ink-2);max-width:64ch;margin:0 0 18px}
+.legend4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+.lg{padding:12px 14px;border-radius:10px;border:1px solid var(--line-soft);box-shadow:var(--shadow);background:var(--card)}
+.lg h4{margin:0 0 5px;font-family:var(--mono);font-size:12px}
+.lg.mini h4{color:var(--build)} .lg.pi h4{color:var(--pi)} .lg.tau h4{color:var(--tau)} .lg.book h4{color:var(--book)}
+.lg p{margin:0;font-size:11.5px;color:var(--ink-2);line-height:1.55}
+.flowbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:18px;padding:14px 16px;font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}
+.flowbar b{color:var(--build)} .flowbar .ar{color:var(--ink-3)}
+/* builder */
+.builder{display:grid;grid-template-columns:230px minmax(0,1fr);gap:0;border:1px solid var(--line-soft);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);margin-top:20px}
+.mrail{background:var(--card-2);border-right:1px solid var(--line-soft);padding:8px;max-height:660px;overflow-y:auto}
+.mstep{display:flex;align-items:baseline;gap:9px;width:100%;text-align:left;font-family:var(--mono);font-size:12.5px;color:var(--ink-2);background:none;border:none;border-radius:8px;padding:8px 10px;cursor:pointer}
+.mstep:hover{background:var(--card)}
+.mstep.sel{background:var(--build-wash);color:var(--build);font-weight:700}
+.mstep .mid{font-weight:700;width:30px;flex:none}
+.mstep .est{margin-left:auto;font-size:10px;color:var(--ink-3)}
+.mstep.sel .est{color:var(--build)}
+.mstep .done{color:var(--good)}
+.mdetail{min-width:0;padding:0;background:var(--card)}
+.mhead{padding:16px 20px 12px;border-bottom:1px solid var(--line-soft)}
+.mhead .mno{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--build)}
+.mhead h3{margin:3px 0 0;font-size:18px}
+.mhead .mmeta{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-top:4px}
+.mbody{padding:6px 20px 18px}
+.mblock{padding:14px 0;border-bottom:1px solid var(--line-soft)}
+.mblock:last-child{border-bottom:none}
+.mblock h4{margin:0 0 8px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+.mblock h4 .ic{font-size:14px}
+.mblock p{margin:0 0 6px;font-size:13.5px;color:var(--ink-2)}
+.mblock code{font-size:11.5px;background:var(--card-2);padding:1px 5px;border-radius:4px}
+.accept{font-size:12.5px;color:var(--ink-2);background:var(--build-wash);border-radius:8px;padding:8px 12px;margin-top:6px}
+.accept b{color:var(--build)}
+.whybook{font-size:13.5px;color:var(--ink-2);background:var(--book-wash);border-radius:8px;padding:10px 13px}
+.whybook .bch{font-family:var(--mono);font-size:11.5px;color:var(--book);font-weight:700;display:block;margin-bottom:4px}
+.refs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px}
+.ref{border:1px solid var(--line-soft);border-radius:9px;padding:9px 12px;font-size:12px;color:var(--ink-2);background:var(--card)}
+.ref .rh{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.04em;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.ref.mini{border-left:3px solid var(--build)} .ref.mini .rh{color:var(--build)}
+.ref.pi{border-left:3px solid var(--pi)} .ref.pi .rh{color:var(--pi)}
+.ref.tau{border-left:3px solid var(--tau)} .ref.tau .rh{color:var(--tau)}
+.ref.book{border-left:3px solid var(--book)} .ref.book .rh{color:var(--book)}
+.ref code{font-size:11px;background:var(--card-2);padding:1px 4px;border-radius:4px}
+.ref.gap{opacity:.72}
+.ref.gap .rh{color:var(--ink-3)}
+.navbtns{display:flex;gap:8px;padding:12px 20px;border-top:1px solid var(--line-soft);background:var(--card-2)}
+.btn{font-family:var(--mono);font-size:12.5px;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--card-2)}
+.btn.primary{background:var(--build-mark);border-color:var(--build-mark);color:#fff;font-weight:700}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{margin-left:auto}
+/* honest gaps + kickoff */
+.gaps{margin-top:20px;padding:16px 18px;border-left:3px solid var(--book-mark)}
+.gaps h4{margin:0 0 8px;font-size:14px;color:var(--book)}
+.gaps p{margin:6px 0;font-size:13px;color:var(--ink-2)}
+.gaps b{color:var(--ink)}
+.kickoff{margin-top:20px;padding:18px 20px}
+.kickoff h3{margin:0 0 10px;font-size:16px}
+.kickoff pre{margin:0;background:var(--term-bg,#10141B);color:#C4CCD8;border-radius:8px;padding:12px 14px;font-size:12.5px;overflow-x:auto;line-height:1.7}
+.kickoff .c-cm{color:#6B7686}
+.kickoff .c-ok{color:#8FC98F}
+footer{margin-top:60px;border-top:1px solid var(--line-soft);padding:24px 0 40px;font-size:12.5px;color:var(--ink-3)}
+footer a{color:var(--build)}
+.provenance{margin-top:10px;font-size:11.5px}
+@media (max-width:900px){
+  .legend4{grid-template-columns:1fr 1fr}
+  .builder{grid-template-columns:1fr}
+  .mrail{max-height:none;border-right:none;border-bottom:1px solid var(--line-soft);display:flex;flex-wrap:wrap;gap:4px}
+  .refs{grid-template-columns:1fr}
+  nav.sections{display:none}
+}
+</style>
+
+<header class="top"><div class="wrap topbar">
+  <div class="brand">跟着搭 · <span class="g">M0–M11 融合施工指南</span></div>
+  <a class="back" href="./index.html">← 主教程</a>
+  <a class="back" href="./advanced.html">进阶篇</a>
+  <a class="back" href="./book-map.html">读书地图</a>
+  <nav class="sections">
+    <a href="#how">怎么用</a><a href="#build">里程碑</a><a href="#gaps">诚实边界</a><a href="#start">开工</a>
+  </nav>
+</div></header>
+
+<section class="hero" id="how"><div class="wrap">
+  <div class="kicker">用书当 why · 用 mini 当 how · 用四份真代码当样板 · 2026-07-20</div>
+  <h1>不是读一个成品，是<span class="g">一步步搭一个自己的 agent</span></h1>
+  <p class="sub">李博杰的书讲透了「为什么」，但它给的是做好的成品；本教程的 <code>mini/</code> 给的是「怎么搭」——M0→M11 十二个里程碑，每步有验收测试。这一页把两者焊在一起：<b>每个里程碑 = 你搭什么（含验收） + 为什么这么搭（对应书章） + 四份参考实现对照</b>。照着走，你就是参照书 + 真代码、一步步建出自己的 harness，且每步都有测试保证没跑偏。</p>
+  <div class="legend4">
+    <div class="lg mini"><h4>⚙️ mini（怎么搭）</h4><p>你亲手写的工程 <code>agent-study/mini/</code>。带 TODO 骨架 + 规格测试 + <code>solutions/</code> 参考答案。这是主线。</p></div>
+    <div class="lg pi"><h4>🔵 pi（生产参考）</h4><p>同一个东西在生产里长什么样。卡住了看它怎么处理边界与长尾。</p></div>
+    <div class="lg tau"><h4>🟡 tau（教学参考）</h4><p>为阅读而写的 Python 实现，最接近你要写的量级。首选对照。</p></div>
+    <div class="lg book"><h4>🟣 书的 coding-agent（第三参考）</h4><p>书 <code>chapter5/coding-agent</code>：扁平单目录、19 个工具、<code>agent.py</code> 513 行。另一种取舍视角。</p></div>
+  </div>
+  <div class="card flowbar">每到一关：<b>① 读书对应章补 why</b> <span class="ar">→</span> <b>② 照 mini 的 TODO 动手</b> <span class="ar">→</span> <b>③ 卡住对照 tau/pi/书</b> <span class="ar">→</span> <b>④ 验收测试全绿 → git tag</b> <span class="ar">→</span> 下一关</div>
+</div></section>
+
+<section id="build"><div class="wrap">
+  <div class="kicker">主体 · 可交互</div>
+  <h2>十二个里程碑：点开每一关</h2>
+  <p class="lede">左侧选里程碑，右侧看这一关的四件事。顺序源自 tau 真实的 24 阶段建造日志——被验证过的施工顺序，不是纸上推演。完整验收清单与「十大典型翻车」见<a href="https://github.com/tangivis/twopi/blob/main/pi-vs-tau-架构对比学习指南.md">主文档</a>第 9 章。</p>
+  <div class="builder">
+    <div class="mrail" id="mRail" role="tablist" aria-label="里程碑"></div>
+    <div class="mdetail">
+      <div class="mhead"><div class="mno" id="mNo"></div><h3 id="mName"></h3><div class="mmeta" id="mMeta"></div></div>
+      <div class="mbody" id="mBody"></div>
+      <div class="navbtns">
+        <button class="btn" id="mPrev">◂ 上一关</button>
+        <button class="btn primary" id="mNext">下一关 ▸</button>
+        <a class="btn ghost" id="mDocLink" href="https://github.com/tangivis/twopi/blob/main/pi-vs-tau-架构对比学习指南.md" style="text-decoration:none;border-bottom:none">📖 第 9 章对应节 →</a>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section id="gaps"><div class="wrap">
+  <div class="kicker">诚实边界</div>
+  <h2>书的 coding-agent 不是每一关都有对应</h2>
+  <div class="card gaps">
+    <h4>它是扁平单目录实现，这本身就是一课</h4>
+    <p>书的 <code>chapter5/coding-agent</code> 追求「一个文件夹跑起来」，所以<b>没有</b> pi/tau 那种严格分层：没有 provider 中立事件层（M2）、没有独立类型层（M1）、没有 append-only 会话树（M7）。这几关它的「参考」列会标成灰色空缺。</p>
+    <p><b>这不是缺点，是取舍对照</b>：把书的扁平 <code>agent.py</code>（513 行什么都塞在一起）和 tau 的分层（<code>loop.py</code> 318 / <code>harness.py</code> 244 / <code>session/</code> 各司其职）并排看，你会亲眼看到「分层到底买来了什么」——这正是 M0 依赖方向守卫想教你的东西。</p>
+    <p>反过来，书的 coding-agent 在<b>工具丰富度</b>上更像 Claude Code：19 个工具含 <code>task_tool.py</code>（子代理即工具，M11 的现成样板）、<code>todo_write_tool.py</code>、<code>exit_plan_mode_tool.py</code>——这些是 mini/tau 的精简版里没有的。取长补短。</p>
+  </div>
+</div></section>
+
+<section id="start"><div class="wrap">
+  <div class="kicker">现在就开工</div>
+  <h2>三条命令，跑起 M0/M1，进入 M2</h2>
+  <div class="card kickoff">
+    <h3>零等待起步（M0/M1 已完成、开箱全绿）</h3>
+    <pre><span class="c-cm"># 1. 进工程、装依赖（uv 会读 pyproject.toml + uv.lock）</span>
+cd agent-study/mini && uv sync
+
+<span class="c-cm"># 2. 跑一遍验收：M0 依赖方向守卫 + M1 类型，应全绿</span>
+./check.sh                          <span class="c-ok"># ✓ ruff + mypy strict + pytest</span>
+
+<span class="c-cm"># 3. 进入 M2 练习：打开 provider 适配器的 TODO 骨架开写</span>
+<span class="c-cm">#    要点清单在文件头，卡住看 tau_ai/ 或 solutions/</span>
+$EDITOR src/mini_ai/openai_compatible.py
+
+<span class="c-cm"># 想先看 M3 循环练习怎么验收（默认跳过，动手时启用）：</span>
+MINI_MILESTONE=3 uv run pytest tests/test_loop_spec.py -v</pre>
+    <p style="font-size:12.5px;color:var(--ink-2);margin:12px 0 0">配合读：动手 M2 前先读书 <b>ch2「Agent 如何调用大模型：理解 API 的上下文结构」</b>补 why，再回来写适配器。每关的书章指引在上面的里程碑卡里。</p>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <p><b style="color:var(--ink)">本系列</b>：<a href="./index.html">主教程</a> · <a href="./advanced.html">进阶篇</a> · <a href="./rust-ai-agent.html">rust 精读</a> · <a href="./book-map.html">读书地图</a> · 本页（融合施工指南）</p>
+  <p>参考实现：pi v0.80.10（earendil-works/pi） · tau v0.2.1（huggingface/tau） · 书 chapter5/coding-agent（bojieli/ai-agent-book，Apache-2.0） · 练习工程 <code>agent-study/mini/</code></p>
+  <p class="provenance">2026-07-20 生成。里程碑与验收取自主文档第 9 章（施工顺序浓缩自 tau 24 阶段建造日志）；书章映射基于 chapter1–10 结构与小节标题、coding-agent 文件结构（agent.py/tool_registry.py/tools/×19/system-prompt.md 等，2026-07-19 克隆 commit 0ab5d1e 核对）。本页单文件、离线可用、无外部依赖。</p>
+</div></footer>
+
+<script>
+const $=s=>document.querySelector(s);
+/* ref: {t:'mini|pi|tau|book', f:'文件', d:'一句话', gap:bool} */
+const MS=[
+ {id:'M0',name:'骨架与依赖方向守卫',est:'半天',ch:'9.1',
+  build:'从空目录建包结构，用一条 AST 测试锁死「上层只能依赖下层」——违规直接红。这是整套架构的地基。',
+  accept:'<code>./check.sh</code> 全绿（ruff + mypy strict + 依赖方向守卫测试）',
+  why:{ch:'书 ch1 · Harness 工程：模型之外的竞争力',txt:'先读懂「为什么模型之外要分层、harness 思维是什么」，再动手立规矩。分层不是洁癖，是让后面 11 关能各自独立演化的前提。'},
+  refs:[
+   {t:'mini',f:'pyproject.toml · tests/test_boundaries.py',d:'AST 守卫已写好，读它'},
+   {t:'pi',f:'packages/ 五包 monorepo',d:'生产级分层：ai/agent/coding-agent/tui/orchestrator'},
+   {t:'tau',f:'src/ 三包 tau_ai/tau_agent/tau_coding',d:'教学级分层，最接近你要建的'},
+   {t:'book',f:'（扁平单目录，无严格分层）',d:'coding-agent 全塞一个目录——反面对照',gap:true}]},
+ {id:'M1',name:'核心类型：消息 / 工具 / 事件',est:'半天',ch:'9.2',
+  build:'定义消息（User/Assistant/ToolCall/ToolResult）、工具（AgentTool）、事件三组类型。类型即文档，也是后面所有代码的地基。',
+  accept:'mypy strict 全绿；<code>tests/test_types.py</code> 通过',
+  why:{ch:'书 ch1（Agent=LLM+上下文+工具）+ ch2（API 上下文结构）',txt:'消息类型 = 你怎么把「上下文」结构化喂给模型。读 ch2 的 API 上下文结构，理解 role/tool_call/tool_result 为何长这样。'},
+  refs:[
+   {t:'mini',f:'src/mini_agent/messages.py · tools.py · events.py',d:'参考实现已给，读透'},
+   {t:'pi',f:'packages/ai/src/types.ts',d:'9 种 API 的中立类型 + compat 开关'},
+   {t:'tau',f:'tau_agent/messages.py（277 行）',d:'0.2.0 起承载 Pi 兼容协议类型'},
+   {t:'book',f:'（无独立类型层，散在 agent.py 里）',d:'扁平实现的代价：类型和逻辑耦合',gap:true}]},
+ {id:'M2',name:'Provider 层：FakeProvider + 真适配器',est:'1–2 天',ch:'9.3',
+  build:'先写永不打真 API 的 FakeProvider（测试用），再写一个真 OpenAI 兼容适配器：把 wire 格式翻译成统一事件流，流永不 throw。',
+  accept:'不打真 API 的流式测试全过；<code>scripts/smoke_provider.py</code> 接本地 Ollama 或任意 OpenAI 兼容端点能跑',
+  why:{ch:'书 ch2 · Agent 如何调用大模型：理解 API 的上下文结构 + 流式响应',txt:'这一关就是把书 ch2 讲的「API 上下文结构 + 流式解析」亲手写一遍。读它，你就知道适配器每个字段为什么这么映射。'},
+  refs:[
+   {t:'mini',f:'src/mini_ai/openai_compatible.py（TODO 练习）· fake.py',d:'骨架 + 要点清单在文件头'},
+   {t:'pi',f:'packages/ai/src/（9 种 API + 逃生舱）',d:'兼容性长尾的极致'},
+   {t:'tau',f:'tau_ai/（OpenAI 兼容 + 手写 Anthropic SSE）',d:'手写 SSE 解析长什么样'},
+   {t:'book',f:'chapter5/coding-agent/config.py（174）· PROVIDERS.md',d:'多 provider 配置 + OpenRouter 兜底'}]},
+ {id:'M3',name:'循环：全项目最重要的 ~130 行',est:'1 天',ch:'9.4',
+  build:'while 循环：拼请求 → 调 provider → 执行工具 → 回填 → 直到没有 tool_calls。四道守卫兜底（截断/异常/未知工具/取消），steering 在轮间注入。',
+  accept:'<code>MINI_MILESTONE=3 uv run pytest tests/test_loop_spec.py</code> 5 条契约全绿',
+  why:{ch:'书 ch1 + ch5 · Coding Agent',txt:'书 ch5 论证「代码是通用 agent 的元能力」，而 coding agent 的心脏就是这个循环。写完这关，你手里就有一个会转的 agent 了。'},
+  refs:[
+   {t:'mini',f:'src/mini_agent/loop.py（9 步 TODO）· solutions/m3_loop.py',d:'卡住看参考答案'},
+   {t:'pi',f:'packages/agent/src/agent-loop.ts（792）',d:'工程加强版：并行执行 + prepareNextTurn'},
+   {t:'tau',f:'tau_agent/loop.py（318）',d:'你的答案纸——注释加强版'},
+   {t:'book',f:'chapter5/coding-agent/agent.py（513）',d:'扁平主循环，什么都在一个文件'}]},
+ {id:'M4',name:'四个工具：坑最密集的一站',est:'2–3 天',ch:'9.5',
+  build:'read / write / edit / bash。每个都要：入参校验、超时、输出截断带续读引导、错误消息可直接行动、防呆（edit 的 oldText 必须唯一）。',
+  accept:'截断 footer / 超时 / oldText 唯一 全部有测试覆盖',
+  why:{ch:'书 ch4 · 工具（设计原则 / 感知·执行·协作 / 异步）',txt:'书 ch4 是工具设计的分类学与原则；这一关把原则落成会超时、会截断、错误可行动的真工具。先读书建立品味，再抠细节。'},
+  refs:[
+   {t:'mini',f:'src/mini_app/tools/（模块清单见 __init__.py）',d:'你的地盘，自己写测试'},
+   {t:'pi',f:'core/tools/edit-diff.ts',d:'模糊匹配管线，防呆的极致'},
+   {t:'tau',f:'tau_coding/tools.py',d:'四工具全文，可抄'},
+   {t:'book',f:'chapter5/coding-agent/tools/（19 个文件）',d:'read/edit/bash/grep… Claude Code 式全套'}]},
+ {id:'M5',name:'Harness：状态、双队列、取消',est:'1 天',ch:'9.6',
+  build:'AgentHarness 管状态；steering 与 follow-up 双队列（默认一次一条）；取消时用占位工具结果回填，保证 transcript 永远合法。',
+  accept:'steering 注入与取消回填可复现（有测试）',
+  why:{ch:'书 ch4（异步 agent / 事件驱动）+ ch2（状态栏元信息）',txt:'双队列与取消是「人怎么实时介入一个在跑的 agent」。对应书 ch4 的事件驱动异步 agent，与 ch2 的状态栏元信息。'},
+  refs:[
+   {t:'mini',f:'src/mini_app/harness/',d:'你的地盘'},
+   {t:'pi',f:'packages/agent/src/agent.ts',d:'订阅者按序结算'},
+   {t:'tau',f:'tau_agent/harness.py（244）',d:'双队列 + 取消 + transcript 修复'},
+   {t:'book',f:'chapter5/coding-agent/system_state.py（50）',d:'状态管理（但无双队列）',gap:true}]},
+ {id:'M6',name:'系统提示词：机械拼装',est:'半天',ch:'9.7',
+  build:'系统提示词 = 函数(环境)：身份 + 工具一行描述 + AGENTS.md + skills 索引，机械拼装、全部可见、无隐藏注入。稳定前缀对 KV-cache 友好。',
+  accept:'提示词可快照测试（同输入同输出）',
+  why:{ch:'书 ch2 · 提示工程 / 动态提示词与 Agent Skills / 状态栏',txt:'书 ch2 这几节正好是这一关的理论：怎么写系统提示词、动态提示词与 Skills 机制、状态栏元信息怎么注入。'},
+  refs:[
+   {t:'mini',f:'src/mini_app/system_prompt.py',d:'你的地盘'},
+   {t:'pi',f:'coding-agent/src/system-prompt.ts',d:'极小提示词（<1k token）'},
+   {t:'tau',f:'tau_coding/system_prompt.py',d:'机械拼装，教学清晰'},
+   {t:'book',f:'chapter5/coding-agent/system-prompt.md + system_state.py',d:'system hints 技巧（书 ch2 现身）'}]},
+ {id:'M7',name:'会话持久化：追加式条目树',est:'1–2 天',ch:'9.8',
+  build:'append-only JSONL 条目树 + leaf 指针（分支/回退天然支持）；SessionState 是从条目重放出来的无状态 reducer。杀进程能原样 resume。',
+  accept:'杀进程 → <code>--resume</code> 原样恢复；分支回退零成本',
+  why:{ch:'书 ch3 · 用户记忆系统（跨会话持久化的近邻）',txt:'会话持久化是「agent 怎么跨中断记住上下文」，与书 ch3 的记忆系统同源。书讲记忆策略，这一关讲落盘的数据结构。'},
+  refs:[
+   {t:'mini',f:'src/mini_app/session/',d:'你的地盘'},
+   {t:'pi',f:'docs/session-format.md + AgentSession',d:'JSONL 树 + 迁移'},
+   {t:'tau',f:'tau_coding/session/（entries→tree→memory）',d:'reducer 字面实现'},
+   {t:'book',f:'（coding-agent 无会话树持久化）',d:'扁平实现的又一处留白',gap:true}]},
+ {id:'M8',name:'CLI print 模式：第一次真正可用',est:'半天',ch:'9.9',
+  build:'print / headless 模式——不开 TUI，直接 stdin→stdout 跑完一个任务。最小可用产品。用它去修一个真 bug 当毕业礼。',
+  accept:'能用 print 模式让 agent 修好一个真实小 bug',
+  why:{ch:'书 ch5 · Coding Agent（端到端完整实现）',txt:'书 ch5 展示一个生产级 coding agent 的完整形态；这一关你第一次拥有能端到端干活的自己版本。拿书的 example 对照跑。'},
+  refs:[
+   {t:'mini',f:'src/mini_app/cli.py',d:'你的地盘'},
+   {t:'pi',f:'coding-agent print/RPC 模式',d:'四种前端模式之一'},
+   {t:'tau',f:'tau_coding print 模式',d:'TUI/print 两模式'},
+   {t:'book',f:'chapter5/coding-agent/main.py · quickstart.py · example_complex_task.py',d:'现成端到端入口，跑一遍'}]},
+ {id:'M9',name:'压缩与溢出恢复',est:'1–2 天',ch:'9.10',
+  build:'compaction：上下文快满时结构化摘要（reserve 16384 / keepRecent 20000），切点永不劈开 tool_call/tool_result 对；溢出恢复：压一次、重试一次，仍溢出才报错。',
+  accept:'超长会话自动压缩且不劈 tool 对；溢出能恢复',
+  why:{ch:'书 ch2 · 上下文压缩策略（强匹配）',txt:'书 ch2 专门有「上下文压缩策略」一节——这一关就是它的代码实现。书还配了独立 demo <code>chapter2/context-compression</code> 可对照。'},
+  refs:[
+   {t:'mini',f:'src/mini_app/compaction.py',d:'你的地盘'},
+   {t:'pi',f:'coding-agent/src/core/compaction.ts',d:'reserve/keepRecent 参数源头'},
+   {t:'tau',f:'tau_coding 压缩实现',d:'教学版结构化摘要'},
+   {t:'book',f:'chapter2/context-compression/（独立 demo）',d:'书另有专门 demo，不止 coding-agent'}]},
+ {id:'M10',name:'评测 harness（选做首推）',est:'1–3 天',ch:'9.11',
+  build:'数据集 + 判分器 + 并发跑分。从 20 个问答对 + exact-match 起步，再升级到测试套件 / LLM judge。没有评测的迭代是盲走。',
+  accept:'20 题跑分能出正确率百分比',
+  why:{ch:'书 ch6 · 评估（整章：数据集/指标/显著性/选型）',txt:'这一关书给的最多——ch6 整章是评估学（数据集设计、指标体系、统计显著性、评估驱动选型）。先读透 ch6，再动手建你的评测环。'},
+  refs:[
+   {t:'mini',f:'M10 选做：评测扩展',d:'借下面三份的骨架'},
+   {t:'pi',f:'（靠 Terminal-Bench 等外部基准）',d:'生产靠外部 benchmark',gap:true},
+   {t:'tau',f:'（无内建评测）',d:'pi/tau 共同的缺口',gap:true},
+   {t:'book',f:'rust-ai-agent evaluator.rs + 书 chapter6/ 各 demo',d:'现成评测脊椎，直接借'}]},
+ {id:'M11',name:'编排：子代理即工具 + fan-out',est:'1–2 天',ch:'13.2 / 进阶篇',
+  build:'把「子代理即工具」和并行 fan-out 长出来：注册一个会 new AgentHarness 的工具，子代理跑完整循环、只回结论；再加并发限流 + 汇总。',
+  accept:'主 agent 派 2 个子调研并汇总（交接物结构化）',
+  why:{ch:'书 ch10 · 多 Agent 协作（分类框架 / 共享vs不共享上下文 / 失败模式）',txt:'书 ch10 给分类框架与失败模式学；进阶篇 A2 给可抄代码与三判据。先过进阶篇冷水框（多 agent≈15× token），再读 ch10 补理论。'},
+  refs:[
+   {t:'mini',f:'M11：子代理工具 + fan-out',d:'进阶篇有代码骨架'},
+   {t:'pi',f:'packages/orchestrator（实验）',d:'L5 留白被官方试探性填上'},
+   {t:'tau',f:'（留白：自定义工具可挂子代理）',d:'编排长在 harness 之上',gap:true},
+   {t:'book',f:'chapter5/coding-agent/task_tool.py + chapter10/parallel-web-research',d:'task_tool 就是子代理即工具的现成样板'}]},
+];
+const RT={mini:'⚙️ mini',pi:'🔵 pi',tau:'🟡 tau',book:'🟣 书 coding-agent'};
+const rail=$('#mRail');
+rail.innerHTML=MS.map((m,i)=>'<button class="mstep" role="tab" data-i="'+i+'"><span class="mid">'+m.id+'</span><span class="mnm">'+m.name.replace(/：.*/,'').slice(0,10)+'</span><span class="est">'+(i<2?'✓':m.est)+'</span></button>').join('');
+let cur=0;
+function render(i){
+  cur=i;const m=MS[i];
+  rail.querySelectorAll('.mstep').forEach((b,j)=>b.classList.toggle('sel',j===i));
+  $('#mNo').textContent='里程碑 '+m.id+(i<2?' · 参考实现已给':' · 你的练习');
+  $('#mName').textContent=m.name;
+  $('#mMeta').textContent='预计 '+m.est+' · 主文档第 '+m.ch+' 节';
+  $('#mBody').innerHTML=
+   '<div class="mblock"><h4><span class="ic">🔨</span>你搭什么</h4><p>'+m.build+'</p>'
+    +'<div class="accept"><b>验收：</b>'+m.accept+'</div></div>'
+  +'<div class="mblock"><h4><span class="ic">📖</span>为什么这么搭</h4>'
+    +'<div class="whybook"><span class="bch">'+m.why.ch+'</span>'+m.why.txt+'</div></div>'
+  +'<div class="mblock"><h4><span class="ic">🧭</span>四份参考实现对照</h4>'
+    +'<div class="refs">'+m.refs.map(r=>'<div class="ref '+r.t+(r.gap?' gap':'')+'"><div class="rh">'+RT[r.t]+'</div><code>'+r.f+'</code><div style="margin-top:4px">'+r.d+'</div></div>').join('')+'</div></div>';
+  $('#mPrev').disabled=i===0;$('#mNext').disabled=i===MS.length-1;
+  $('#mNext').textContent=i===MS.length-1?'到头了 ✓':'下一关 ▸';
+}
+rail.addEventListener('click',e=>{const b=e.target.closest('.mstep');if(b)render(+b.dataset.i)});
+$('#mPrev').addEventListener('click',()=>render(Math.max(0,cur-1)));
+$('#mNext').addEventListener('click',()=>render(Math.min(MS.length-1,cur+1)));
+render(0);
+</script>
