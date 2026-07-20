@@ -6,7 +6,7 @@
   --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
   --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
   --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
-  --pi:#1C5CAB; --tau:#8A5600;
+  --pi:#1C5CAB; --tau:#8A5600; --rust:#A6431A; --book:#A8326E;
   --pi-mark:#2A78D6; --tau-mark:#EDA100;
   --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10);
   --good:#006300; --bad:#B03030; --bad-mark:#D03B3B;
@@ -21,7 +21,7 @@
     --bg:#0C0F14; --card:#131720; --card-2:#1A1F2B;
     --ink:#E8EAEF; --ink-2:#A7ADB9; --ink-3:#767D8A;
     --line:rgba(232,234,239,.13); --line-soft:rgba(232,234,239,.07);
-    --pi:#6DA7EC; --tau:#EDA100;
+    --pi:#6DA7EC; --tau:#EDA100; --rust:#E39366; --book:#E58BB4;
     --pi-mark:#3987E5; --tau-mark:#C98500;
     --pi-wash:rgba(57,135,229,.13); --tau-wash:rgba(201,133,0,.14);
     --good:#0CA30C; --bad:#E66767; --bad-mark:#E66767;
@@ -42,7 +42,7 @@
   --bg:#F5F6F8; --card:#FFFFFF; --card-2:#EEF0F4;
   --ink:#14161A; --ink-2:#555B66; --ink-3:#8A909B;
   --line:rgba(20,22,26,.12); --line-soft:rgba(20,22,26,.07);
-  --pi:#1C5CAB; --tau:#8A5600;
+  --pi:#1C5CAB; --tau:#8A5600; --rust:#A6431A; --book:#A8326E;
   --pi-mark:#2A78D6; --tau-mark:#EDA100;
   --pi-wash:rgba(42,120,214,.09); --tau-wash:rgba(237,161,0,.10);
   --good:#006300; --bad:#B03030; --bad-mark:#D03B3B;
@@ -314,7 +314,7 @@ footer p{margin:4px 0}
 <header class="top"><div class="wrap topbar">
   <div class="brand"><span class="pi-c">pi</span> × <span class="tau-c">tau</span> <span style="color:var(--ink-3)">/ agent 教程</span></div>
   <nav class="sections">
-    <a href="#overview">总览</a><a href="#loop">循环模拟器</a><a href="#arch">三层架构</a><a href="#mech">机制对比</a><a href="#data">数据</a><a href="#practice">最佳实践</a><a href="#eco">生态选型</a><a href="#path">学习路径</a><a href="./advanced.html" style="color:var(--pi)">进阶篇 ↗</a>
+    <a href="#overview">总览</a><a href="#coords">四个坐标</a><a href="#loop">循环模拟器</a><a href="#arch">三层架构</a><a href="#mech">机制对比</a><a href="#data">数据</a><a href="#practice">最佳实践</a><a href="#eco">生态选型</a><a href="#path">学习路径</a><a href="./advanced.html" style="color:var(--pi)">进阶篇 ↗</a>
   </nav>
 </div></header>
 
@@ -351,6 +351,25 @@ footer p{margin:4px 0}
       </div>
     </div>
   </div>
+</div></section>
+
+<!-- ================= 四个坐标 ================= -->
+<section id="coords"><div class="wrap">
+  <div class="kicker">开始之前 · 四个坐标</div>
+  <h2>这套教程建在四个真实项目上</h2>
+  <p class="lede">它们<b>不是</b>同一件事的四个版本，而是 agent 光谱上的四个坐标点。记住一句话就不会混：<b>pi / tau 是循环式 agent，rust-ai-agent 是还没长出循环的"前传"，书是讲这一切"为什么"的教科书。</b></p>
+  <div class="card" style="padding:6px 20px 16px;overflow-x:auto">
+    <table class="ticktable">
+      <thead><tr><th>坐标</th><th>是什么</th><th>有 agent 循环吗</th><th>光谱位置</th><th>在教程哪看</th></tr></thead>
+      <tbody>
+        <tr><td><b style="color:var(--pi)">pi</b> <small style="color:var(--ink-3)">TS · v0.80.10</small></td><td>生产级 coding-agent harness（成品）</td><td class="st"><span style="color:var(--good)">✅ 有</span></td><td>agent 端 · 成品</td><td>主教程全站 · 三层架构 · 十大机制</td></tr>
+        <tr><td><b style="color:var(--tau)">tau</b> <small style="color:var(--ink-3)">Python · v0.2.1</small></td><td>教学级 harness（pi 的可读复刻）</td><td class="st"><span style="color:var(--good)">✅ 有</span></td><td>agent 端 · 逐行读</td><td>主教程 · 第 9 章从零复刻</td></tr>
+        <tr><td><b style="color:var(--rust)">rust-ai-agent</b> <small style="color:var(--ink-3)">Rust · ep05</small></td><td>增强 LLM + 结构化输出 + GAIA 评测</td><td class="st"><span style="color:var(--bad)">❌ 无</span> <small style="color:var(--ink-3)">ep05 仅单轮工具</small></td><td><b>workflow 端 · 前传</b></td><td><a href="./rust-ai-agent.html">代码精读页</a> · 第 12 章</td></tr>
+        <tr><td><b style="color:var(--book)">ai-agent-book</b> <small style="color:var(--ink-3)">书 · 李博杰</small></td><td>《深入理解 AI Agent》原理全景 + 每章 demo</td><td class="st">— 讲原理</td><td>理论纵深（跨到模型侧）</td><td><a href="./book-map.html">读书地图</a> · 第 14 章</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12.5px;color:var(--ink-3);margin-top:10px">⚠️ 常见误解：rust-ai-agent 是 Rust 写的 + 名字带 agent，但它<b>不是"Rust 版的 tau"</b>——没有 while 循环，是"前传"。｜ 想动手一步步搭一个自己的 → <a href="./build-guide.html">融合施工指南</a>（书当 why、mini 当 how、四份真代码当样板）。</p>
 </div></section>
 
 <!-- ================= 模拟器 ================= -->
